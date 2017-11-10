@@ -1,0 +1,152 @@
+fileFormatVersion: 2
+guid: 5ffd472476e51d942964bf4a20d1637e
+timeCreated: 1507111162
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: AileronL01
+    100002: AileronR01
+    100004: BrakeL01
+    100006: BrakeL02
+    100008: BrakeR01
+    100010: Canopy01
+    100012: Eject_Seat
+    100014: ElevatorL01
+    100016: ElevatorR01
+    100018: EngineL01
+    100020: FlapL01
+    100022: FlapR01
+    100024: GearDoorF01
+    100026: GearDoorF02
+    100028: GearDoorL01
+    100030: GearDoorL02
+    100032: GearDoorR01
+    100034: GearDoorR02
+    100036: Glass_Canopy01
+    100038: LOD0
+    100040: //RootNode
+    100042: RudderL01
+    100044: studio.a10.mesh_08
+    400000: AileronL01
+    400002: AileronR01
+    400004: BrakeL01
+    400006: BrakeL02
+    400008: BrakeR01
+    400010: Canopy01
+    400012: Eject_Seat
+    400014: ElevatorL01
+    400016: ElevatorR01
+    400018: EngineL01
+    400020: FlapL01
+    400022: FlapR01
+    400024: GearDoorF01
+    400026: GearDoorF02
+    400028: GearDoorL01
+    400030: GearDoorL02
+    400032: GearDoorR01
+    400034: GearDoorR02
+    400036: Glass_Canopy01
+    400038: LOD0
+    400040: //RootNode
+    400042: RudderL01
+    400044: studio.a10.mesh_08
+    2300000: BrakeL02
+    2300002: Canopy01
+    2300004: Eject_Seat
+    2300006: ElevatorL01
+    2300008: ElevatorR01
+    2300010: EngineL01
+    2300012: Glass_Canopy01
+    2300014: LOD0
+    2300016: studio.a10.mesh_08
+    3300000: BrakeL02
+    3300002: Canopy01
+    3300004: Eject_Seat
+    3300006: ElevatorL01
+    3300008: ElevatorR01
+    3300010: EngineL01
+    3300012: Glass_Canopy01
+    3300014: LOD0
+    3300016: studio.a10.mesh_08
+    4300000: studio.a10.mesh_08
+    4300002: LOD0
+    4300004: Canopy01
+    4300006: Glass_Canopy01
+    4300008: EngineL01
+    4300010: Eject_Seat
+    4300012: ElevatorR01
+    4300014: ElevatorL01
+    4300016: BrakeL02
+    7400000: Take 001
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

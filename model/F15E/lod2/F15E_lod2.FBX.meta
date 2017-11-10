@@ -1,0 +1,139 @@
+fileFormatVersion: 2
+guid: 4f876e661d1a4e746a4ac351065dddb4
+timeCreated: 1507128123
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: AileronL01
+    100002: AileronR01
+    100004: BrakeL01
+    100006: Canopy01
+    100008: Eject_Seat01
+    100010: ElevatorL01
+    100012: ElevatorR01
+    100014: EngineL01
+    100016: EngineR01
+    100018: //RootNode
+    100020: FlapL01
+    100022: FlapR01
+    100024: Glass01
+    100026: Glass_Canopy01
+    100028: LOD0
+    100030: RudderL01
+    100032: RudderR01
+    100034: studio.a10.mesh_08
+    400000: AileronL01
+    400002: AileronR01
+    400004: BrakeL01
+    400006: Canopy01
+    400008: Eject_Seat01
+    400010: ElevatorL01
+    400012: ElevatorR01
+    400014: EngineL01
+    400016: EngineR01
+    400018: //RootNode
+    400020: FlapL01
+    400022: FlapR01
+    400024: Glass01
+    400026: Glass_Canopy01
+    400028: LOD0
+    400030: RudderL01
+    400032: RudderR01
+    400034: studio.a10.mesh_08
+    2300000: BrakeL01
+    2300002: Canopy01
+    2300004: Eject_Seat01
+    2300006: EngineL01
+    2300008: EngineR01
+    2300010: Glass_Canopy01
+    2300012: LOD0
+    2300014: studio.a10.mesh_08
+    3300000: BrakeL01
+    3300002: Canopy01
+    3300004: Eject_Seat01
+    3300006: EngineL01
+    3300008: EngineR01
+    3300010: Glass_Canopy01
+    3300012: LOD0
+    3300014: studio.a10.mesh_08
+    4300000: studio.a10.mesh_08
+    4300002: LOD0
+    4300004: Canopy01
+    4300006: Glass_Canopy01
+    4300008: Eject_Seat01
+    4300010: EngineL01
+    4300012: EngineR01
+    4300014: BrakeL01
+    7400000: Take 001
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
