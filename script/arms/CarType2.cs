@@ -21,7 +21,6 @@ public class CarType2 : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
 		transform_lod0 = transform.FindChild ("car_type2_lod0");

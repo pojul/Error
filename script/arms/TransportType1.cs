@@ -64,7 +64,6 @@ public class TransportType1 : MonoBehaviour {
 	void openDoor(){
 		
 		if(doorTransform_lod0.localEulerAngles.x > 301 || doorTransform_lod0.localEulerAngles.x < 1){
-			Debug.Log ("gqb------>" + doorTransform_lod0.localEulerAngles.x);
 			doorTransform_lod0.rotation = Quaternion.Slerp(doorTransform_lod0.rotation, 
 				Quaternion.Euler(new Vector3(300, doorTransform_lod0.localEulerAngles.y, doorTransform_lod0.localEulerAngles.z)), openDoorSpeed * Time.deltaTime);
 			doorTransform_lod1.localEulerAngles = new Vector3(doorTransform_lod0.localEulerAngles.x, doorTransform_lod0.localEulerAngles.y, doorTransform_lod0.localEulerAngles.z);

@@ -31,10 +31,10 @@ public class AirAction : MonoBehaviour {
 			createNavCube ();
 		}
 		nav.destination = navPoint;//target.transform.position;
-		nav.speed = 2000;
-		nav.acceleration = 2000;
+		nav.speed = GameInit.mach;
+		nav.acceleration = GameInit.mach*2;
 		//nav.baseOffset = 50;
-		//nav.angularSpeed = 100;
+		nav.angularSpeed = 200;
 		moniNavStopped = true;
 	}
 

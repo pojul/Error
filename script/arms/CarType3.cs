@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CarType3 : MonoBehaviour {
 
+	private float height = 60.0f;
+
 	private AudioSource mAudioSource;
 
 	private Transform transform_lod0;
@@ -36,6 +38,9 @@ public class CarType3 : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
+		transform.position = new Vector3 (transform.position.x, height, transform.position.z);
+
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
 		transform_lod0 = transform.FindChild ("car_type3_lod0");
