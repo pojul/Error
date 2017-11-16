@@ -16,6 +16,11 @@ public class GameInit  : MonoBehaviour {
 	public static List<GameObject> gameObjectInstance = new List <GameObject>();
 	public static Hashtable maxInstance = new Hashtable();
 	public static Hashtable currentInstance = new Hashtable();
+	public static Hashtable park0 = new Hashtable(); //我方停车位
+	public static Hashtable park1 = new Hashtable(); //敌方停车位
+
+	public static Hashtable Car5Area0 = new Hashtable();
+	public static Hashtable Car5Area1 = new Hashtable();
 
 	public static Vector3 home1Pos = new Vector3(0, 0, -60000);
 	public static Vector3 home2Pos = new Vector3(0, 0, 60000);//19003//17750
@@ -95,10 +100,10 @@ public class GameInit  : MonoBehaviour {
 		prices.Add ("missile1", 33);
 		prices.Add ("missile2", 29);
 		prices.Add ("shell1", 1);
-		prices.Add ("transport1", 62);
+		prices.Add ("transport1", 1);//62
 
 		maxInstance.Add ("cannon1", 20);
-		maxInstance.Add ("car2", 10);
+		maxInstance.Add ("car2", 12);
 		maxInstance.Add ("car3", 16);
 		maxInstance.Add ("car4", 16);
 		maxInstance.Add ("car5", 6);
@@ -128,17 +133,60 @@ public class GameInit  : MonoBehaviour {
 		currentInstance.Add ("1_shell1", 0);
 		currentInstance.Add ("0_transport1", 0);
 		currentInstance.Add ("1_transport1", 0);
+
+		park0.Add (new Vector3 (3000, 0, -40000), 0);//0:空闲；1:被占用
+		park0.Add (new Vector3 (5000, 0, -40000), 0);
+		park0.Add (new Vector3 (7000, 0, -40000), 0);
+		park0.Add (new Vector3 (9000, 0, -40000), 0);
+		park0.Add (new Vector3 (11000, 0, -40000), 0);
+		park0.Add (new Vector3 (20000, 0, -54500), 0);
+		park0.Add (new Vector3 (20000, 0, -56500), 0);
+		park0.Add (new Vector3 (20000, 0, -58500), 0);
+		park0.Add (new Vector3 (20000, 0, -60500), 0);
+		park0.Add (new Vector3 (20000, 0, -62500), 0);
+		park0.Add (new Vector3 (-16000, 0, -49000), 0);
+		park0.Add (new Vector3 (-16000, 0, -51000), 0);
+		park0.Add (new Vector3 (-16000, 0, -53000), 0);
+		park0.Add (new Vector3 (-16000, 0, -55000), 0);
+		park0.Add (new Vector3 (-16000, 0, -57000), 0);
+		park0.Add (new Vector3 (-18000, 0, -78000), 0);
+		park0.Add (new Vector3 (-14000, 0, -78000), 0);
+		park0.Add (new Vector3 (-18000, 0, -82000), 0);
+		park0.Add (new Vector3 (-14000, 0, -82000), 0);
+
+		park1.Add (new Vector3 (-3000, 0, -40000), 0);
+		park1.Add (new Vector3 (-5000, 0, -40000), 0);
+		park1.Add (new Vector3 (-7000, 0, -40000), 0);
+		park1.Add (new Vector3 (-9000, 0, -40000), 0);
+		park1.Add (new Vector3 (-11000, 0, -40000), 0);
+		park1.Add (new Vector3 (16000, 0, 52000), 0);
+		park1.Add (new Vector3 (16000, 0, 54000), 0);
+		park1.Add (new Vector3 (16000, 0, 56000), 0);
+		park1.Add (new Vector3 (16000, 0, 58000), 0);
+		park1.Add (new Vector3 (16000, 0, 60000), 0);
+		park1.Add (new Vector3 (-18000, 0, 74500), 0);
+		park1.Add (new Vector3 (-18000, 0, 72500), 0);
+		park1.Add (new Vector3 (-18000, 0, 70500), 0);
+		park1.Add (new Vector3 (-18000, 0, 68500), 0);
+		park1.Add (new Vector3 (-18000, 0, 66500), 0);
+		park1.Add (new Vector3 (14000, 0, 78500), 0);
+		park1.Add (new Vector3 (14000, 0, 82500), 0);
+		park1.Add (new Vector3 (18000, 0, 78500), 0);
+		park1.Add (new Vector3 (18000, 0, 82500), 0);
+
 	}
 
-	public static void instanceGameobject(int playerId, string type){
+	public static void instanceGameobject(string playerId, string type){
 		float initZ = -60000;
-		if(playerId  == 1){
+		if("1".Equals(playerId)){
 			initZ = 60000;
 		}
 		GameObject prefab = (GameObject)Instantiate(Resources.Load((string)modelpaths[type]), 
 			new Vector3(0, 200, initZ), Quaternion.Euler(0, 0, 0)) as GameObject;
 		prefab.tag = (playerId + "_" + type);
 		gameObjectInstance.Add (prefab);
+		currentInstance [prefab.tag] = (int)currentInstance [prefab.tag] + 1;
+
 	}
 
 

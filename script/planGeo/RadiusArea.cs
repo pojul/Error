@@ -6,13 +6,16 @@ public class RadiusArea{
 
 	public int areaId;
 
+	public float maxRange = 50000f;
+	public float minRange = 10000f;
+
 	public RadiusArea(int areaId){
 		this.areaId = areaId;
 	}
 
 	public Vector3 getRandomPoint(){
 		float mRandomAngle = Random.Range (0.0f, Mathf.PI/2);
-		float mRandomRadius = Random.Range (10000f, 50000f);
+		float mRandomRadius = Random.Range (minRange, maxRange);
 		float x = 0.0f;
 		float z = 0.0f;
 		if(areaId == 1){

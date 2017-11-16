@@ -26,16 +26,28 @@ public class CarType6 : MonoBehaviour {
 	private Transform paoTransform_lod1;
 	private Transform paoTransform_lod2;
 
+	private float height = 70.0f;
 	private float aimSpeed = 1.0f;
 	private float aimMaxVer = 10.0f;
+	private float maxMoveSpeed = GameInit.mach * 0.4f;
 
 	private bool isMoving = false;
+
+	public GameObject navCube;
+	public UnityEngine.AI.NavMeshAgent nav;
+
+	public string playerId = "";
+	public string type = "";
+
+	public int behavior = 1;//1: patrol;
+	private RadiusArea mPatrolArea;
 
 	//test
 	private GameObject target;
 
 	// Use this for initialization
 	void Start () {
+		transform.position = new Vector3 (transform.position.x, height, transform.position.z);
 
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
@@ -59,9 +71,23 @@ public class CarType6 : MonoBehaviour {
 		paoTransform_lod1 = panTransform_lod1.FindChild ("pao");
 		paoTransform_lod2 = panTransform_lod2.FindChild ("pao");
 
+		string[] strs = transform.tag.Split ('_');
+		playerId = strs [0];
+		type = strs [1];
+
+		if("0".Equals(playerId)){
+			mPatrolArea = new RadiusArea (Random.Range(1,4));
+		}else if("1".Equals(playerId)){
+			mPatrolArea = new RadiusArea (Random.Range(5,8));
+		}
+
 		//test
 		target = GameObject.FindGameObjectWithTag("player");
 		run ();
+
+		createNavCube ();
+
+		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
 
 	}
 	
@@ -78,6 +104,12 @@ public class CarType6 : MonoBehaviour {
 			listenerRollAni ();
 		}
 
+	}
+
+	void behaviorListener(){
+		if(nav != null && behavior == 1 && !nav.hasPath && !nav.pathPending && mPatrolArea != null){
+			startNav(mPatrolArea.getRandomPoint());
+		}
 	}
 
 
@@ -132,4 +164,30 @@ public class CarType6 : MonoBehaviour {
 			mAudioSource.Stop ();
 		}
 	}
+
+	public void startNav(Vector3 navPoint){
+		if(navCube == null){
+			createNavCube ();
+		}
+		nav.destination = navPoint;//target.transform.position;
+		float patrol = Random.Range(maxMoveSpeed*0.5f, maxMoveSpeed);
+		nav.speed = patrol;
+		nav.acceleration = patrol * 2f;
+		nav.autoRepath = true;
+		//nav.baseOffset = 50;
+		nav.angularSpeed = 100;
+	}
+
+	public void createNavCube(){
+		navCube = GameObject.CreatePrimitive (PrimitiveType.Cube);
+		navCube.transform.position = transform.position;
+		navCube.transform.localScale = new Vector3 (100, 100, 100);
+		navCube.AddComponent<UnityEngine.AI.NavMeshAgent>();
+		transform.parent = navCube.transform;
+
+		MeshRenderer m = navCube.GetComponent<MeshRenderer>();
+		m.enabled = false;
+		nav= navCube.GetComponent<UnityEngine.AI.NavMeshAgent> ();
+	}
+
 }

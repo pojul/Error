@@ -102,7 +102,7 @@ public class BuyArmsUI : MonoBehaviour {
 			}
 			if(GUI.Button(new Rect(itemBuyX, (itemSpace*i + Screen.height * 0.3f / 10), itemBuyWidth, itemBuyheight), buyStr)){
 				if(buyStatus [0].Equals(buyStr)){
-					GameInit.instanceGameobject (0, armNames[i]);
+					GameInit.instanceGameobject ("0", armNames[i]);
 					GameInit.MyMoney = GameInit.MyMoney - (int)GameInit.prices [armNames [i]];
 				}
 			}
