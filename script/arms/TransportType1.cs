@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TransportType1 : MonoBehaviour {
+public class TransportType1 : PojulObject {
 
 	private AudioSource mAudioSource;
 
@@ -191,8 +191,7 @@ public class TransportType1 : MonoBehaviour {
 				//stop ();
 			}
 		}else if(nav != null && nav.hasPath && !nav.pathPending && navPathDistance > 0){
-			//Debug.Log ("gqb ------>" + (nav.remainingDistance / navPathDistance));
-			if((nav.remainingDistance / navPathDistance) < 0.2){
+			if((nav.remainingDistance / navPathDistance) < 0.3){
 				flyHeightSpeed = -Mathf.Abs (flyHeightSpeed);
 				flyHeight = height;
 			}
@@ -247,12 +246,11 @@ public class TransportType1 : MonoBehaviour {
 		nav.acceleration = maxMoveSpeed ;
 		nav.autoRepath = true;
 		//nav.baseOffset = 50;
-		nav.angularSpeed = 45;
+		nav.angularSpeed = 20;
 		navPathDistance = Mathf.Abs((new Vector3(transform.position.x, 0, transform.position.z) - park).magnitude);
 		flyHeight = Random.Range (minFlyHeight, maxFlyHeight);
 		flyHeightSpeed = Mathf.Abs (flyHeightSpeed);
 		initHeight = 0;
-		Debug.Log (flyHeight + "gqb------>" + navPathDistance);
 	}
 
 	public void createNavCube(){

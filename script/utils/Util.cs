@@ -45,4 +45,32 @@ public class Util : MonoBehaviour {
 		return areaid = areaid;
 	}
 
+	public static string updateCoordinate(Transform mTransform, string currentCoordinate){
+		if(GameInit.coordinateManager == null){
+			return currentCoordinate;
+		}
+		int coordinateX = (int)mTransform.position.x / 4000;
+		int coordinateZ = (int)mTransform.position.z / 4000;
+		string tempCoordinate = coordinateX.ToString() + coordinateZ.ToString();
+		//Debug.Log (mTransform.position.x + "gqb----->updateCoordinate: " + coordinateX);
+		if(currentCoordinate.Equals(tempCoordinate)){
+			return currentCoordinate;
+		}
+
+		if(GameInit.coordinateManager.ContainsKey(currentCoordinate)){
+			GameInit.coordinateManager [currentCoordinate].Remove (mTransform);
+		}
+
+		if(!GameInit.coordinateManager.ContainsKey(tempCoordinate)){
+			List<Transform> objs = new List<Transform> ();
+			objs.Add (mTransform);
+			GameInit.coordinateManager.Add (tempCoordinate, objs);
+			currentCoordinate = tempCoordinate;
+		}else {
+			GameInit.coordinateManager [tempCoordinate].Add (mTransform);
+			currentCoordinate = tempCoordinate;
+		}
+		return currentCoordinate;
+	}
+
 }

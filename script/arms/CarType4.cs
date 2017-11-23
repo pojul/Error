@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CarType4 : MonoBehaviour {
+public class CarType4 : PojulObject {
 
 	private AudioSource mAudioSource;
 

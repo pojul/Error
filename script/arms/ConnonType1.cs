@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ConnonType1 : MonoBehaviour {
+public class ConnonType1 : PojulObject {
 
 	private AudioSource mAudioSource;
 

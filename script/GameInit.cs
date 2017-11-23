@@ -18,6 +18,7 @@ public class GameInit  : MonoBehaviour {
 	public static Hashtable currentInstance = new Hashtable();
 	public static Hashtable park0 = new Hashtable(); //我方停车位
 	public static Hashtable park1 = new Hashtable(); //敌方停车位
+	public static Dictionary<string, List<Transform>> coordinateManager = new Dictionary<string, List<Transform>>();
 
 	public static Hashtable Car5Area0 = new Hashtable();
 	public static Hashtable Car5Area1 = new Hashtable();
@@ -70,6 +71,15 @@ public class GameInit  : MonoBehaviour {
 		InstancePlayer();
 
 		InvokeRepeating("addMoney", 2.0f, 2.0f);
+
+		InvokeRepeating("gc", 60.0f, 60.0f);
+	}
+
+	void gc(){
+		if(ShowFPS.currFPS < 20.0f){
+			System.GC.Collect ();
+		}
+
 	}
 
 	void addMoney(){
@@ -80,6 +90,9 @@ public class GameInit  : MonoBehaviour {
 		modelpaths.Add ("A10_lod", "Prefabs/A10a_lod");
 		modelpaths.Add ("A10", "Prefabs/A-10a");
 		modelpaths.Add ("air_ray_A10", "Prefabs/Particle/air_ray_A101");
+		modelpaths.Add ("tankFire", "Prefabs/Particle/tankFire");
+		modelpaths.Add ("bomb1", "Prefabs/Particle/bomb1");
+		modelpaths.Add ("bomb2", "Prefabs/Particle/bomb2");
 		modelpaths.Add ("cannon1", "Prefabs/arms/cannon_type1");
 		modelpaths.Add ("car2", "Prefabs/arms/car_type2");
 		modelpaths.Add ("car3", "Prefabs/arms/car_type3");
@@ -108,8 +121,8 @@ public class GameInit  : MonoBehaviour {
 		maxInstance.Add ("car4", 16);
 		maxInstance.Add ("car5", 6);
 		maxInstance.Add ("car6", 8);
-		maxInstance.Add ("missile1", 20);
-		maxInstance.Add ("missile2", 10);
+		maxInstance.Add ("missile1",10);
+		maxInstance.Add ("missile2", 2);
 		maxInstance.Add ("shell1", 100000);
 		maxInstance.Add ("transport1", 6);
 
@@ -177,13 +190,20 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	public static void instanceGameobject(string playerId, string type){
+
+		string tag = (playerId + "_" + type);
+		if ("missile1".Equals (type) || "missile2".Equals (type)) {
+			currentInstance [tag] = (int)currentInstance [tag] + 1;
+			return;
+		}
+
 		float initZ = -60000;
 		if("1".Equals(playerId)){
 			initZ = 60000;
 		}
 		GameObject prefab = (GameObject)Instantiate(Resources.Load((string)modelpaths[type]), 
 			new Vector3(0, 200, initZ), Quaternion.Euler(0, 0, 0)) as GameObject;
-		prefab.tag = (playerId + "_" + type);
+		prefab.tag = tag;
 		gameObjectInstance.Add (prefab);
 		currentInstance [prefab.tag] = (int)currentInstance [prefab.tag] + 1;
 

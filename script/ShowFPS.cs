@@ -9,7 +9,7 @@ public class ShowFPS : MonoBehaviour {
 	//最后间隔时间
 	private double lastInterval;
 	private int frames = 0;
-	private float currFPS;
+	public static float currFPS;
 
 	// Use this for initialization
 	void Start () {
@@ -29,7 +29,7 @@ public class ShowFPS : MonoBehaviour {
 		}
 	}
 
-	private void OnGUI(){
+	void OnGUI(){
 		GUILayout.Label ("1FPS：" + currFPS.ToString("f2"));
 	}
 }

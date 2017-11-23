@@ -7,7 +7,7 @@ public class RadiusArea{
 	public int areaId;
 
 	public float maxRange = 50000f;
-	public float minRange = 10000f;
+	public float minRange = 15000f;
 
 	public RadiusArea(int areaId){
 		this.areaId = areaId;

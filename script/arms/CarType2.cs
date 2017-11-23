@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CarType2 : MonoBehaviour {
+public class CarType2 : PojulObject {
 
 	private AudioSource mAudioSource;
 
@@ -82,7 +82,7 @@ public class CarType2 : MonoBehaviour {
 			mAnimator_lod0.SetBool ("roll", false);
 			mAnimator_lod1.SetBool ("roll", false);
 		}
-		if(nav != null && !nav.hasPath && !nav.pathPending){
+		if(nav != null && !nav.hasPath/* && !nav.pathPending*/){
 			stop ();
 		}
 	}

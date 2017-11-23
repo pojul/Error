@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GunType1 : MonoBehaviour {
+public class GunType1 : PojulObject {
 
 	private float height = 50;
 

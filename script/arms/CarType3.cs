@@ -12,6 +12,8 @@ public class CarType3 : MonoBehaviour {
 	private Transform transform_lod1;
 	private Transform transform_lod2;
 
+	private Transform fireTransform;
+
 	private Animator mAnimator_lod0;
 	private Animator mAnimator_lod1;
 	private Animator mAnimator_lod2;
@@ -20,9 +22,9 @@ public class CarType3 : MonoBehaviour {
 	private Transform panTransform_lod1;
 	private Transform panTransform_lod2;
 
-	private Renderer mRenderer_lod0_pan;
-	private Renderer mRenderer_lod1_pan;
-	private Renderer mRenderer_lod2_pan;
+	private Renderer mRenderer_lod0_main;
+	private Renderer mRenderer_lod1_main;
+	private Renderer mRenderer_lod2_main;
 
 	private Transform paoTransform_lod0;
 	private Transform paoTransform_lod1;
@@ -31,17 +33,21 @@ public class CarType3 : MonoBehaviour {
 	private float aimSpeed = 1.0f;
 	private float aimMaxVer = 10.0f;
 
+	private bool isPanDestoryed = false;
 	private bool isMoving = false;
 	private float maxMoveSpeed = GameInit.mach * 0.4f;
 
 	//test
 	private GameObject target;
+	private float fireInterval = 12.0f;
+	private float lastFileTime = 0.0f;
 
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 
 	public string playerId = "";
 	public string type = "";
+	public string currentCoordinate = "";
 
 	public int behavior = 1;//1: patrol;
 	private RadiusArea mPatrolArea;
@@ -57,6 +63,8 @@ public class CarType3 : MonoBehaviour {
 		transform_lod1 = transform.FindChild ("car_type3_lod1");
 		transform_lod2 = transform.FindChild ("car_type3_lod2");
 
+		fireTransform = transform.FindChild ("car_type3_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
+
 		mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
 		mAnimator_lod2 = (Animator)transform_lod2.GetComponent<Animator> ();
@@ -68,9 +76,9 @@ public class CarType3 : MonoBehaviour {
 		panTransform_lod1 = transform_lod1.FindChild("pan");
 		panTransform_lod2 = transform_lod2.FindChild("pan");
 
-		mRenderer_lod0_pan = panTransform_lod0.GetComponent<Renderer>();
-		mRenderer_lod1_pan = panTransform_lod1.GetComponent<Renderer>();
-		mRenderer_lod2_pan = panTransform_lod2.GetComponent<Renderer>();
+		mRenderer_lod0_main = transform_lod0.FindChild("main").GetComponent<Renderer>();
+		mRenderer_lod1_main = transform_lod1.FindChild("main").GetComponent<Renderer>();
+		mRenderer_lod2_main = transform_lod2.FindChild("main").GetComponent<Renderer>();
 
 		paoTransform_lod0 = panTransform_lod0.FindChild ("pao");
 		paoTransform_lod1 = panTransform_lod1.FindChild ("pao");
@@ -93,6 +101,7 @@ public class CarType3 : MonoBehaviour {
 		createNavCube ();
 
 		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
+		InvokeRepeating ("updateCoordinate", 2.0f, 2.0f);
 		//startNav (new Vector3 (3340, 60, -34925));
 		//startNav (new Vector3 (0, 60, 0));
 	}
@@ -100,15 +109,7 @@ public class CarType3 : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		/*if (Time.time % 10 > 5) {
-			run ();
-		} else {
-			stop ();
-		}*/
-
-		if(target == null){
-			target = GameObject.FindGameObjectWithTag("player");
-		}else{
+		if(!isPanDestoryed){
 			aimEnemy (target.transform);
 		}
 			
@@ -123,14 +124,46 @@ public class CarType3 : MonoBehaviour {
 			
 		//}
 
+		rayCastEnemy ();
+
 		if(nav != null && behavior == 1 && !nav.hasPath && !nav.pathPending && mPatrolArea != null){
 			startNav(mPatrolArea.getRandomPoint());
 			//Debug.Log (nav.hasPath + "------>" + nav.isStopped + " ;" + nav.pathStatus + " ;" + nav.pathPending +　" ;" + nav.isPathStale);
 		}
 	}
 
+	void rayCastEnemy(){
+		if(target == null){
+			return;
+		}
+		RaycastHit hit;
+		if(Physics.Raycast (paoTransform_lod0.position, paoTransform_lod0.forward, out hit, 12000.0f)){
+			//Debug.Log (paoTransform_lod0.forward + "gqb------>hit:" + hit.transform.root.name);
+			if(hit.transform != null && hit.transform.root.name != "Plane" && (Time.time - lastFileTime) > fireInterval){
+				lastFileTime = Time.time;
+				fire ();
+			}
+		}
+	}
+
+	void fire(){
+		shootShell ();
+		GameObject fire = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/tankFire"), 
+			fireTransform.position, fireTransform.rotation) as GameObject;
+		fire.tag = "tankFire";
+	}
+
+	void shootShell(){
+		GameObject shell1 = (GameObject)Instantiate(Resources.Load("Prefabs/arms/shell_type1"), 
+			(paoTransform_lod0.position + paoTransform_lod0.forward*10), paoTransform_lod0.rotation) as GameObject;
+		shell1.tag = "shell1";
+		((ShellType1)shell1.GetComponent<ShellType1> ()).shoot(10000, 250);
+	}
 
     void aimEnemy(Transform enemyTransform){
+		if(target == null){
+			return;
+		}
 		panTransform_lod0.rotation = Quaternion.Slerp(panTransform_lod0.rotation, 
 			Quaternion.LookRotation(enemyTransform.position - panTransform_lod0.position), aimSpeed * Time.deltaTime);
 
@@ -154,13 +187,13 @@ public class CarType3 : MonoBehaviour {
 	}
 
 	void listenerRollAni(){
-		if (mRenderer_lod0_pan.isVisible && !mAnimator_lod0.GetBool ("roll")) {
+		if (mRenderer_lod0_main.isVisible && !mAnimator_lod0.GetBool ("roll")) {
 			mAnimator_lod0.SetBool ("roll", true);
 			mAnimator_lod1.SetBool ("roll", false);
-		} else if (mRenderer_lod1_pan.isVisible && !mAnimator_lod1.GetBool ("roll")) {
+		} else if (mRenderer_lod1_main.isVisible && !mAnimator_lod1.GetBool ("roll")) {
 			mAnimator_lod1.SetBool ("roll", true);
 			mAnimator_lod0.SetBool ("roll", false);
-		} else if(!mRenderer_lod0_pan.isVisible && !mRenderer_lod1_pan.isVisible){
+		} else if(!mRenderer_lod0_main.isVisible && !mRenderer_lod1_main.isVisible){
 			mAnimator_lod0.SetBool ("roll", false);
 			mAnimator_lod1.SetBool ("roll", false);
 		}
@@ -200,6 +233,7 @@ public class CarType3 : MonoBehaviour {
 		navCube.transform.position = transform.position;
 		navCube.transform.localScale = new Vector3 (100, 100, 100);
 		navCube.AddComponent<UnityEngine.AI.NavMeshAgent>();
+		Destroy (navCube.GetComponent<BoxCollider> ());
 		transform.parent = navCube.transform;
 
 		MeshRenderer m = navCube.GetComponent<MeshRenderer>();
@@ -207,5 +241,50 @@ public class CarType3 : MonoBehaviour {
 		nav= navCube.GetComponent<UnityEngine.AI.NavMeshAgent> ();
 	}
 
+	/*public override void isFired(Collision collision, int type){
+		if(type ==2){
+			if(collision.gameObject.name.Equals("pan") && !isPanDestoryed){
+				destoryPan (collision);
+			}
+		}
+	}*/
+
+	void destoryPan(Collision collision){
+		panTransform_lod0.parent = null;
+		panTransform_lod1.parent = panTransform_lod0;
+		panTransform_lod2.parent = panTransform_lod0;
+		panTransform_lod0.gameObject.AddComponent<Rigidbody> ();
+
+		paoTransform_lod0.parent = null;
+		paoTransform_lod1.parent = paoTransform_lod0;
+		paoTransform_lod2.parent = paoTransform_lod0;
+		paoTransform_lod0.gameObject.AddComponent<BoxCollider> ();
+		paoTransform_lod0.gameObject.AddComponent<Rigidbody> ();
+
+		Vector3 explosionPos = new Vector3 (collision.contacts[0].point.x, 
+			(collision.contacts[0].point.y - 10), 
+			collision.contacts[0].point.z);
+		Collider[] colliders = Physics.OverlapSphere(explosionPos, 50.0f);
+		foreach (Collider hit in colliders){
+			if (hit.GetComponent<Rigidbody>()){ 
+				hit.GetComponent<Rigidbody>().AddExplosionForce(5000.0f, explosionPos, 50.0f);
+			}  
+		}
+		Invoke ("destoryPan", 20);
+	}
+
+	void destoryPan(){
+		if(panTransform_lod0 != null){
+			Destroy (panTransform_lod0.gameObject);
+		}
+		if(paoTransform_lod0 != null){
+			Destroy (paoTransform_lod0.gameObject);
+		}
+		isPanDestoryed = true;
+	}
+
+	void updateCoordinate(){
+		currentCoordinate = Util.updateCoordinate (transform, currentCoordinate);
+	}
 
 }
