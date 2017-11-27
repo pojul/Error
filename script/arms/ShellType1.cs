@@ -7,10 +7,11 @@ public class ShellType1 : PojulObject {
 	public float startSpeed;
 	public float decaySpeed;
 	public bool isShoot = false;
+	private float startTime;
 
 	// Use this for initialization
 	void Start () {
-		
+		startTime = Time.time;
 	}
 	
 	// Update is called once per frame
@@ -19,6 +20,9 @@ public class ShellType1 : PojulObject {
 			transform.GetComponent<Rigidbody> ().AddForce (transform.up*60.0f);
 			transform.position = transform.position + transform.forward * startSpeed * Time.deltaTime;
 			startSpeed = startSpeed - decaySpeed * Time.deltaTime;
+		}
+		if((Time.time - startTime) > 6){
+			destory ();
 		}
 	}
 
@@ -34,7 +38,11 @@ public class ShellType1 : PojulObject {
 			contact.point, Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
 		bomb2.tag = "bomb2";
 		bomb2.transform.parent = collision.gameObject.transform;
-		((PojulObject)collision.gameObject.transform.root.GetComponent<PojulObject> ()).isFired(collision, 2);
+		Transform root = collision.gameObject.transform.root.GetChild(0);
+		if(root.GetComponent<PojulObject> ()){
+			((PojulObject)root.GetComponent<PojulObject> ()).isFired(collision, 2);
+		}
+
 		destory ();
 	}
 

@@ -35,6 +35,7 @@ public class TestScript : PojulObject {
 	private bool isPanDestoryed = false;
 
 	public string currentCoordinate = "";
+	public List<Transform> nearEnemys;
 
 	//test
 	private GameObject target;
@@ -71,7 +72,14 @@ public class TestScript : PojulObject {
 	}
 
 	void updateCoordinate(){
-		currentCoordinate = Util.updateCoordinate (transform, currentCoordinate);
+		object[]  coordinateInfo = Util.updateCoordinate (transform, currentCoordinate, "0", true, 0);
+		if(coordinateInfo[0] != null){
+			currentCoordinate = (string)coordinateInfo [0];
+		}
+		if(coordinateInfo[1] != null){
+			nearEnemys = (List<Transform>)coordinateInfo [1];
+		}
+		Debug.Log ("gqb------>currentCoordinate: " + currentCoordinate);
 	}
 
 

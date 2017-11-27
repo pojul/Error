@@ -25,12 +25,6 @@ public class CarType2 : PojulObject {
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 
-	public string playerId = "";
-	public string type = "";
-
-	public int behavior = 0;//0: no behavior;
-
-
 	// Use this for initialization
 	void Start () {
 		transform.position = new Vector3 (transform.position.x, height, transform.position.z);

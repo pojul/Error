@@ -30,10 +30,6 @@ public class CarType5 : PojulObject {
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 
-	public string playerId = "";
-	public string type = "";
-
-	public int behavior = 0;
 	private RadiusArea mPatrolArea;
 
 	// Use this for initialization

@@ -18,13 +18,26 @@ public class GameInit  : MonoBehaviour {
 	public static Hashtable currentInstance = new Hashtable();
 	public static Hashtable park0 = new Hashtable(); //我方停车位
 	public static Hashtable park1 = new Hashtable(); //敌方停车位
-	public static Dictionary<string, List<Transform>> coordinateManager = new Dictionary<string, List<Transform>>();
+	public static Dictionary<string, List<Transform>> coordinateManager0 = new Dictionary<string, List<Transform>>();
+	public static Dictionary<string, List<Transform>> coordinateManager1 = new Dictionary<string, List<Transform>>();
+
+	public static List<Transform>  allNearEnemys_0 = new List<Transform>();
+	public static List<Transform>  allNearEnemys_1 = new List<Transform>();
+	public static Dictionary<int, List<Transform>>  nearEnemys_0 = new Dictionary<int, List<Transform>>();
+	public static Dictionary<int, List<Transform>>  nearEnemys_1 = new Dictionary<int, List<Transform>>();
 
 	public static Hashtable Car5Area0 = new Hashtable();
 	public static Hashtable Car5Area1 = new Hashtable();
 
 	public static Vector3 home1Pos = new Vector3(0, 0, -60000);
 	public static Vector3 home2Pos = new Vector3(0, 0, 60000);//19003//17750
+
+	public static List<Transform> invades_0 = new List<Transform> ();
+	public static List<Transform> invades_1 = new List<Transform> ();
+
+	public static Texture2D backgroundProgress;
+	public static Texture2D progress1;
+	public static Texture2D progress2;
 	
 	private GameObject player;
 
@@ -63,7 +76,6 @@ public class GameInit  : MonoBehaviour {
     {
         Debug.Log("SecondMethod After scene is loaded and game is running.");
     }*/
-
 
 	void Start () {
 
@@ -104,9 +116,13 @@ public class GameInit  : MonoBehaviour {
 		modelpaths.Add ("shell1", "Prefabs/arms/shell_type1");
 		modelpaths.Add ("transport1", "Prefabs/arms/transport_type1");
 
+		backgroundProgress = (Texture2D)Resources.Load ("icon/progress1/progress1a");
+		progress1 = (Texture2D)Resources.Load ("icon/progress1/progress1c");
+		progress2 = (Texture2D)Resources.Load ("icon/progress1/progress1d");
+
 		prices.Add ("cannon1", 8);
 		prices.Add ("car2", 6);
-		prices.Add ("car3", 21);
+		prices.Add ("car3", 1);//21
 		prices.Add ("car4", 25);
 		prices.Add ("car5", 28);
 		prices.Add ("car6", 20);
@@ -117,7 +133,7 @@ public class GameInit  : MonoBehaviour {
 
 		maxInstance.Add ("cannon1", 20);
 		maxInstance.Add ("car2", 12);
-		maxInstance.Add ("car3", 16);
+		maxInstance.Add ("car3", 100);//16
 		maxInstance.Add ("car4", 16);
 		maxInstance.Add ("car5", 6);
 		maxInstance.Add ("car6", 8);
@@ -212,7 +228,7 @@ public class GameInit  : MonoBehaviour {
 
 
 	void InstancePlayer(){
-		player = (GameObject)Instantiate(Resources.Load((string)modelpaths["A10"]), 
+		player = (GameObject)Instantiate(Resources.Load((string)modelpaths["A10_lod"]), 
 			new Vector3(0, 125, -60000), Quaternion.Euler(0, 0, 0)) as GameObject;
 		player.tag = "player";
 		((A10aPlan)player.GetComponent<A10aPlan>()).setPlayType (0);
@@ -233,7 +249,7 @@ public class GameInit  : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		minoAirShip ();
+		//minoAirShip ();
 	}
 
 	void minoAirShip (){

@@ -42,35 +42,117 @@ public class Util : MonoBehaviour {
 				}
 			}
 		}
-		return areaid = areaid;
+		return areaid;
 	}
 
-	public static string updateCoordinate(Transform mTransform, string currentCoordinate){
-		if(GameInit.coordinateManager == null){
-			return currentCoordinate;
+	public static object[] updateCoordinate(Transform mTransform, string currentCoordinate, string playerId, 
+		bool fndEnemys, int findArea){
+		object[] infors = new object[2];
+		Dictionary<string, List<Transform>> coordinateManager = null;
+		Dictionary<string, List<Transform>> enemyCoordinateManager = null;
+		if("0".Equals(playerId)){
+			coordinateManager = GameInit.coordinateManager0;
+			enemyCoordinateManager = GameInit.coordinateManager1;
+		}else if("1".Equals(playerId)){
+			coordinateManager = GameInit.coordinateManager1;
+			enemyCoordinateManager = GameInit.coordinateManager0;
 		}
-		int coordinateX = (int)mTransform.position.x / 4000;
-		int coordinateZ = (int)mTransform.position.z / 4000;
+
+		if(coordinateManager == null){
+			return infors;
+		}
+		int coordinateX = (int)mTransform.position.x / 10000;
+		int coordinateZ = (int)mTransform.position.z / 10000;
 		string tempCoordinate = coordinateX.ToString() + coordinateZ.ToString();
 		//Debug.Log (mTransform.position.x + "gqb----->updateCoordinate: " + coordinateX);
 		if(currentCoordinate.Equals(tempCoordinate)){
-			return currentCoordinate;
+			return infors;
 		}
 
-		if(GameInit.coordinateManager.ContainsKey(currentCoordinate)){
-			GameInit.coordinateManager [currentCoordinate].Remove (mTransform);
+		if(coordinateManager.ContainsKey(currentCoordinate)){
+			coordinateManager [currentCoordinate].Remove (mTransform);
 		}
 
-		if(!GameInit.coordinateManager.ContainsKey(tempCoordinate)){
+		if(!coordinateManager.ContainsKey(tempCoordinate)){
 			List<Transform> objs = new List<Transform> ();
 			objs.Add (mTransform);
-			GameInit.coordinateManager.Add (tempCoordinate, objs);
+			coordinateManager.Add (tempCoordinate, objs);
 			currentCoordinate = tempCoordinate;
 		}else {
-			GameInit.coordinateManager [tempCoordinate].Add (mTransform);
+			coordinateManager [tempCoordinate].Add (mTransform);
 			currentCoordinate = tempCoordinate;
 		}
-		return currentCoordinate;
+		infors [0] = (object)currentCoordinate;
+		if(!fndEnemys || enemyCoordinateManager == null){
+			return infors;
+		}
+		List<Transform> nearEnemys = new List<Transform> ();
+		for(int i = (coordinateX-findArea); i <= (coordinateX+findArea); i++){
+			for(int j = (coordinateZ-findArea); j <= (coordinateZ+findArea); j++){
+				string key = i.ToString() + j.ToString();
+				Debug.Log (key + "gqb------>util: " + enemyCoordinateManager.ContainsKey(key));
+				if(enemyCoordinateManager.ContainsKey(key) && enemyCoordinateManager[key] != null){
+					if("0".Equals(playerId)){
+						Debug.Log (key + "gqb------>util: " + enemyCoordinateManager[key].Count);
+					}
+					nearEnemys.AddRange (enemyCoordinateManager[key]);
+				}
+			}
+		}	
+		infors [1] = (object)nearEnemys;
+
+		return infors;
+	}
+
+	public static void AddNearEnemys(Transform mTransform, string playerId){
+		Dictionary<int, List<Transform>> nearEnemys = null;
+		List<Transform> allNearEnemys = null;
+		if("0".Equals(playerId)){
+			nearEnemys = GameInit.nearEnemys_0;
+			allNearEnemys = GameInit.allNearEnemys_0;
+		}else if("1".Equals(playerId)){
+			nearEnemys = GameInit.nearEnemys_1;
+			allNearEnemys = GameInit.allNearEnemys_1;
+		}
+		if(allNearEnemys.Contains(mTransform)){
+			return;
+		}
+		allNearEnemys.Add (mTransform);
+		int radioAreaId = getRadioAreaId (mTransform);
+		if (nearEnemys.ContainsKey (radioAreaId)) {
+			nearEnemys [radioAreaId].Add (mTransform);
+
+		} else {
+			List<Transform> transforms = new List<Transform>();
+			transforms.Add (mTransform);
+			nearEnemys.Add (radioAreaId, transforms);
+		}
+
+	}
+
+	public static int getRadioAreaId(Transform mTransform){
+		if(mTransform.position.x > -55000 && mTransform.position.x < 0){
+			if(mTransform.position.z < -60000 && mTransform.position.z > -115000){
+				return 4;
+			}else if(mTransform.position.z > -60000 && mTransform.position.z < -5000){
+				return 1;
+			}else if(mTransform.position.z > 5000 && mTransform.position.z < 60000){
+				return 6;
+			}else if(mTransform.position.z > 60000 && mTransform.position.z < 115000){
+				return 8;
+			}
+		}else if(mTransform.position.x > 0 && mTransform.position.x < 55000){
+			if(mTransform.position.z < -60000 && mTransform.position.z > -115000){
+				return 3;
+			}else if(mTransform.position.z > -60000 && mTransform.position.z < -5000){
+				return 2;
+			}else if(mTransform.position.z > 5000 && mTransform.position.z < 60000){
+				return 5;
+			}else if(mTransform.position.z > 60000 && mTransform.position.z < 115000){
+				return 7;
+			}
+		}
+		return 0;
 	}
 
 }

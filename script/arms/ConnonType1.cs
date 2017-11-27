@@ -32,11 +32,6 @@ public class ConnonType1 : PojulObject {
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 
-	public string playerId = "";
-	public string type = "";
-
-	public int behavior = 0;//0: no behavior;
-
 	//test
 	private GameObject target;
 

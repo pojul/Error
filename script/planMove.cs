@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class planMove : MonoBehaviour {
 	
-	public float speed = 600f;
+	public float speed = 280f;
 	private float piRate = 2* Mathf.PI/360;
 	
 	void Start(){
