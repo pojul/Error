@@ -92,7 +92,7 @@ public class BuyArmsUI : MonoBehaviour {
 			if((int)GameInit.prices[armNames[i]] > GameInit.MyMoney){
 				buyStr = buyStatus [1];
 			}
-			if((int)GameInit.currentInstance[("0_"+armNames[i])] >= (int)GameInit.maxInstance[armNames[i]]/2){
+			if((int)GameInit.currentInstance[("0_"+armNames[i])] >= (int)GameInit.maxInstance[("0_"+armNames[i])]){
 				buyStr = buyStatus [2];
 			}
 

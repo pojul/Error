@@ -42,7 +42,8 @@ public class TransportType1 : PojulObject {
 	private float navPathDistance = -1f;
 	private float maxFlyHeight = 9000.0f;
 	private float minFlyHeight = 7000.0f;
-	private float flyHeight = 190.0f;
+	//private float flyHeight = 190.0f;
+	private float flyHeight = 0f;
 	private float flyHeightSpeed = 480f;
 
 	private Vector3 park;
@@ -130,25 +131,6 @@ public class TransportType1 : PojulObject {
 	}
 
 	void listenerRollAni(){
-		/*if (mRenderer_lod0_propeller1.isVisible  || mRenderer_lod0_propeller2.isVisible && !mAnimator_lod0.GetBool ("roll")) {
-			//mAnimator_lod0.SetBool ("roll", true);
-			//mAnimator_lod1.SetBool ("roll", false);
-			propeller1Transform_lod0.localEulerAngles = new Vector3(propeller1Transform_lod0.localEulerAngles.x, 
-				propeller1Transform_lod0.localEulerAngles.y + aniSpeed, propeller1Transform_lod0.localEulerAngles.z);
-			
-		} else if (mRenderer_lod1_propeller1.isVisible  || mRenderer_lod1_propeller2.isVisible && !mAnimator_lod1.GetBool ("roll")) {
-			//mAnimator_lod1.SetBool ("roll", true);
-			//mAnimator_lod0.SetBool ("roll", false);
-		} else if(!mRenderer_lod0_propeller1.isVisible  && !mRenderer_lod0_propeller2.isVisible
-			&& !mRenderer_lod1_propeller1.isVisible  && !mRenderer_lod1_propeller2.isVisible){
-			//mAnimator_lod0.SetBool ("roll", false);
-			//mAnimator_lod1.SetBool ("roll", false);
-		}*/
-		//Debug.Log (mAnimator_lod0.speed + "gqb" +mAnimator_lod1.speed);
-
-		//transform.position = Vector3.Slerp(transform.position, 
-		//	new Vector3(navCube.transform.position.x, flyHeight, navCube.transform.position.z), 0.02f*Time.deltaTime);
-
 		float posY = transform.position.y;
 		if (Mathf.Abs (flyHeight - transform.position.y +initHeight) > 10) {
 			posY = posY + flyHeightSpeed * Time.deltaTime;
@@ -222,7 +204,7 @@ public class TransportType1 : PojulObject {
 	void run (){
 		isMoving = true;
 		aniSpeed = 0.0f;
-		flyHeight = 190;
+		//flyHeight = 190;
 		//mAnimator_lod0.speed = 4;
 		//mAnimator_lod1.speed = 4;
 		//mAnimator_lod0.SetBool ("roll", true);

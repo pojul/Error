@@ -16,6 +16,7 @@ public class CarType3 : PojulObject {
 	private Transform[] lunzis = new Transform[8];
 
 	private Transform fireTransform;
+	private Transform aimTransform;
 
 	private Animator mAnimator_lod0;
 	private Animator mAnimator_lod1;
@@ -40,7 +41,6 @@ public class CarType3 : PojulObject {
 	private float aimSpeed = 10.0f;
 	private float aimMaxVer = 10.0f;
 
-	private bool isPanDestoryed = false;
 	private bool isMoving = false;
 	private float maxMoveSpeed = GameInit.mach * 0.4f;
 
@@ -52,15 +52,7 @@ public class CarType3 : PojulObject {
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 
-	/*private string PlayerId;
-	public override string playerId { get{return PlayerId;}set{ PlayerId = value;}}
-	private string Type;
-	public override string type { get{ return Type;} set{ Type = value;}}*/
-	public string currentCoordinate = "";
-
 	private RadiusArea mPatrolArea;
-	private Vector3 myCenter;
-	private Vector3 enemyCenter;
 
 	//血量条
 	public Slider sliderHealth;
@@ -83,6 +75,7 @@ public class CarType3 : PojulObject {
 		transform_lod1 = transform.FindChild ("car_type3_lod1");
 		transform_lod2 = transform.FindChild ("car_type3_lod2");
 		fireTransform = transform.FindChild ("car_type3_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
+		aimTransform = transform.FindChild ("aim");
 
 		mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
@@ -125,11 +118,13 @@ public class CarType3 : PojulObject {
 			myCenter = new Vector3 (0,0,60000);
 			enemyCenter = new Vector3 (0,0,-60000);
 			enemyId = "0";
-			//Debug.Log ("gqb------>" + GameInit.gameObjectInstance[0].tag);
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.698f, 0.255f, 0.157f);
-			transform.position = new Vector3 ((GameInit.gameObjectInstance[0].transform.position.x + 5000),
-				GameInit.gameObjectInstance[0].transform.position.y, 
-				(GameInit.gameObjectInstance[0].transform.position.z + 5000));
+			transform.position = new Vector3 (0,
+				25, 
+				-10000);
+			/*transform.position = new Vector3 (-40000,
+				25, 
+				-51000);*/
 		}
 
 		RectTransform mRectTransform = sliderHealth.GetComponent<RectTransform> ();
@@ -137,7 +132,7 @@ public class CarType3 : PojulObject {
 		sliderHealth.value = sliderHealth.maxValue;
 
 		//test
-		GameObject targetObj = null;GameObject.FindGameObjectWithTag("player");
+		GameObject targetObj = null;//GameObject.FindGameObjectWithTag("player");
 		if(targetObj != null){
 			target = targetObj.transform.FindChild ("aim");
 		}
@@ -169,8 +164,13 @@ public class CarType3 : PojulObject {
 	}
 
 	void behaviorListener(){
-
 		rayCastEnemy ();
+
+		if(nav != null && behavior == 1  && 
+			(nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid || nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial) ){
+			startNav(mPatrolArea.getRandomPoint());
+		}
+
 
 		if(nav != null && behavior == 1 && !nav.hasPath && !nav.pathPending && mPatrolArea != null && target == null){
 			startNav(mPatrolArea.getRandomPoint());
@@ -180,26 +180,24 @@ public class CarType3 : PojulObject {
 	}
 
 	void rayCastEnemy(){
-		if(target == null){
-			return;
-		}
-		if(isDestoryed){
+		if(target == null || isPanDestoryed || isDestoryed){
 			return;
 		}
 		RaycastHit hit;
 		if(paoTransform_lod0 != null && Physics.Raycast (paoTransform_lod0.position, paoTransform_lod0.forward, out hit, 12000.0f)){
-			//Debug.Log (paoTransform_lod0.forward + "gqb------>hit:" + hit.transform.root.name);
-			if(hit.transform != null && hit.transform.root.name != "Plane" && (Time.time - lastFileTime) > fireInterval){
-				lastFileTime = Time.time;
-				fire ();
+			if(hit.transform != null && (Time.time - lastFileTime) > fireInterval && hit.transform.root.childCount > 0){
+				//Debug.Log (hit.transform.root.GetChild(0).name + "; gqb------>hit:" + hit.transform.root.GetChild(0).tag);
+				string[] tags = hit.transform.root.GetChild(0).tag.Split ('_');
+				if (tags.Length == 2 && enemyId.Equals(tags [0]) && ("car2".Equals (tags [1]) || "car3".Equals (tags [1])
+				   || "car4".Equals (tags [1]) || "car5".Equals (tags [1]) || "car6".Equals (tags [1]))) {
+					lastFileTime = Time.time;
+					fire ();
+				}
 			}
 		}
 	}
 
 	void fire(){
-		if(target == null){
-			return;
-		}
 		shootShell ();
 		GameObject fire = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/tankFire"), 
 			fireTransform.position, fireTransform.rotation) as GameObject;
@@ -208,13 +206,13 @@ public class CarType3 : PojulObject {
 
 	void shootShell(){
 		GameObject shell1 = (GameObject)Instantiate(Resources.Load("Prefabs/arms/shell_type1"), 
-			(paoTransform_lod0.position + paoTransform_lod0.forward*10), paoTransform_lod0.rotation) as GameObject;
+			(paoTransform_lod0.position + paoTransform_lod0.forward*30), paoTransform_lod0.rotation) as GameObject;
 		shell1.tag = "shell1";
 		((ShellType1)shell1.GetComponent<ShellType1> ()).shoot(10000, 0);
 	}
 
     void aimEnemy(Transform enemyTransform){
-		if(target == null || paoTransform_lod0 == null){
+		if(target == null || isPanDestoryed || isDestoryed){
 			return;
 		}
 		panTransform_lod0.rotation = Quaternion.Slerp(panTransform_lod0.rotation, 
@@ -240,6 +238,9 @@ public class CarType3 : PojulObject {
 	}
 
 	void listenerRollAni(){
+		if(isPanDestoryed || isDestoryed){
+			return;
+		}
 		if (mRenderer_lod0_main.isVisible && !mAnimator_lod0.GetBool ("roll")) {
 			mAnimator_lod0.SetBool ("roll", true);
 			mAnimator_lod1.SetBool ("roll", false);
@@ -303,7 +304,7 @@ public class CarType3 : PojulObject {
 		navCube.transform.position = transform.position;
 		navCube.transform.localScale = new Vector3 (100, 100, 100);
 		navCube.AddComponent<UnityEngine.AI.NavMeshAgent>();
-		Destroy (navCube.GetComponent<BoxCollider> ());
+		Destroy(navCube.GetComponent<BoxCollider> ());
 		transform.parent = navCube.transform;
 
 		MeshRenderer m = navCube.GetComponent<MeshRenderer>();
@@ -314,14 +315,21 @@ public class CarType3 : PojulObject {
 	public override void isFired(Collision collision, int type){
 		if(type ==2){
 			sliderHealth.value = sliderHealth.value - 36;
-			Debug.Log ("gqb------>sliderHealth: " + sliderHealth.value);
 			if(sliderHealth.value <= 0 && !isDestoryed){
+				isDestoryed = true;
+				isPanDestoryed = true;
 				DestoryAll (collision);
 				return;
 			}
 			if(collision.gameObject.name.Equals("pan") && !isPanDestoryed && !isDestoryed){
+				isPanDestoryed = true;
 				destoryPan (collision);
 			}
+		}else if(type ==3){
+			isDestoryed = true;
+			isPanDestoryed = true;
+			DestoryAll (collision);
+			return;
 		}
 	}
 
@@ -336,10 +344,11 @@ public class CarType3 : PojulObject {
 			paoTransform_lod0.parent = null;
 			paoTransform_lod1.parent = paoTransform_lod0;
 			paoTransform_lod2.parent = paoTransform_lod0;
-			if(!paoTransform_lod0.gameObject.GetComponent<BoxCollider> ()){
-				paoTransform_lod0.gameObject.AddComponent<BoxCollider> ();
+			if(!paoTransform_lod0.gameObject.GetComponent<MeshCollider> ()){
+				paoTransform_lod0.gameObject.AddComponent<MeshCollider> ();
+				paoTransform_lod0.gameObject.GetComponent<MeshCollider> ().convex = true;
 				paoTransform_lod0.gameObject.AddComponent<Rigidbody> ();
-				paoTransform_lod0.gameObject.GetComponent<Rigidbody> ().mass = 0.8f;
+				paoTransform_lod0.gameObject.GetComponent<Rigidbody> ().mass = 0.9f;
 			}
 		}
 
@@ -348,7 +357,7 @@ public class CarType3 : PojulObject {
 		mainTransform_lod2.parent = mainTransform_lod0;
 		if(!mainTransform_lod0.gameObject.GetComponent<Rigidbody>()){
 			mainTransform_lod0.gameObject.AddComponent<Rigidbody> ();
-			mainTransform_lod0.gameObject.GetComponent<Rigidbody> ().mass = 1.5f;
+			mainTransform_lod0.gameObject.GetComponent<Rigidbody> ().mass = 1.4f;
 		}
 
 		for(int i =0;i <= 7; i++){
@@ -359,10 +368,11 @@ public class CarType3 : PojulObject {
 			lunzi_lod1.parent = lunzi_lod0;
 			lunzi_lod2.parent = lunzi_lod0;
 			lunzis [i] = lunzi_lod0;
-			if(!lunzi_lod0.gameObject.GetComponent<BoxCollider>()){
-				lunzi_lod0.gameObject.AddComponent<BoxCollider> ();
+			if(!lunzi_lod0.gameObject.GetComponent<MeshCollider>()){
+				lunzi_lod0.gameObject.AddComponent<MeshCollider> ();
+				lunzi_lod0.gameObject.GetComponent<MeshCollider> ().convex = true;
 				lunzi_lod0.gameObject.AddComponent<Rigidbody> ();
-				lunzi_lod0.gameObject.GetComponent<Rigidbody> ().mass = 0.7f;
+				lunzi_lod0.gameObject.GetComponent<Rigidbody> ().mass = 0.8f;
 			}
 		}
 		Vector3 explosionPos = new Vector3 (collision.contacts[0].point.x, 
@@ -370,19 +380,22 @@ public class CarType3 : PojulObject {
 			collision.contacts[0].point.z);
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, 200.0f);
 		foreach (Collider hit in colliders){
-			if (hit.GetComponent<Rigidbody>()){ 
-				hit.GetComponent<Rigidbody>().AddExplosionForce(50000.0f, explosionPos, 200.0f);
+			if (hit.GetComponent<Rigidbody>()){
+				hit.GetComponent<Rigidbody>().AddExplosionForce(30000.0f, explosionPos, 200.0f);
 			}  
 		}
-		Invoke ("destoryAll", 60);
-		isDestoryed = true;
+		Invoke ("destoryAll", 30);
 		if(nav != null){
 			nav.enabled = false;	
 		}
-		Transform aim = transform.FindChild ("aim");
 		stop ();
+		Transform aim = transform.FindChild ("aim");
 		if(aim != null){
 			Destroy (aim.gameObject);
+		}
+
+		if(GameInit.currentInstance.ContainsKey((string)tag)){
+			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
 		}
 
 	}
@@ -397,8 +410,9 @@ public class CarType3 : PojulObject {
 		paoTransform_lod0.parent = null;
 		paoTransform_lod1.parent = paoTransform_lod0;
 		paoTransform_lod2.parent = paoTransform_lod0;
-		if (!paoTransform_lod0.gameObject.GetComponent<BoxCollider> ()) {
-			paoTransform_lod0.gameObject.AddComponent<BoxCollider> ();
+		if (!paoTransform_lod0.gameObject.GetComponent<MeshCollider> ()) {
+			paoTransform_lod0.gameObject.AddComponent<MeshCollider> ();
+			paoTransform_lod0.gameObject.GetComponent<MeshCollider> ().convex = true;
 			paoTransform_lod0.gameObject.AddComponent<Rigidbody> ();
 		}
 
@@ -411,6 +425,11 @@ public class CarType3 : PojulObject {
 				hit.GetComponent<Rigidbody>().AddExplosionForce(6000.0f, explosionPos, 50.0f);
 			}  
 		}
+
+		if(aimTransform != null && mainTransform_lod0 != null){
+			aimTransform.position = mainTransform_lod0.position;
+		}
+
 		Invoke ("destoryPan", 20);
 	}
 
@@ -421,7 +440,6 @@ public class CarType3 : PojulObject {
 		if(paoTransform_lod0 != null){
 			Destroy (paoTransform_lod0.gameObject);
 		}
-		isPanDestoryed = true;
 	}
 
 	void destoryAll(){
@@ -439,13 +457,11 @@ public class CarType3 : PojulObject {
 				Destroy(lunzis[i].gameObject);
 			}
 		}
+
 		Destroy(transform.root.gameObject);
 	}
 
 	void findInvade(){
-		if(target != null && !isDestoryed){
-			Debug.Log (target.name + "gqb------>target: " + target.tag);
-		}
 		Collider[] colliders = Physics.OverlapSphere (transform.position, 12000);
 		for(int i =0; i< colliders.Length; i++ ){
 			if(colliders[i].transform.root.childCount <= 0){
@@ -493,7 +509,7 @@ public class CarType3 : PojulObject {
 						tempTransforms.Remove (tempTransforms [i]);
 						continue;
 					}
-					if((myCenter - tempTransforms[i].position).magnitude < dangeroustDis){
+					if(tempTransforms[i] != null && (myCenter - tempTransforms[i].position).magnitude < dangeroustDis){
 						dangeroustEnemy = tempTransforms [i];
 						dangeroustDis = (myCenter - tempTransforms [i].position).magnitude;
 					}

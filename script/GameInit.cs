@@ -99,12 +99,13 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	void initData(){
-		modelpaths.Add ("A10_lod", "Prefabs/A10a_lod");
+		modelpaths.Add ("a10", "Prefabs/A10a_lod");
 		modelpaths.Add ("A10", "Prefabs/A-10a");
 		modelpaths.Add ("air_ray_A10", "Prefabs/Particle/air_ray_A101");
 		modelpaths.Add ("tankFire", "Prefabs/Particle/tankFire");
 		modelpaths.Add ("bomb1", "Prefabs/Particle/bomb1");
 		modelpaths.Add ("bomb2", "Prefabs/Particle/bomb2");
+		modelpaths.Add ("missile_blaze1", "Prefabs/Particle/missile_blaze1");
 		modelpaths.Add ("cannon1", "Prefabs/arms/cannon_type1");
 		modelpaths.Add ("car2", "Prefabs/arms/car_type2");
 		modelpaths.Add ("car3", "Prefabs/arms/car_type3");
@@ -113,6 +114,8 @@ public class GameInit  : MonoBehaviour {
 		modelpaths.Add ("car6", "Prefabs/arms/car_type6");
 		modelpaths.Add ("missile1", "Prefabs/arms/missile_type1");
 		modelpaths.Add ("missile2", "Prefabs/arms/missile_type2");
+		modelpaths.Add ("missile3", "Prefabs/arms/missile_type3");
+		modelpaths.Add ("missile4", "Prefabs/arms/missile_type4");
 		modelpaths.Add ("shell1", "Prefabs/arms/shell_type1");
 		modelpaths.Add ("transport1", "Prefabs/arms/transport_type1");
 
@@ -120,30 +123,43 @@ public class GameInit  : MonoBehaviour {
 		progress1 = (Texture2D)Resources.Load ("icon/progress1/progress1c");
 		progress2 = (Texture2D)Resources.Load ("icon/progress1/progress1d");
 
-		prices.Add ("cannon1", 8);
-		prices.Add ("car2", 6);
+		prices.Add ("a10", 1);
+		prices.Add ("car2", 1);//6
 		prices.Add ("car3", 1);//21
-		prices.Add ("car4", 25);
-		prices.Add ("car5", 28);
+		prices.Add ("car4", 1);//23
+		prices.Add ("car5", 1);//28
 		prices.Add ("car6", 20);
 		prices.Add ("missile1", 33);
 		prices.Add ("missile2", 29);
+		prices.Add ("missile3", 1);
 		prices.Add ("shell1", 1);
 		prices.Add ("transport1", 1);//62
 
-		maxInstance.Add ("cannon1", 20);
-		maxInstance.Add ("car2", 12);
-		maxInstance.Add ("car3", 100);//16
-		maxInstance.Add ("car4", 16);
-		maxInstance.Add ("car5", 6);
-		maxInstance.Add ("car6", 8);
-		maxInstance.Add ("missile1",10);
-		maxInstance.Add ("missile2", 2);
-		maxInstance.Add ("shell1", 100000);
-		maxInstance.Add ("transport1", 6);
+		maxInstance.Add ("0_a10", 20);
+		maxInstance.Add ("1_a10", 20);
+		maxInstance.Add ("0_car2", 20);//12
+		maxInstance.Add ("1_car2", 12);
+		maxInstance.Add ("0_car3", 40);//16
+		maxInstance.Add ("1_car3", 40);//16
+		maxInstance.Add ("0_car4", 100);//16
+		maxInstance.Add ("1_car4", 100);//16
+		maxInstance.Add ("0_car5", 6);
+		maxInstance.Add ("1_car5", 6);
+		maxInstance.Add ("0_car6", 8);
+		maxInstance.Add ("1_car6", 8);
+		maxInstance.Add ("0_missile1",10);
+		maxInstance.Add ("1_missile1",10);
+		maxInstance.Add ("0_missile2", 2);
+		maxInstance.Add ("1_missile2", 2);
+		maxInstance.Add ("0_missile3", 2);
+		maxInstance.Add ("1_missile3", 2);
+		maxInstance.Add ("0_shell1", 100000);
+		maxInstance.Add ("1_shell1", 100000);
+		maxInstance.Add ("0_transport1", 6);
+		maxInstance.Add ("1_transport1", 6);
 
-		currentInstance.Add ("0_cannon1", 0);
-		currentInstance.Add ("1_cannon1", 0);
+		currentInstance.Add ("0_a10", 0);
+		currentInstance.Add ("1_a10", 0);
 		currentInstance.Add ("0_car2", 0);
 		currentInstance.Add ("1_car2", 0);
 		currentInstance.Add ("0_car3", 0);
@@ -157,6 +173,8 @@ public class GameInit  : MonoBehaviour {
 		currentInstance.Add ("0_missile1", 0);
 		currentInstance.Add ("1_missile1", 0);
 		currentInstance.Add ("0_missile2", 0);
+		currentInstance.Add ("1_missile3", 0);
+		currentInstance.Add ("0_missile3", 0);
 		currentInstance.Add ("1_missile2", 0);
 		currentInstance.Add ("0_shell1", 0);
 		currentInstance.Add ("1_shell1", 0);
@@ -206,7 +224,6 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	public static void instanceGameobject(string playerId, string type){
-
 		string tag = (playerId + "_" + type);
 		if ("missile1".Equals (type) || "missile2".Equals (type)) {
 			currentInstance [tag] = (int)currentInstance [tag] + 1;
@@ -228,48 +245,16 @@ public class GameInit  : MonoBehaviour {
 
 
 	void InstancePlayer(){
-		player = (GameObject)Instantiate(Resources.Load((string)modelpaths["A10_lod"]), 
+		player = (GameObject)Instantiate(Resources.Load((string)modelpaths["a10"]), 
 			new Vector3(0, 125, -60000), Quaternion.Euler(0, 0, 0)) as GameObject;
-		player.tag = "player";
+		player.tag = "0_a10";
 		((A10aPlan)player.GetComponent<A10aPlan>()).setPlayType (0);
 		player.AddComponent<planMove> ();
-	}
-	
-
-	void buildAir (Vector3 navPoint){
-		GameObject prefabA10 = (GameObject)Instantiate(Resources.Load((string)modelpaths["A10_lod"]), 
-			new Vector3(0, 200, -60000), Quaternion.Euler(0, 0, 0)) as GameObject;
-		prefabA10.tag = "A10";
-		((A10aPlan)prefabA10.GetComponent<A10aPlan>()).setPlayType (1);
-		prefabA10.AddComponent<AirAction>();
-		AirAction ai = (AirAction)prefabA10.GetComponent<AirAction> ();
-		modelParams.Add (ai, prefabA10);
-		ai.startNav (navPoint);
 	}
 
 	// Update is called once per frame
 	void Update () {
-		//minoAirShip ();
-	}
-
-	void minoAirShip (){
-		int shipTimes = (int)(Time.time/airShipInterval);
-		if (!airShapArrive && shipTimes % 2 == 0) {
-			airShapArrive = true;
-			hasBuildAirNum = 0;
-			airShapArriveTime = Time.time;
-		} else if(shipTimes % 2 == 1){
-			airShapArrive = false;
-			return;
-		}
-		if(airShapArrive){
-			float dTime = Time.time - airShapArriveTime;
-			int airBuildNum = (int)(dTime / eachAirShipInterval);
-			if(hasBuildAirNum < airShipNum && hasBuildAirNum < airBuildNum){
-				buildAir (myNavPoint1as[hasBuildAirNum%4]);
-				hasBuildAirNum = hasBuildAirNum + 1;
-			}
-		}
+		
 	}
 
 }

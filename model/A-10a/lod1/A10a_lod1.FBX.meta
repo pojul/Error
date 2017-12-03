@@ -1,34 +1,15 @@
 fileFormatVersion: 2
-guid: e508d5ae4da5d0b4ea2e2f657cf8aea5
-timeCreated: 1507220585
+guid: 32a7f78bd65d667448cd5bf65cc211da
+timeCreated: 1512027845
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
-    100002: studio_a10_mesh_06
-    100004: studio_a10_mesh_07
-    100006: studio_a10_mesh_08
-    100008: studio_a10_mesh_09
     400000: //RootNode
-    400002: studio_a10_mesh_06
-    400004: studio_a10_mesh_07
-    400006: studio_a10_mesh_08
-    400008: studio_a10_mesh_09
-    2300000: studio_a10_mesh_06
-    2300002: studio_a10_mesh_07
-    2300004: studio_a10_mesh_08
-    2300006: studio_a10_mesh_09
-    3300000: studio_a10_mesh_06
-    3300002: studio_a10_mesh_07
-    3300004: studio_a10_mesh_08
-    3300006: studio_a10_mesh_09
-    4300000: studio_a10_mesh_09
-    4300002: studio_a10_mesh_08
-    4300004: studio_a10_mesh_07
-    4300006: studio_a10_mesh_06
-    7400000: Take 001
-    9500000: //RootNode
+    2300000: //RootNode
+    3300000: //RootNode
+    4300000: main
   materials:
     importMaterials: 1
     materialName: 0
@@ -93,7 +74,7 @@ ModelImporter:
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
