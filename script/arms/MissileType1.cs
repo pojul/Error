@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MissileType3 : PojulObject {
+public class MissileType1 : PojulObject {
 
 	private AudioSource mAudioSource;
 
@@ -13,10 +13,10 @@ public class MissileType3 : PojulObject {
 	private bool isForward = false;
 	private bool isDecay = false;
 
-	private float maxSpeed = GameInit.mach * 2.8f;
-	private float acceleration = 20;
+	private float maxSpeed = GameInit.mach * 5f;
+	private float acceleration = 36;
 	private float speed = 0;
-	private float aimSpeed = 3.5f;
+	private float aimSpeed = 10f;
 
 	private Rigidbody mRigidbody;
 
@@ -26,7 +26,7 @@ public class MissileType3 : PojulObject {
 
 		blazePos = transform.FindChild ("blazePos");
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 		if(target != null){
@@ -35,13 +35,14 @@ public class MissileType3 : PojulObject {
 			if (!isForward && !missTarget) {
 				transform.rotation = Quaternion.Slerp(transform.rotation, 
 					Quaternion.LookRotation(target.position - transform.position), aimSpeed * Time.deltaTime);
-				if(blaze != null){
-					blaze.transform.localEulerAngles = new Vector3 (0,0,0);
-				}
 				newRotation = transform.rotation;
 			}
 			if(transform.parent != null){
 				transform.parent = null;
+			}
+
+			if(blaze != null){
+				blaze.transform.localEulerAngles = new Vector3 (0,0,0);
 			}
 
 			transform.position = transform.position + transform.forward * speed * Time.deltaTime;
@@ -86,12 +87,14 @@ public class MissileType3 : PojulObject {
 		playerId = strs [0];
 		type = strs [1];
 		this.target = target;
-		this.speed = startSpeed;
+		this.speed = startSpeed + 200;
+		isForward = true;
+
 
 		initBlaze ();
 
-		Invoke ("startDecay", 5);
-		Invoke ("destoryMissile", 35);
+		Invoke ("startDecay", 15);
+		Invoke ("destoryMissile", 45);
 
 	}
 
@@ -104,11 +107,12 @@ public class MissileType3 : PojulObject {
 		destory ();
 	}
 
+
 	void initBlaze(){
-		blaze = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile_blaze1"]), 
+		blaze = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile_blaze2"]), 
 			blazePos.position, Quaternion.Euler(0, 0, 0)) as GameObject;
 		blaze.transform.parent = transform;
-		Invoke ("addRigidbody", 0.8f);
+		Invoke ("addRigidbody", 1.8f);
 		if(mAudioSource != null && !mAudioSource.isPlaying){
 			mAudioSource.Play ();
 		}
@@ -116,6 +120,7 @@ public class MissileType3 : PojulObject {
 	}
 
 	void addRigidbody(){
+		isForward = false;
 		transform.gameObject.AddComponent<Rigidbody> ();
 		transform.gameObject.GetComponent<Rigidbody> ().useGravity = false;
 		mRigidbody = transform.GetComponent<Rigidbody> ();
@@ -138,11 +143,11 @@ public class MissileType3 : PojulObject {
 		if(mPojulObject != null){
 			mPojulObject.isFired(collision, 3);
 		}
+
 		destory ();
 	}
 
 	void destory(){
 		Destroy (this.gameObject);
 	}
-
 }

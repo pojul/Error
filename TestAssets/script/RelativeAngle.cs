@@ -46,8 +46,11 @@ public class RelativeAngle : MonoBehaviour {
 
 			float dx1 = Mathf.Abs (angle1.eulerAngles.x - angle.eulerAngles.x);
 			float dx2 = 360 - dx1;
-			Debug.Log ("gqb------>d angle x: " + Mathf.Min(dx1, dx2) + "; d angle y: " + Mathf.Min(dy1, dy2));
+			Debug.Log (transform.tag + "; gqb------>d angle x: " + Mathf.Min(dx1, dx2) + "; d angle y: " + Mathf.Min(dy1, dy2));
 
+			if(transform.tag.Equals("Untagged")){
+				Debug.Log ("gqb------>tag: null");
+			}
 			//Debug.Log ("gqb------>angle1 x: " + angle1.eulerAngles.x + "; y: " + angle1.eulerAngles.y);
 			//Debug.Log ("gqb------>angle x: " + angle.eulerAngles.x + "; y: " + angle.eulerAngles.y);
 			//Debug.Log ("gqb------>dx: " + (angle1.eulerAngles.x - angle.eulerAngles.x) + "; dy: " + (angle1.eulerAngles.y - angle.eulerAngles.y) );

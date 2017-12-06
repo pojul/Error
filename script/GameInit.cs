@@ -106,6 +106,8 @@ public class GameInit  : MonoBehaviour {
 		modelpaths.Add ("bomb1", "Prefabs/Particle/bomb1");
 		modelpaths.Add ("bomb2", "Prefabs/Particle/bomb2");
 		modelpaths.Add ("missile_blaze1", "Prefabs/Particle/missile_blaze1");
+		modelpaths.Add ("missile_blaze2", "Prefabs/Particle/missile_blaze2");
+		modelpaths.Add ("inflame", "Prefabs/Particle/inflame");
 		modelpaths.Add ("cannon1", "Prefabs/arms/cannon_type1");
 		modelpaths.Add ("car2", "Prefabs/arms/car_type2");
 		modelpaths.Add ("car3", "Prefabs/arms/car_type3");
@@ -143,8 +145,8 @@ public class GameInit  : MonoBehaviour {
 		maxInstance.Add ("1_car3", 40);//16
 		maxInstance.Add ("0_car4", 100);//16
 		maxInstance.Add ("1_car4", 100);//16
-		maxInstance.Add ("0_car5", 6);
-		maxInstance.Add ("1_car5", 6);
+		maxInstance.Add ("0_car5", 3);
+		maxInstance.Add ("1_car5", 3);
 		maxInstance.Add ("0_car6", 8);
 		maxInstance.Add ("1_car6", 8);
 		maxInstance.Add ("0_missile1",10);
@@ -247,7 +249,7 @@ public class GameInit  : MonoBehaviour {
 	void InstancePlayer(){
 		player = (GameObject)Instantiate(Resources.Load((string)modelpaths["a10"]), 
 			new Vector3(0, 125, -60000), Quaternion.Euler(0, 0, 0)) as GameObject;
-		player.tag = "0_a10";
+		player.tag = "0_player";
 		((A10aPlan)player.GetComponent<A10aPlan>()).setPlayType (0);
 		player.AddComponent<planMove> ();
 	}

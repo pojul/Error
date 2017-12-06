@@ -8,6 +8,10 @@ public class PojulObject : MonoBehaviour {
 	public bool isPanDestoryed = false;
 
 	public bool isMissileAimed = false;
+	public Transform MissileAimedTra = null;
+	public bool isAvoidMissile = false;
+
+	public bool missTarget = false;//for missile
 
 	public string playerId = "";
 	public string enemyId = "";

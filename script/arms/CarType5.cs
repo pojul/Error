@@ -40,6 +40,14 @@ public class CarType5 : PojulObject {
 
 	private RadiusArea mPatrolArea;
 
+	private Transform target;
+
+	private List<Transform> missilePoses = new List<Transform>();
+	private Dictionary<Transform, Transform> missiles = new Dictionary<Transform, Transform> ();
+	private int maxMountMissle = 2;
+	private int currentMountMissle = 0;
+
+
 	//血量条
 	public Slider sliderHealth;
 	// Use this for initialization
@@ -52,13 +60,14 @@ public class CarType5 : PojulObject {
 		transform_lod1 = transform.FindChild ("car_type5_lod1");
 		transform_lod2 = transform.FindChild ("car_type5_lod2");
 
+
 		aimTransform = transform.FindChild ("aim");
 
 		mainTransform_lod0 = transform_lod0.FindChild("main");
 		mainTransform_lod1 = transform_lod1.FindChild("main");
 		mainTransform_lod2 = transform_lod2.FindChild("main");
 
-		Debug.Log (mainTransform_lod0 + "gqb------>" + mainTransform_lod1);
+		//Debug.Log (mainTransform_lod0 + "gqb------>" + mainTransform_lod1);
 
 		mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
@@ -70,6 +79,15 @@ public class CarType5 : PojulObject {
 		paoTransform_lod1 = transform_lod1.FindChild ("pao");
 		paoTransform_lod2 = transform_lod2.FindChild ("pao");
 
+		missilePoses.Add (paoTransform_lod0.FindChild ("missilePos1"));
+		missilePoses.Add (paoTransform_lod0.FindChild ("missilePos2"));
+		missilePoses.Add (paoTransform_lod0.FindChild ("missilePos3"));
+		missilePoses.Add (paoTransform_lod0.FindChild ("missilePos4"));
+
+		missiles.Add (missilePoses[0], null);
+		missiles.Add (missilePoses[1], null);
+		missiles.Add (missilePoses[2], null);
+		missiles.Add (missilePoses[3], null);
 
 		run ();
 
@@ -102,10 +120,31 @@ public class CarType5 : PojulObject {
 		mPatrolArea.maxRange = 40000;
 		mPatrolArea.minRange = 20000;
 		startNav(mPatrolArea.getRandomPoint());
+
+
+		addMissile ();
+
+		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
+		InvokeRepeating ("findInvade", 2.0f, 2.0f);
+
 	}
-	
+
+	void addMissile(){
+		for(int i = 0; i< missilePoses.Count; i++){
+			GameObject prefab = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile1"]), 
+				missilePoses[i].position, Quaternion.Euler(0, 0, 0)) as GameObject;
+			missiles [missilePoses[i]] = prefab.transform;
+			prefab.transform.parent = paoTransform_lod0;
+			prefab.GetComponent<MeshRenderer> ().enabled = false;
+			currentMountMissle = currentMountMissle + 1;
+		}
+	}
+
 	// Update is called once per frame
 	void Update () {
+		if(isDestoryed){
+			return;
+		}
 		sliderHealth.transform.rotation = Quaternion.Euler(mainTransform_lod0.rotation.eulerAngles.x , 
 			Camera.main.transform.rotation.eulerAngles.y,
 			mainTransform_lod0.rotation.eulerAngles.z);
@@ -118,6 +157,87 @@ public class CarType5 : PojulObject {
 
 		if(isMoving){
 			listenerRollAni ();
+		}
+	}
+
+	void behaviorListener(){
+		if(isDestoryed){
+			return;
+		}
+		if (MissileAimedTra == null) {
+			isMissileAimed = false;
+		} else {
+			PojulObject p = MissileAimedTra.gameObject.GetComponent<PojulObject> ();
+			if (p.missTarget) {
+				isMissileAimed = false;
+			} else {
+				isMissileAimed = true;
+			}
+		}
+
+		if(nav != null && behavior == 1  && 
+			(nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid || nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial) ){
+			startNav(mPatrolArea.getRandomPoint());
+		}
+
+		if(nav != null && (nav.hasPath || nav.pathPending)){
+			readyLaunch = false;
+		}
+
+		if(nav != null && !nav.hasPath && !nav.pathPending){
+			readyLaunch = true;
+		}
+
+		isTargetInFire ();
+	}
+
+	void isTargetInFire(){
+		if(target == null || isDestoryed){
+			return;
+		}
+		PojulObject mPojulObject = target.parent.gameObject.GetComponent<PojulObject> ();
+		if(mPojulObject == null || mPojulObject.isMissileAimed || mPojulObject.isDestoryed){
+			return;
+		}
+
+		if (paoTransform_lod0.localEulerAngles.x > 275 || paoTransform_lod0.localEulerAngles.x < 265) {
+			return;
+		}
+		float distance = (transform.position - target.position).magnitude;
+
+		//Debug.DrawRay(transform.position, (target.position - transform.position).normalized *16000, Color.white);
+		RaycastHit hit;
+		if((target.position.y - transform.position.y) > 20 && distance < 30000
+			&& Physics.Raycast (transform.position, (target.position - transform.position).normalized, out hit, 35000.0f)){
+			if(!hit.transform.root.tag.Equals("Untagged") || (hit.transform.root.childCount > 0 && !hit.transform.root.GetChild(0).tag.Equals("Untagged"))){
+				fireMissile ();
+			}
+		}
+		//Debug.Log ("gqb------>distance: " + distance);
+	}
+
+	void fireMissile(){
+		if(isDestoryed){
+			return;
+		}
+		if(currentMountMissle <= 0){
+			return;
+		}
+		for (int i = 0; i < missilePoses.Count; i++) {
+			if(missiles [missilePoses[i]] != null){
+				missiles [missilePoses [i]].gameObject.GetComponent<MeshRenderer> ().enabled = true;
+				MissileType1 mMissileType1 = missiles [missilePoses [i]].gameObject.GetComponent<MissileType1> ();
+				float startSpeed = 0;
+				PojulObject mPojulObject = target.parent.gameObject.GetComponent<PojulObject> ();
+				mMissileType1.fireInit ((playerId + "_missile1" ), target, startSpeed);
+				if(mPojulObject != null){
+					mPojulObject.isMissileAimed = true;
+					mPojulObject.MissileAimedTra = missiles [missilePoses [i]];
+				}
+				missiles [missilePoses [i]] = null;
+				currentMountMissle = currentMountMissle  - 1;
+				break;
+			}
 		}
 	}
 
@@ -244,6 +364,11 @@ public class CarType5 : PojulObject {
 				DestoryAll (collision, 120000.0f);
 				return;
 			}
+		}else if(type ==3){
+			isDestoryed = true;
+			isPanDestoryed = true;
+			DestoryAll (collision, 120000.0f);
+			return;
 		}
 	}
 
@@ -298,12 +423,24 @@ public class CarType5 : PojulObject {
 			Destroy (aim.gameObject);
 		}
 
+		if("0".Equals(playerId)){
+			if (GameInit.Car5Area0.ContainsKey (mPatrolArea.areaId)) {
+				GameInit.Car5Area0.Remove (mPatrolArea.areaId);
+			}
+		}else if("1".Equals(playerId)){
+			if (GameInit.Car5Area1.ContainsKey (mPatrolArea.areaId)) {
+				GameInit.Car5Area1.Remove (mPatrolArea.areaId);
+			}
+		}
+
 		if(GameInit.currentInstance.ContainsKey((string)tag)){
 			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
 		}
+
 	}
 
 	void destoryAll(){
+
 		if(mainTransform_lod0 != null){
 			Destroy (mainTransform_lod0.gameObject);
 		}
@@ -317,6 +454,51 @@ public class CarType5 : PojulObject {
 		}
 
 		Destroy(transform.root.gameObject);
+	}
+
+	void findInvade(){
+		updateCurrentMountMissle ();
+
+		Collider[] colliders = Physics.OverlapSphere (transform.position, 30000);
+		for (int i = 0; i < colliders.Length; i++) {
+			if (colliders [i].transform.root.childCount <= 0) {
+				continue;
+			}
+			Transform tempTransform = colliders [i].transform.root.GetChild (0);
+			string tag = tempTransform.tag;
+			if(tag.Equals("Untagged")){
+				if (colliders [i].transform.parent == null) {
+					continue;
+				}
+				if(colliders [i].transform.parent.tag.Equals("Untagged")){
+					continue;
+				}
+				tempTransform = colliders [i].transform.parent;
+			}
+			tag = tempTransform.tag;
+			//Debug.Log ("gqb------>findInvade tag: " + tag);
+			string[] strs = tempTransform.tag.Split ('_');
+			if (strs.Length == 2) {
+				string tempPlayerId = strs [0];
+				string tempType = strs [1];
+				if (enemyId.Equals (tempPlayerId)) {
+					if (target == null && ("a10".Equals (tempType))) {
+						target = tempTransform.FindChild ("aim");
+					}
+					Util.AddNearEnemys (tempTransform, playerId);
+				}
+			}
+		}
+	}
+
+	void updateCurrentMountMissle(){
+		int temptMountMissle = 0;
+		for (int i = 0; i < missilePoses.Count; i++) {
+			if(missiles [missilePoses[i]] != null){
+				temptMountMissle = temptMountMissle + 1;
+			}
+		}
+		currentMountMissle = temptMountMissle;
 	}
 
 }

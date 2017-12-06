@@ -164,6 +164,13 @@ public class CarType3 : PojulObject {
 	}
 
 	void behaviorListener(){
+
+		if (MissileAimedTra == null) {
+			isMissileAimed = false;
+		} else {
+			isMissileAimed = true;
+		}
+
 		rayCastEnemy ();
 
 		if(nav != null && behavior == 1  && 
@@ -313,15 +320,18 @@ public class CarType3 : PojulObject {
 	}
 
 	public override void isFired(Collision collision, int type){
+		if(isDestoryed){
+			return;
+		}
 		if(type ==2){
 			sliderHealth.value = sliderHealth.value - 36;
-			if(sliderHealth.value <= 0 && !isDestoryed){
+			if(sliderHealth.value <= 0){
 				isDestoryed = true;
 				isPanDestoryed = true;
 				DestoryAll (collision);
 				return;
 			}
-			if(collision.gameObject.name.Equals("pan") && !isPanDestoryed && !isDestoryed){
+			if(collision.gameObject.name.Equals("pan") && !isPanDestoryed){
 				isPanDestoryed = true;
 				destoryPan (collision);
 			}
@@ -469,6 +479,9 @@ public class CarType3 : PojulObject {
 			}
 			Transform tempTransform = colliders[i].transform.root.GetChild (0);
 			string tag = tempTransform.tag;
+			if (tag.Equals ("Untagged")) {
+				continue;
+			}
 			string[] strs = tempTransform.tag.Split ('_');
 			if(strs.Length == 2){
 				string tempPlayerId = strs[0];
