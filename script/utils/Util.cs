@@ -22,24 +22,34 @@ public class Util : MonoBehaviour {
 
 	public static int getCar5AreaId(string playId){
 		int areaid = -1;
+		int times = 0;
 		if ("0".Equals (playId)) {
 			bool matchArea = false;
 			while (!matchArea) {
+				if(times > 50){
+					areaid = Random.Range (1, 4);
+					break;
+				}
 				int areaId = Random.Range (1, 4);
 				if(!GameInit.Car5Area0.ContainsKey(areaId)){
 					matchArea = true;
 					areaid = areaId;
 				}
-
+				times = times + 1;
 			}
 		}else if("1".Equals(playId)){
 			bool matchArea = false;
 			while (!matchArea) {
+				if(times > 4){
+					areaid = Random.Range(5, 8);
+					break;
+				}
 				int areaId = Random.Range(5, 8);
 				if(!GameInit.Car5Area1.ContainsKey(areaId)){
 					matchArea = true;
 					areaid = areaId;
 				}
+				times = times + 1;
 			}
 		}
 		return areaid;

@@ -33,6 +33,14 @@ public class CarType2 : PojulObject {
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 
+	public int[] maxMissiles = {4, 3, 7};
+
+	public int[] currentMissiles = {0, 0, 0};
+
+	private GameObject supplyCar5;
+
+	public bool isGetMissileRoad = false;
+
 	//血量条
 	public Slider sliderHealth;
 	// Use this for initialization
@@ -65,6 +73,7 @@ public class CarType2 : PojulObject {
 		type = strs [1];
 
 		if ("0".Equals (playerId)) {
+			GameInit.MyCar2.Add (transform);
 			park = Util.getIdlePart ("0");
 			GameInit.park0 [park] = 1;
 			myCenter = new Vector3 (0,0,-60000);
@@ -72,6 +81,7 @@ public class CarType2 : PojulObject {
 			enemyId = "1";
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
 		}else if ("1".Equals (playerId)){
+			GameInit.EnemyCar2.Add (transform);
 			park = Util.getIdlePart ("1");
 			GameInit.park1 [park] = 1;
 			myCenter = new Vector3 (0,0,60000);
@@ -84,10 +94,14 @@ public class CarType2 : PojulObject {
 		mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
 		sliderHealth.value = sliderHealth.maxValue;
 
+
 		startNav (park);
 	
-	}
+		//InvokeRepeating("behaviorListener", 1f, 1f);
+		InvokeRepeating("missileTransport", 2f, 2f);
 
+	}
+		
 	// Update is called once per frame
 	void Update () {
 		sliderHealth.transform.rotation = Quaternion.Euler(mainTransform_lod0.rotation.eulerAngles.x , 
@@ -96,6 +110,117 @@ public class CarType2 : PojulObject {
 
 		if(isMoving){
 			listenerRollAni ();
+		}
+	}
+
+	void behaviorListener(){
+
+	}
+
+	void missileTransport(){
+		if(supplyCar5 != null){
+			startNav (new Vector3(supplyCar5.transform.position.x, 0 ,supplyCar5.transform.position.z));
+			isGetMissileRoad = false;
+			CarType5 mCarType5 = supplyCar5.GetComponent<CarType5> ();
+			if((supplyCar5.transform.position - transform.position).magnitude < 800){
+				exchange (mCarType5);
+			}
+			return;
+		}
+		if(currentMissiles[0] > 0){
+			findNeedMissile1 ();
+		}
+
+		getMissile ();
+	}
+
+	void getMissile(){
+
+		if ((GameInit.remainMissile [(playerId + "_missile1")] > 0 && (currentMissiles[0] < maxMissiles[0]))
+			|| (GameInit.remainMissile [(playerId + "_missile2")] > 0 && (currentMissiles[1] < maxMissiles[1]))
+			|| (GameInit.remainMissile [(playerId + "_missile3")] > 0 && (currentMissiles[2] < maxMissiles[2]))) {
+
+			if((transform.position - myCenter).magnitude < 800 ){
+				exchangeRemainMissile ((playerId + "_missile1"), 0);
+				exchangeRemainMissile ((playerId + "_missile2"), 1);
+				exchangeRemainMissile ((playerId + "_missile3"), 2);
+			}
+			if(isGetMissileRoad){
+				return;
+			}
+			Vector3 centerPoint = new Vector3 ((myCenter.x + Random.Range (200, 300)), 0, 
+				                      (myCenter.z + Random.Range (200, 300)));
+			startNav (centerPoint);
+			isGetMissileRoad = true;
+		} else {
+			if(nav.destination != park){
+				isGetMissileRoad = false;
+				startNav (park);
+			}
+		}
+	}
+
+	void exchangeRemainMissile(string type, int which){
+		if(GameInit.remainMissile[type] <= 0){
+			return;
+		}
+		int needNum = maxMissiles[which] - currentMissiles[which];
+		int canSupplyNum = GameInit.remainMissile[type];
+		Debug.Log ("gqb------>needNum: " + needNum + "; canSupplyNum: " + canSupplyNum);
+		if (canSupplyNum <= needNum) {
+			currentMissiles [which] = currentMissiles [which] + canSupplyNum;
+			GameInit.remainMissile [type] = 0;
+		} else {
+			currentMissiles [which] = maxMissiles [which];
+			GameInit.remainMissile [type] = GameInit.remainMissile [type] - needNum;
+		}
+	}
+
+	void exchange(CarType5 mCarType5){
+		int needNum = mCarType5.maxMountMissle - mCarType5.currentMountMissle;
+		int canSupplyNum = currentMissiles[0];
+
+		if(canSupplyNum <= needNum){
+			mCarType5.addMissile (canSupplyNum);
+			//mCarType5.currentMountMissle = mCarType5.currentMountMissle + canSupplyNum;
+			currentMissiles[0] = 0;
+		}else{
+			//mCarType5.currentMountMissle = mCarType5.maxMountMissle;
+			mCarType5.addMissile (needNum);
+			currentMissiles[0] = currentMissiles[0] - needNum;
+		}
+		mCarType5.isSupplied = false;
+		supplyCar5 = null;
+	}
+
+	void findNeedMissile1(){
+		if(supplyCar5 != null){
+			return;
+		}
+		Hashtable Car5s = new Hashtable();
+		if("0".Equals (playerId)) {
+			Car5s = GameInit.Car5Area0;
+		}else if("1".Equals (playerId)){
+			Car5s = GameInit.Car5Area1;
+		}
+		int currentPriority = 4;
+		GameObject tempSupplyCar5 = null;
+		foreach(int key in Car5s.Keys){
+			GameObject car5 = (GameObject)Car5s[key];
+			if(car5 == null){
+				continue;
+			}
+			CarType5 mCarType5= car5.GetComponent<CarType5> ();
+			if(mCarType5 != null && !mCarType5.isSupplied && (mCarType5.currentMountMissle < mCarType5.maxMountMissle) 
+				&& (mCarType5.priority < currentPriority)){
+				currentPriority = mCarType5.priority;
+				tempSupplyCar5 = car5;
+			}
+		}
+		if(tempSupplyCar5 != null){
+			CarType5 mCarType5= tempSupplyCar5.GetComponent<CarType5> ();
+			mCarType5.isSupplied = true;
+			supplyCar5 = tempSupplyCar5;
 		}
 	}
 
@@ -142,7 +267,7 @@ public class CarType2 : PojulObject {
 			return;
 		}
 		nav.destination = navPoint;//target.transform.position;
-		float patrol = Random.Range(maxMoveSpeed*0.5f, maxMoveSpeed);
+		float patrol = Random.Range(maxMoveSpeed*0.9f, maxMoveSpeed);
 		nav.speed = patrol;
 		nav.acceleration = patrol * 2f;
 		nav.autoRepath = true;
@@ -167,8 +292,8 @@ public class CarType2 : PojulObject {
 
 	public void createNavCube(){
 		navCube = GameObject.CreatePrimitive (PrimitiveType.Cube);
-		navCube.transform.position = transform.position;
-		navCube.transform.localScale = new Vector3 (200, 200, 200);
+		navCube.transform.position = new Vector3(transform.position.x, 6f, transform.position.z);
+		navCube.transform.localScale = new Vector3 (10, 10, 10);
 		navCube.AddComponent<UnityEngine.AI.NavMeshAgent>();
 		Destroy(navCube.GetComponent<BoxCollider> ());
 		transform.parent = navCube.transform;
@@ -237,6 +362,11 @@ public class CarType2 : PojulObject {
 	}
 
 	void destoryAll(){
+		if ("0".Equals (playerId)) {
+			GameInit.MyCar2.Remove (transform);
+		} else if("1".Equals (playerId)){
+			GameInit.EnemyCar2.Remove (transform);
+		}
 		if(mainTransform_lod0 != null){
 			Destroy (mainTransform_lod0.gameObject);
 		}

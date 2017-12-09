@@ -44,9 +44,10 @@ public class CarType5 : PojulObject {
 
 	private List<Transform> missilePoses = new List<Transform>();
 	private Dictionary<Transform, Transform> missiles = new Dictionary<Transform, Transform> ();
-	private int maxMountMissle = 2;
-	private int currentMountMissle = 0;
-
+	public int maxMountMissle = 3;
+	public int currentMountMissle = 0;
+	public int priority = 1;
+	public bool isSupplied = false;
 
 	//血量条
 	public Slider sliderHealth;
@@ -98,14 +99,18 @@ public class CarType5 : PojulObject {
 		int areaId = -1;
 		if ("0".Equals (playerId)) {
 			areaId = Util.getCar5AreaId ("0");
-			GameInit.Car5Area0.Add (areaId, gameObject);
+			if(!GameInit.Car5Area0.ContainsKey (areaId)){
+				GameInit.Car5Area0.Add (areaId, this.gameObject);
+			}
 			myCenter = new Vector3 (0,0,-60000);
 			enemyCenter = new Vector3 (0,0,60000);
 			enemyId = "1";
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
 		} else if ("1".Equals (playerId)) {
 			areaId = Util.getCar5AreaId ("1");
-			GameInit.Car5Area1.Add (areaId, gameObject);
+			if(!GameInit.Car5Area1.ContainsKey (areaId)){
+				GameInit.Car5Area1.Add (areaId, this.gameObject);
+			}
 			myCenter = new Vector3 (0,0,60000);
 			enemyCenter = new Vector3 (0,0,-60000);
 			enemyId = "0";
@@ -121,22 +126,28 @@ public class CarType5 : PojulObject {
 		mPatrolArea.minRange = 20000;
 		startNav(mPatrolArea.getRandomPoint());
 
-
-		addMissile ();
-
+		//addMissile ();
+		currentMountMissle = 0;
 		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
 		InvokeRepeating ("findInvade", 2.0f, 2.0f);
 
 	}
 
-	void addMissile(){
+	public void addMissile(int num){
+		int addnum = 0;
 		for(int i = 0; i< missilePoses.Count; i++){
-			GameObject prefab = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile1"]), 
-				missilePoses[i].position, Quaternion.Euler(0, 0, 0)) as GameObject;
-			missiles [missilePoses[i]] = prefab.transform;
-			prefab.transform.parent = paoTransform_lod0;
-			prefab.GetComponent<MeshRenderer> ().enabled = false;
-			currentMountMissle = currentMountMissle + 1;
+			if(addnum >= num){
+				return;
+			}
+			if(missiles [missilePoses[i]] == null){
+				GameObject prefab = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile1"]), 
+					missilePoses[i].position, missilePoses[i].rotation) as GameObject;
+				missiles [missilePoses[i]] = prefab.transform;
+				prefab.transform.parent = paoTransform_lod0;
+				prefab.GetComponent<MeshRenderer> ().enabled = false;
+				currentMountMissle = currentMountMissle + 1;
+				addnum = addnum + 1;
+			}
 		}
 	}
 
@@ -178,13 +189,14 @@ public class CarType5 : PojulObject {
 		if(nav != null && behavior == 1  && 
 			(nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid || nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial) ){
 			startNav(mPatrolArea.getRandomPoint());
+			readyLaunch = true;
 		}
 
-		if(nav != null && (nav.hasPath || nav.pathPending)){
+		if(nav != null && nav.hasPath){
 			readyLaunch = false;
 		}
 
-		if(nav != null && !nav.hasPath && !nav.pathPending){
+		if(nav != null && !nav.hasPath){
 			readyLaunch = true;
 		}
 
@@ -343,7 +355,7 @@ public class CarType5 : PojulObject {
 	public void createNavCube(){
 		navCube = GameObject.CreatePrimitive (PrimitiveType.Cube);
 		navCube.transform.position = transform.position;
-		navCube.transform.localScale = new Vector3 (200, 200, 200);
+		navCube.transform.localScale = new Vector3 (100, 100, 100);
 		navCube.AddComponent<UnityEngine.AI.NavMeshAgent>();
 		Destroy(navCube.GetComponent<BoxCollider> ());
 		transform.parent = navCube.transform;

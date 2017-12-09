@@ -29,6 +29,11 @@ public class GameInit  : MonoBehaviour {
 	public static Hashtable Car5Area0 = new Hashtable();
 	public static Hashtable Car5Area1 = new Hashtable();
 
+	public static Dictionary<string, int> remainMissile = new Dictionary<string, int>();
+
+	public static List<Transform> MyCar2 = new List<Transform> ();
+	public static List<Transform> EnemyCar2 = new List<Transform> ();
+
 	public static Vector3 home1Pos = new Vector3(0, 0, -60000);
 	public static Vector3 home2Pos = new Vector3(0, 0, 60000);//19003//17750
 
@@ -131,8 +136,8 @@ public class GameInit  : MonoBehaviour {
 		prices.Add ("car4", 1);//23
 		prices.Add ("car5", 1);//28
 		prices.Add ("car6", 20);
-		prices.Add ("missile1", 33);
-		prices.Add ("missile2", 29);
+		prices.Add ("missile1", 1);//33
+		prices.Add ("missile2", 1);//29
 		prices.Add ("missile3", 1);
 		prices.Add ("shell1", 1);
 		prices.Add ("transport1", 1);//62
@@ -149,12 +154,12 @@ public class GameInit  : MonoBehaviour {
 		maxInstance.Add ("1_car5", 3);
 		maxInstance.Add ("0_car6", 8);
 		maxInstance.Add ("1_car6", 8);
-		maxInstance.Add ("0_missile1",10);
-		maxInstance.Add ("1_missile1",10);
+		maxInstance.Add ("0_missile1",8);
+		maxInstance.Add ("1_missile1",8);
 		maxInstance.Add ("0_missile2", 2);
 		maxInstance.Add ("1_missile2", 2);
-		maxInstance.Add ("0_missile3", 2);
-		maxInstance.Add ("1_missile3", 2);
+		maxInstance.Add ("0_missile3", 14);
+		maxInstance.Add ("1_missile3", 14);
 		maxInstance.Add ("0_shell1", 100000);
 		maxInstance.Add ("1_shell1", 100000);
 		maxInstance.Add ("0_transport1", 6);
@@ -175,13 +180,20 @@ public class GameInit  : MonoBehaviour {
 		currentInstance.Add ("0_missile1", 0);
 		currentInstance.Add ("1_missile1", 0);
 		currentInstance.Add ("0_missile2", 0);
-		currentInstance.Add ("1_missile3", 0);
-		currentInstance.Add ("0_missile3", 0);
 		currentInstance.Add ("1_missile2", 0);
+		currentInstance.Add ("0_missile3", 0);
+		currentInstance.Add ("1_missile3", 0);
 		currentInstance.Add ("0_shell1", 0);
 		currentInstance.Add ("1_shell1", 0);
 		currentInstance.Add ("0_transport1", 0);
 		currentInstance.Add ("1_transport1", 0);
+
+		remainMissile.Add ("0_missile1", 0);
+		remainMissile.Add ("1_missile1", 0);
+		remainMissile.Add ("0_missile2", 0);
+		remainMissile.Add ("1_missile2", 0);
+		remainMissile.Add ("0_missile3", 0);
+		remainMissile.Add ("1_missile3", 0);
 
 		park0.Add (new Vector3 (3000, 0, -40000), 0);//0:空闲；1:被占用
 		park0.Add (new Vector3 (5000, 0, -40000), 0);
@@ -227,8 +239,11 @@ public class GameInit  : MonoBehaviour {
 
 	public static void instanceGameobject(string playerId, string type){
 		string tag = (playerId + "_" + type);
-		if ("missile1".Equals (type) || "missile2".Equals (type)) {
+		if ("missile1".Equals (type) || "missile2".Equals (type) || "missile3".Equals (type)) {
 			currentInstance [tag] = (int)currentInstance [tag] + 1;
+			//Debug.Log ("gqb------>instanceGameobject1 tag remainMissile: " + remainMissile[tag]);
+			remainMissile[tag] = remainMissile[tag] + 1;
+			//Debug.Log ("gqb------>instanceGameobject2 tag remainMissile: " + remainMissile[tag]);
 			return;
 		}
 

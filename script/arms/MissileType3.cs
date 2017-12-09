@@ -16,7 +16,7 @@ public class MissileType3 : PojulObject {
 	private float maxSpeed = GameInit.mach * 2.8f;
 	private float acceleration = 20;
 	private float speed = 0;
-	private float aimSpeed = 3.5f;
+	private float aimSpeed = 4.5f;
 
 	private Rigidbody mRigidbody;
 
@@ -142,6 +142,9 @@ public class MissileType3 : PojulObject {
 	}
 
 	void destory(){
+		if(GameInit.currentInstance.ContainsKey((string)tag)){
+			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
+		}
 		Destroy (this.gameObject);
 	}
 

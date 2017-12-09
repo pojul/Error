@@ -13,7 +13,7 @@ public class CreateEmeny : MonoBehaviour {
 		//Invoke ("createEnemy", 120);
 		//Invoke ("createEnemy", 160);
 		//Invoke ("createEnemy", 170);
-		InvokeRepeating ("createEnemy1", 50, 50);
+		InvokeRepeating ("createEnemy1", 150, 50);
 		//Invoke ("createEnemy1", 155);
 	}
 	

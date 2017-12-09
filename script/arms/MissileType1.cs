@@ -13,22 +13,34 @@ public class MissileType1 : PojulObject {
 	private bool isForward = false;
 	private bool isDecay = false;
 
-	private float maxSpeed = GameInit.mach * 5f;
+	private float maxSpeed = GameInit.mach * 3.5f;
 	private float acceleration = 36;
 	private float speed = 0;
 	private float aimSpeed = 10f;
 
 	private Rigidbody mRigidbody;
 
+	private ParticleSystem mParticleSystem;
+	private Transform mFire;
+
+
+
 	// Use this for initialization
 	void Start () {
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
 		blazePos = transform.FindChild ("blazePos");
+
+		//InvokeRepeating ("velocityOverLife", 1f, 1f);
+
 	}
 
 	// Update is called once per frame
 	void Update () {
+		if(isDestoryed){
+			transform.position = transform.position + transform.forward * GameInit.mach * Time.deltaTime;
+			return;
+		}
 		if(target != null){
 			Quaternion rawRotation = transform.rotation;
 			Quaternion newRotation = new Quaternion();
@@ -51,7 +63,6 @@ public class MissileType1 : PojulObject {
 					speed = speed + acceleration;
 				}
 			}
-
 			if(isDecay){
 				GameObject g = new GameObject ();
 				g.transform.rotation = rawRotation;
@@ -61,9 +72,8 @@ public class MissileType1 : PojulObject {
 				float angle = Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg;
 				//Debug.Log (speed + "gqb------>angle: " + angle);
 				if(angle < 90 && speed > 400){
-					speed = speed - 2 - angle *3.5f;
+					speed = speed - 2 - angle *2.5f;
 				}
-
 				if(speed <= 400){
 					missTarget = true;
 					transform.rotation = Quaternion.Slerp(transform.rotation, 
@@ -71,11 +81,6 @@ public class MissileType1 : PojulObject {
 							transform.rotation.eulerAngles.y,
 							transform.rotation.eulerAngles.z), 0.02f * Time.deltaTime);
 				}
-
-				/*if(missTarget && !mRigidbody.useGravity){
-					mRigidbody.useGravity = true;
-				}*/
-
 				Destroy (g);
 			}
 		}
@@ -110,20 +115,21 @@ public class MissileType1 : PojulObject {
 
 	void initBlaze(){
 		blaze = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile_blaze2"]), 
-			blazePos.position, Quaternion.Euler(0, 0, 0)) as GameObject;
+			blazePos.position, blazePos.rotation) as GameObject;
 		blaze.transform.parent = transform;
 		Invoke ("addRigidbody", 1.8f);
 		if(mAudioSource != null && !mAudioSource.isPlaying){
 			mAudioSource.Play ();
 		}
-
+		mParticleSystem = blaze.transform.FindChild ("smoke").gameObject.GetComponent<ParticleSystem>();
+		mFire = blaze.transform.FindChild ("fire");
 	}
 
 	void addRigidbody(){
 		isForward = false;
 		transform.gameObject.AddComponent<Rigidbody> ();
 		transform.gameObject.GetComponent<Rigidbody> ().useGravity = false;
-		mRigidbody = transform.GetComponent<Rigidbody> ();
+		mRigidbody = transform.gameObject.GetComponent<Rigidbody> ();
 	}
 
 	void OnCollisionEnter(Collision collision){
@@ -144,10 +150,33 @@ public class MissileType1 : PojulObject {
 			mPojulObject.isFired(collision, 3);
 		}
 
-		destory ();
+		Destroy(transform.gameObject.GetComponent<Rigidbody> ());
+		Destroy(transform.gameObject.GetComponent<BoxCollider> ());
+		if(transform.gameObject.GetComponent<MeshRenderer> ()){
+			transform.gameObject.GetComponent<MeshRenderer> ().enabled = false;
+		}
+
+		isDestoryed = true;
+		if(mFire != null){
+			Destroy (mFire.gameObject);
+		}
+		if(mParticleSystem != null){
+			System.Type mType = mParticleSystem.main.GetType ();
+			System.Reflection.PropertyInfo property = mType.GetProperty("loop");
+			Debug.Log ("gqb------>property1: " + property.GetValue(mParticleSystem.main, null));
+			property.SetValue (mParticleSystem.main, false, null);
+			Debug.Log ("gqb------>property1: " + property.GetValue(mParticleSystem.main, null));
+		}
+		Invoke ("destory", 15f);
+		//destory ();
 	}
 
 	void destory(){
+		if(GameInit.currentInstance.ContainsKey((string)tag)){
+			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
+		}
 		Destroy (this.gameObject);
+
 	}
+
 }
