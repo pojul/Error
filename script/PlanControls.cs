@@ -55,9 +55,9 @@ public class PlanControls : MonoBehaviour {
 	//control3 ： 垂直方向控制
 	public GUIStyle control3Circlestyle;
 	private float control3CircleSize = Screen.height*3.2f/10;//Screen.height*5f/30;
-	private float control3CircleCenterX = Screen.width*9.4f/10 - Screen.height*1.6f/10;//Screen.width*8.15f/10 - Screen.height*2.5f/30;
+	public static float control3CircleCenterX = Screen.width*9.4f/10 - Screen.height*1.6f/10;//Screen.width*8.15f/10 - Screen.height*2.5f/30;
 	private float control3CircleCenterY = Screen.height*8.15f/10;
-	private float control3CircleX = Screen.width*9.4f/10 - Screen.height*3.2f/10;
+	public static float control3CircleX = Screen.width*9.4f/10 - Screen.height*3.2f/10;
 	private float control3CircleY = Screen.height*6.55f/10;
 	
 	private float oldPoint3Rolation = -1.0f;
@@ -74,6 +74,8 @@ public class PlanControls : MonoBehaviour {
 	private float controlCircle3bY = Screen.height*7.425f/10;*/ 
 	
 	Gyroscope gyro;
+
+	public static float rorateSpeed = 70f;
 	
 	// Use this for initialization
 	void Start () {
@@ -204,6 +206,7 @@ public class PlanControls : MonoBehaviour {
 
 	void accelerateListener(){
 		int phoneRolationX = (int)(Input.acceleration.x * 90);
+		planMove.rotate2 = Input.acceleration.x;
 	    int dRolX = Mathf.Abs(newPoint2Rolation - phoneRolationX);
 		if(dRolX > 1){
 			newPoint2Rolation = phoneRolationX;
@@ -438,6 +441,7 @@ public class PlanControls : MonoBehaviour {
 			}
 			float touchRol = getRolation (x, y, Controls1CenterX, Controls1CenterY);
 			dRol = touchRol - ControToucher1PreRolate;
+
 			dRol = limitMaxRlo(dRol);
 			newPoint1Rolation = newPoint1Rolation + dRol;
 			//updatePoint1ByRolate (2);
@@ -449,6 +453,7 @@ public class PlanControls : MonoBehaviour {
 			}
 			float touchRol = getRolation (x, y, Controls1CenterX, Controls1CenterY);
 			dRol = touchRol - ControToucher2PreRolate;
+
 			dRol = limitMaxRlo(dRol);
 			newPoint1Rolation = newPoint1Rolation + dRol;
 			//updatePoint1ByRolate (2);
@@ -491,6 +496,8 @@ public class PlanControls : MonoBehaviour {
 			float touchRol = getRolation (x, y, control3CircleCenterX, control3CircleCenterY);
 			dRol = touchRol - ControToucher1PreRolate;
 			dRol = limitMaxRlo(dRol);
+			planMove.dRotate3 = planMove.dRotate3 + dRol;
+			//Debug.Log ("gqb------>onControl3Toucher1: " + dRol);
 			newPoint3Rolation = newPoint3Rolation + dRol;
 			//updatePoint3ByRolate (2);
 			ControToucher1PreRolate = touchRol;
@@ -502,6 +509,8 @@ public class PlanControls : MonoBehaviour {
 			float touchRol = getRolation (x, y, control3CircleCenterX, control3CircleCenterY);
 			dRol = touchRol - ControToucher2PreRolate;
 			dRol = limitMaxRlo(dRol);
+			planMove.dRotate3 = planMove.dRotate3 + dRol;
+			//Debug.Log ("gqb------>onControl3Toucher2: " + dRol);
 			newPoint3Rolation = newPoint3Rolation + dRol;
 			//updatePoint3ByRolate (2);
 			ControToucher2PreRolate = touchRol;
@@ -509,7 +518,7 @@ public class PlanControls : MonoBehaviour {
 	}
 
 	float limitMaxRlo(float dRol){
-		float maxdRol = 5;
+		float maxdRol = rorateSpeed * Time.deltaTime;
 		if(dRol > maxdRol){
 			dRol = maxdRol;
 		}else if(dRol < -maxdRol){

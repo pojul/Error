@@ -11,7 +11,7 @@ public class BuyArmsUI : MonoBehaviour {
 	private float buyWidth = Screen.height/10;
 	private float buyHeight = Screen.height/10;
 	private float buyX = 0;
-	private float buyY = Screen.height/6;
+	private float buyY = Screen.height/2;
 
 	private bool showShopWin = false;
 	private Rect shopWinRect = new Rect (Screen.width*2.5f/10, Screen.height*2/10, Screen.width*5/10, Screen.height*6/10);

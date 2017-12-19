@@ -36,7 +36,7 @@ public class TransportType1 : PojulObject {
 	private bool isMoving = false;
 	private float openDoorSpeed = 0.4f;
 	private int initHeight = 2500;
-	private float height = 190;
+	private float height = 84; //190;
 	private float maxMoveSpeed = GameInit.mach * 0.6f;
 	private float aniSpeed = 0.0f;
 	private float navPathDistance = -1f;

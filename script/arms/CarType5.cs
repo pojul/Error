@@ -32,7 +32,7 @@ public class CarType5 : PojulObject {
 	public bool readyLaunch = false;
 
 	private float aimSpeed = 4.8f;
-	private float height = 69.0f;
+	private float height = 46.5f; //69.0f;
 	private float maxMoveSpeed = GameInit.mach * 0.36f;
 
 	public GameObject navCube;
@@ -219,7 +219,7 @@ public class CarType5 : PojulObject {
 
 		//Debug.DrawRay(transform.position, (target.position - transform.position).normalized *16000, Color.white);
 		RaycastHit hit;
-		if((target.position.y - transform.position.y) > 20 && distance < 30000
+		if((target.position.y - transform.position.y) > 0 && distance < 32000
 			&& Physics.Raycast (transform.position, (target.position - transform.position).normalized, out hit, 35000.0f)){
 			if(!hit.transform.root.tag.Equals("Untagged") || (hit.transform.root.childCount > 0 && !hit.transform.root.GetChild(0).tag.Equals("Untagged"))){
 				fireMissile ();
@@ -354,8 +354,8 @@ public class CarType5 : PojulObject {
 
 	public void createNavCube(){
 		navCube = GameObject.CreatePrimitive (PrimitiveType.Cube);
-		navCube.transform.position = transform.position;
-		navCube.transform.localScale = new Vector3 (100, 100, 100);
+		navCube.transform.position = new Vector3(transform.position.x, 6f, transform.position.z);
+		navCube.transform.localScale = new Vector3 (10, 10, 10);
 		navCube.AddComponent<UnityEngine.AI.NavMeshAgent>();
 		Destroy(navCube.GetComponent<BoxCollider> ());
 		transform.parent = navCube.transform;
@@ -385,6 +385,10 @@ public class CarType5 : PojulObject {
 	}
 
 	void DestoryAll(Collision collision, float power){
+
+		GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMountMissle;
+		currentMountMissle = 0;
+
 		mainTransform_lod0.parent = null;
 		mainTransform_lod1.parent = mainTransform_lod0;
 		mainTransform_lod2.parent = mainTransform_lod0;
@@ -436,17 +440,23 @@ public class CarType5 : PojulObject {
 		}
 
 		if("0".Equals(playerId)){
-			if (GameInit.Car5Area0.ContainsKey (mPatrolArea.areaId)) {
+			if (GameInit.Car5Area0.ContainsValue(this.gameObject)) {
 				GameInit.Car5Area0.Remove (mPatrolArea.areaId);
 			}
 		}else if("1".Equals(playerId)){
-			if (GameInit.Car5Area1.ContainsKey (mPatrolArea.areaId)) {
+			if (GameInit.Car5Area1.ContainsValue(this.gameObject)) {
 				GameInit.Car5Area1.Remove (mPatrolArea.areaId);
 			}
 		}
 
 		if(GameInit.currentInstance.ContainsKey((string)tag)){
 			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
+		}
+		if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
+			GameInit.gameObjectInstance.Remove (transform.gameObject);
+		}
+		if("0".Equals(playerId) && GameInit.myThumbnailObjs.Contains(transform.gameObject)){
+			GameInit.myThumbnailObjs.Remove (transform.gameObject);
 		}
 
 	}
@@ -471,7 +481,7 @@ public class CarType5 : PojulObject {
 	void findInvade(){
 		updateCurrentMountMissle ();
 
-		Collider[] colliders = Physics.OverlapSphere (transform.position, 30000);
+		Collider[] colliders = Physics.OverlapSphere (transform.position, 33000);
 		for (int i = 0; i < colliders.Length; i++) {
 			if (colliders [i].transform.root.childCount <= 0) {
 				continue;
@@ -479,16 +489,16 @@ public class CarType5 : PojulObject {
 			Transform tempTransform = colliders [i].transform.root.GetChild (0);
 			string tag = tempTransform.tag;
 			if(tag.Equals("Untagged")){
-				if (colliders [i].transform.parent == null) {
+				if (colliders [i].transform == null) {
 					continue;
 				}
-				if(colliders [i].transform.parent.tag.Equals("Untagged")){
+				if(colliders [i].transform.tag.Equals("Untagged")){
 					continue;
 				}
-				tempTransform = colliders [i].transform.parent;
+				tempTransform = colliders [i].transform;
 			}
 			tag = tempTransform.tag;
-			//Debug.Log ("gqb------>findInvade tag: " + tag);
+			//Debug.Log ("gqb------>findInvade1 tag: " + tag);
 			string[] strs = tempTransform.tag.Split ('_');
 			if (strs.Length == 2) {
 				string tempPlayerId = strs [0];
@@ -504,6 +514,9 @@ public class CarType5 : PojulObject {
 	}
 
 	void updateCurrentMountMissle(){
+		if(isDestoryed){
+			return;
+		}
 		int temptMountMissle = 0;
 		for (int i = 0; i < missilePoses.Count; i++) {
 			if(missiles [missilePoses[i]] != null){

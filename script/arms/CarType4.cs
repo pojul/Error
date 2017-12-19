@@ -442,30 +442,32 @@ public class CarType4 : PojulObject {
 	}
 
 	void findDangeroust(){
-		Dictionary<int, List<Transform>> nearEnemys = null;
+		if(isDestoryed){
+			return;
+		}
+
+		if(playerType ==0){
+			return;
+		}
+
+		Dictionary<int, Dictionary<Transform, float>> nearEnemys = null;
 		if("0".Equals(playerId)){
 			nearEnemys = GameInit.nearEnemys_0;
 		}else if("1".Equals(playerId)){
 			nearEnemys = GameInit.nearEnemys_1;
 		}
 		if(nearEnemys.ContainsKey(mPatrolArea.areaId) && nearEnemys [mPatrolArea.areaId].Count > 0){
-			List<Transform> tempTransforms = nearEnemys [mPatrolArea.areaId];
-			if (tempTransforms [0] == null) {
-				tempTransforms.Remove (tempTransforms [0]);
-				return;
-			}
-			Transform dangeroustEnemy = tempTransforms [0];
-			float dangeroustDis = (myCenter - dangeroustEnemy.position).magnitude;
-			if(tempTransforms.Count > 1){
-				for(int i = 1; i < tempTransforms.Count; i++){
-					if(tempTransforms[i] = null){
-						tempTransforms.Remove (tempTransforms [i]);
-						continue;
-					}
-					if((myCenter - tempTransforms[i].position).magnitude < dangeroustDis){
-						dangeroustEnemy = tempTransforms [i];
-						dangeroustDis = (myCenter - tempTransforms [i].position).magnitude;
-					}
+			Dictionary<Transform, float> tempTransforms = nearEnemys [mPatrolArea.areaId];//----
+			float dangeroustDis = 1000000.0f;
+			Transform dangeroustEnemy = null;
+			foreach(Transform key in tempTransforms.Keys){
+				if(key == null){
+					continue;
+				}
+				float tempDis = (myCenter - key.position).magnitude;
+				if( tempDis < dangeroustDis && (Time.time - tempTransforms[key]) < 3.2f){
+					dangeroustEnemy = key;
+					dangeroustDis = tempDis;
 				}
 			}
 			if(dangeroustEnemy != null && dangeroustEnemy.FindChild("aim") != null){

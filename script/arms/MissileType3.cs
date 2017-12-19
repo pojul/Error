@@ -13,16 +13,19 @@ public class MissileType3 : PojulObject {
 	private bool isForward = false;
 	private bool isDecay = false;
 
-	private float maxSpeed = GameInit.mach * 2.8f;
-	private float acceleration = 20;
+	private float maxSpeed = GameInit.mach * 3.0f;
+	private float acceleration = 25;
 	private float speed = 0;
-	private float aimSpeed = 4.5f;
+	private float aimSpeed = 4.3f;
 
 	private Rigidbody mRigidbody;
+	private BoxCollider mBoxCollider;
 
 	// Use this for initialization
 	void Start () {
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
+		mBoxCollider = transform.gameObject.GetComponent<BoxCollider> ();
+		mBoxCollider.enabled = false;
 
 		blazePos = transform.FindChild ("blazePos");
 	}
@@ -60,7 +63,7 @@ public class MissileType3 : PojulObject {
 				float angle = Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg;
 				//Debug.Log (speed + "gqb------>angle: " + angle);
 				if(angle < 90 && speed > 400){
-					speed = speed - 2 - angle *3.5f;
+					speed = speed - 2.2f - angle *3.0f;
 				}
 
 				if(speed <= 400){
@@ -116,6 +119,8 @@ public class MissileType3 : PojulObject {
 	}
 
 	void addRigidbody(){
+		mBoxCollider.enabled = true;
+
 		transform.gameObject.AddComponent<Rigidbody> ();
 		transform.gameObject.GetComponent<Rigidbody> ().useGravity = false;
 		mRigidbody = transform.GetComponent<Rigidbody> ();
@@ -131,8 +136,8 @@ public class MissileType3 : PojulObject {
 		Transform root = collision.gameObject.transform.root.GetChild(0);
 		PojulObject mPojulObject = root.GetComponent<PojulObject> ();
 
-		if(mPojulObject == null && collision.gameObject.transform.parent != null){
-			root = collision.gameObject.transform.parent;
+		if(mPojulObject == null && collision.gameObject.transform != null){
+			root = collision.gameObject.transform;
 			mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 		}
 		if(mPojulObject != null){
@@ -142,10 +147,18 @@ public class MissileType3 : PojulObject {
 	}
 
 	void destory(){
-		if(GameInit.currentInstance.ContainsKey((string)tag)){
-			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
+		lock(GameInit.locker){
+			if(!GameInit.currentInstance.ContainsKey((string)tag)){
+				return;
+			}
+			if(GameInit.currentInstance.ContainsKey((string)tag)){
+				GameInit.currentInstance[tag] = GameInit.currentInstance[tag] - 1;
+			}
+			if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
+				GameInit.gameObjectInstance.Remove (transform.gameObject);
+			}
+			Destroy (this.gameObject);
 		}
-		Destroy (this.gameObject);
 	}
 
 }

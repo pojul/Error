@@ -13,8 +13,8 @@ public class MissileType1 : PojulObject {
 	private bool isForward = false;
 	private bool isDecay = false;
 
-	private float maxSpeed = GameInit.mach * 3.5f;
-	private float acceleration = 36;
+	private float maxSpeed = GameInit.mach * 4.5f;
+	private float acceleration = 40;
 	private float speed = 0;
 	private float aimSpeed = 10f;
 
@@ -142,8 +142,8 @@ public class MissileType1 : PojulObject {
 		Transform root = collision.gameObject.transform.root.GetChild(0);
 		PojulObject mPojulObject = root.GetComponent<PojulObject> ();
 
-		if(mPojulObject == null && collision.gameObject.transform.parent != null){
-			root = collision.gameObject.transform.parent;
+		if(mPojulObject == null && collision.gameObject.transform != null){
+			root = collision.gameObject.transform;
 			mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 		}
 		if(mPojulObject != null){
@@ -163,17 +163,23 @@ public class MissileType1 : PojulObject {
 		if(mParticleSystem != null){
 			System.Type mType = mParticleSystem.main.GetType ();
 			System.Reflection.PropertyInfo property = mType.GetProperty("loop");
-			Debug.Log ("gqb------>property1: " + property.GetValue(mParticleSystem.main, null));
+			//Debug.Log ("gqb------>property1: " + property.GetValue(mParticleSystem.main, null));
 			property.SetValue (mParticleSystem.main, false, null);
-			Debug.Log ("gqb------>property1: " + property.GetValue(mParticleSystem.main, null));
+			//Debug.Log ("gqb------>property1: " + property.GetValue(mParticleSystem.main, null));
 		}
 		Invoke ("destory", 15f);
 		//destory ();
 	}
 
 	void destory(){
+		if(!GameInit.currentInstance.ContainsKey((string)tag)){
+			return;
+		}
 		if(GameInit.currentInstance.ContainsKey((string)tag)){
 			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
+		}
+		if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
+			GameInit.gameObjectInstance.Remove (transform.gameObject);
 		}
 		Destroy (this.gameObject);
 

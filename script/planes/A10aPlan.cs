@@ -27,11 +27,13 @@ public class A10aPlan : PojulObject {
 	private Transform transform_lod1;
 	private Transform transform_lod2;
 
+	private Transform[] fires = new Transform[8];
+
 	private Transform aimTransform;
 
 	private float maxMoveSpeed = GameInit.mach;
 	private float moveSpeed = 0.0f;
-	private float rolateSpeed = 40f;
+	private float rolateSpeed = 30f;
 	private GameObject navCube;
 	private UnityEngine.AI.NavMeshAgent nav;
 
@@ -40,8 +42,6 @@ public class A10aPlan : PojulObject {
 
 	private Transform target;
 
-	private int playerType = 1; //0: player; 1:  prefab
-
 	private float minHeight = 1000;
 	private float maxHeight = 12000;
 	private float piRate = 2* Mathf.PI/360;
@@ -49,8 +49,6 @@ public class A10aPlan : PojulObject {
 	private float height = 7000;
 	private float avoidAngle = 0;
 
-	//private List<Transform> missles = new List<Transform>();
-	//private List<Transform> misslesPos = new List<Transform>();
 	private List<Transform> missilePoses = new List<Transform>();
 	private Dictionary<Transform, Transform> missiles = new Dictionary<Transform, Transform> ();
 	public int maxMountMissle = 3;
@@ -58,8 +56,12 @@ public class A10aPlan : PojulObject {
 	private GameObject inflameObj;
 	private Transform missileCar;
 
+	private Rigidbody mPlayerRigidbody;
+
 	//血量条
 	public Slider sliderHealth;
+	public Canvas mCanvas;
+
 	// Use this for initialization
 	void Start () {
 		transform.position = new Vector3 (transform.position.x, initHeight, transform.position.z);
@@ -84,31 +86,41 @@ public class A10aPlan : PojulObject {
 		missiles.Add (missilePoses[2], null);
 		missiles.Add (missilePoses[3], null);
 
+		fires[0] = transform.FindChild ("fire1");
+		fires[1] = transform.FindChild ("fire2");
+		fires[2] = transform.FindChild ("fire3");
+		fires[3] = transform.FindChild ("fire4");
+		fires[4] = transform.FindChild ("fire5");
+		fires[5] = transform.FindChild ("fire6");
+		fires[6] = transform.FindChild ("fire7");
+		fires[7] = transform.FindChild ("fire8");
+
+
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
 		type = strs [1];
 
 		int areaId = -1;
+		RectTransform mRectTransform = sliderHealth.GetComponent<RectTransform> ();
 		if ("0".Equals (playerId)) {
 			mPatrolArea = new RadiusArea (Random.Range(1,4));
 			myCenter = new Vector3 (0,0,-60000);
 			enemyCenter = new Vector3 (0,0,60000);
 			enemyId = "1";
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
+			mRectTransform.sizeDelta = new Vector2 (0, 0);
 		} else if ("1".Equals (playerId)) {
 			mPatrolArea = new RadiusArea (Random.Range(5,8));
 			myCenter = new Vector3 (0,0,60000);
 			enemyCenter = new Vector3 (0,0,-60000);
 			enemyId = "0";
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.698f, 0.255f, 0.157f);
-
+			mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
 			//for test
-			transform.position = new Vector3 (0, initHeight, -10000);
+			//transform.position = new Vector3 (0, initHeight, -10000);
 
 		}
 		mPatrolArea.minRange = 25000;
-		RectTransform mRectTransform = sliderHealth.GetComponent<RectTransform> ();
-		mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
 		sliderHealth.value = sliderHealth.maxValue;
 
 		createNavCube ();
@@ -124,12 +136,19 @@ public class A10aPlan : PojulObject {
 			mAudioSource.volume = 0.015f;
 		}
 
+		//mRigidbody = transform.gameObject.GetComponent<Rigidbody> ();
+
+
 		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
 		InvokeRepeating ("findInvade", 2.0f, 2.0f);
 		InvokeRepeating ("interceptInvade", 5.0f, 5.0f);
 		InvokeRepeating("avoidMissile", 0.9f, 0.9f);
 
+
+		//transform.gameObject.
 		//addMissile ();
+
+		//initMisslie ();
 
 	}
 		
@@ -141,7 +160,8 @@ public class A10aPlan : PojulObject {
 		if(playerType == 1){
 			airMoveAuto ();
 		}else if(playerType == 0){
-			//Debug.Log ("gqb------>volume: " + mAudioSource.volume);
+			planMove.currentMountMissle = currentMountMissle;
+			//Debug.Log ("gqb------>fireAim: " + UImanager.fireAim);
 		}
 
 		sliderHealth.transform.rotation = Quaternion.Euler(transform_lod0.rotation.eulerAngles.x , 
@@ -150,6 +170,9 @@ public class A10aPlan : PojulObject {
 	}
 
 	void airMoveAuto(){
+		if(playerType == 0){
+			return;
+		}
 		float dRolX = transform.rotation.eulerAngles.x;
 
 		//if(target == null){
@@ -184,21 +207,59 @@ public class A10aPlan : PojulObject {
 			//navCube.transform.rotation;
 	}
 
-	public void setPlayType(int playerType){
+	public override void setPlayType(int playerType){
 		this.playerType = playerType;
 		if(playerType == 0){
-			Camera.main.transform.position = new Vector3((transform.position.x + cameraX), 
-				(transform.position.y + cameraY), 
-				(transform.position.z+ cameraZ));
-			Camera.main.transform.parent = transform;
+			sliderHealth.GetComponent<RectTransform> ().sizeDelta = new Vector2(0,0);
 			if(nav != null){
 				nav.enabled = false;
 			}
 			if(mAudioSource != null){
-				mAudioSource.volume = 0.15f;
+				mAudioSource.volume = 0.1f;
 			}
+			if(!transform.gameObject.GetComponent<planMove> ()){
+				transform.gameObject.AddComponent<planMove> ();
+			}
+			if(mPlayerRigidbody == null){
+				transform.gameObject.AddComponent<Rigidbody> ();
+				mPlayerRigidbody = transform.gameObject.GetComponent<Rigidbody> ();
+				mPlayerRigidbody.useGravity = false;
+				mPlayerRigidbody.drag = 2f;
+				mPlayerRigidbody.angularDrag = 2f;
+				planMove.mRigidbody = mPlayerRigidbody;
+			}
+			planMove.player = transform;
+			planMove.speed = moveSpeed;
+			planMove.maxSpeed = 1000;
+			planMove.maxAccelerate = 1.5f;
+			PlanControls.rorateSpeed = 65f;
+			if(fires [0] == null){
+				fires [0] = transform.FindChild ("fire1");
+			}
+			WorldUIManager.fireAimTra = fires [0];
+			WorldUIManager.fireAimDistance = 21000.0f;
+			GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().setPlayerUI("a10");
 		}else if(playerType == 1){
-			
+			/*
+			*need judge is in nav area
+			*/
+			sliderHealth.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
+			if (nav != null) {
+				nav.enabled = true;
+			}
+			if (mAudioSource != null) {
+				mAudioSource.volume = 1.0f;
+			}
+			if (mPlayerRigidbody != null) {
+				Destroy (transform.gameObject.GetComponent<Rigidbody> ());
+				planMove.mRigidbody = null;
+			}
+			if(transform.gameObject.GetComponent<planMove> ()){
+				Destroy (transform.gameObject.GetComponent<planMove> ());
+			}
+			planMove.player = null;
+			WorldUIManager.fireAimTra = null;
+			WorldUIManager.fireAimDistance = 0.0f;
 		}
 	}
 
@@ -239,6 +300,7 @@ public class A10aPlan : PojulObject {
 
 		if(playerType == 0){
 			//isTargetInFire ();
+			addMissileOfPlayer();
 			return;
 		}
 
@@ -334,6 +396,27 @@ public class A10aPlan : PojulObject {
 		}
 	}
 
+	public override void fireMissileOfPlayer(Transform target){
+		if(currentMountMissle <= 0){
+			return;
+		}
+		for (int i = 0; i < missilePoses.Count; i++) {
+			if(missiles [missilePoses[i]] != null){
+				MissileType3 mMissileType3 = missiles [missilePoses [i]].gameObject.GetComponent<MissileType3> ();
+				float startSpeed = planMove.speed;
+				PojulObject mPojulObject = target.gameObject.GetComponent<PojulObject> ();
+				mMissileType3.fireInit ((playerId + "_missile3" ), target, startSpeed);
+				if(mPojulObject != null){
+					mPojulObject.isMissileAimed = true;
+					mPojulObject.MissileAimedTra = missiles [missilePoses [i]];
+				}
+				missiles [missilePoses [i]] = null;
+				currentMountMissle = currentMountMissle  - 1;
+				break;
+			}
+		}
+	}
+
 	public void startNav(Vector3 navPoint){
 		if(navCube == null){
 			createNavCube ();
@@ -347,13 +430,14 @@ public class A10aPlan : PojulObject {
 		//Debug.Log ("gqb------>startNav height: " + height);
 		moveSpeed = patrol;
 		nav.speed = moveSpeed;
-		nav.acceleration = moveSpeed * 1.2f;
+		nav.acceleration = moveSpeed * 0.6f;
 		nav.autoRepath = true;
 		//nav.baseOffset = 50;
 		nav.angularSpeed = rolateSpeed;
 	}
 
 	public void startNav(Vector3 navPoint, float speed){
+		
 		if(navCube == null){
 			createNavCube ();
 		}
@@ -364,7 +448,7 @@ public class A10aPlan : PojulObject {
 		height = Random.Range(minHeight, maxHeight);
 		moveSpeed = speed;
 		nav.speed = moveSpeed;
-		nav.acceleration = moveSpeed * 1.2f;
+		nav.acceleration = moveSpeed * 0.6f;
 		nav.autoRepath = true;
 		nav.angularSpeed = rolateSpeed;
 	}
@@ -383,15 +467,17 @@ public class A10aPlan : PojulObject {
 	}
 
 	void findInvade(){
-		if(playerType ==0 || isDestoryed){
+		if(isDestoryed){
 			return;
 		}
 		if(currentMountMissle < maxMountMissle){
 			findMissileCar ();
 		}
-		if (MissileAimedTra != null) {
-			return;
-		}
+		//if (MissileAimedTra != null) {
+			//return;
+		//}
+
+		List<Transform> tempNearEnemy = new List<Transform> ();
 
 		Collider[] colliders = Physics.OverlapSphere (transform.position, 25000);
 		for (int i = 0; i < colliders.Length; i++) {
@@ -401,13 +487,13 @@ public class A10aPlan : PojulObject {
 			Transform tempTransform = colliders [i].transform.root.GetChild (0);
 			string tag = tempTransform.tag;
 			if(tag.Equals("Untagged")){
-				if (colliders [i].transform.parent == null) {
+				if (colliders [i].transform == null) {
 					continue;
 				}
-				if(colliders [i].transform.parent.tag.Equals("Untagged")){
+				if(colliders [i].transform.tag.Equals("Untagged")){
 					continue;
 				}
-				tempTransform = colliders [i].transform.parent;
+				tempTransform = colliders [i].transform;
 			}
 			tag = tempTransform.tag;
 			//Debug.Log ("gqb------>findInvade tag: " + tag);
@@ -421,11 +507,21 @@ public class A10aPlan : PojulObject {
 						target = tempTransform.FindChild ("aim");
 					}
 					Util.AddNearEnemys (tempTransform, playerId);
+					if(playerType == 0){
+						if(tempTransform != null && (transform.position - tempTransform.position).magnitude < 22000 && !tempNearEnemy.Contains(tempTransform)){
+							tempNearEnemy.Add (tempTransform);
+						}
+					}
 				}
 			}
 		}
 		if (target == null) {
 			findDangeroust ();
+		}
+		if(playerType == 0){
+			lock(GameInit.locker){
+				planMove.nearEnemy = tempNearEnemy;
+			}
 		}
 	}
 
@@ -458,19 +554,32 @@ public class A10aPlan : PojulObject {
 		if(playerType ==0){
 			return;
 		}
-		Dictionary<int, List<Transform>> nearEnemys = null;
+		Dictionary<int, Dictionary<Transform, float>> nearEnemys = null;//----
 		if("0".Equals(playerId)){
 			nearEnemys = GameInit.nearEnemys_0;
 		}else if("1".Equals(playerId)){
 			nearEnemys = GameInit.nearEnemys_1;
 		}
 		if(nearEnemys.ContainsKey(mPatrolArea.areaId) && nearEnemys [mPatrolArea.areaId].Count > 0){
-			List<Transform> tempTransforms = nearEnemys [mPatrolArea.areaId];
-			if (tempTransforms [0] == null) {
+			Dictionary<Transform, float> tempTransforms = nearEnemys [mPatrolArea.areaId];//----
+			/*if (tempTransforms [0] == null) {
 				tempTransforms.Remove (tempTransforms [0]);
 				return;
+			}*/
+			float dangeroustDis = 1000000.0f;
+			Transform dangeroustEnemy = null;
+			foreach(Transform key in tempTransforms.Keys){
+				if(key == null){
+					continue;
+				}
+				float tempDis = (myCenter - key.position).magnitude;
+				if( tempDis < dangeroustDis && (Time.time - tempTransforms[key]) < 3.2f){
+					dangeroustEnemy = key;
+					dangeroustDis = tempDis;
+				}
+
 			}
-			Transform dangeroustEnemy = tempTransforms [0];
+			/*Transform dangeroustEnemy = tempTransforms [0];
 			float dangeroustDis = (myCenter - dangeroustEnemy.position).magnitude;
 			if(tempTransforms.Count > 1){
 				for(int i = 1; i < tempTransforms.Count; i++){
@@ -483,7 +592,7 @@ public class A10aPlan : PojulObject {
 						dangeroustDis = (myCenter - tempTransforms [i].position).magnitude;
 					}
 				}
-			}
+			}*/
 			if(dangeroustEnemy != null && dangeroustEnemy.FindChild("aim") != null){
 				target = dangeroustEnemy.FindChild("aim");
 			}
@@ -536,6 +645,12 @@ public class A10aPlan : PojulObject {
 	}
 
 	public override void isFired(Collision collision, int type){
+
+		//test
+		if(playerType == 0){
+			return;
+		}
+
 		if(isDestoryed){
 			return;
 		}
@@ -548,21 +663,25 @@ public class A10aPlan : PojulObject {
 	}
 
 	void inflame(Collision collision){
+
+		GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMountMissle;
+		currentMountMissle = 0;
+
 		if(transform_lod0 == null){
 			return;
 		}
 
-		transform_lod0.parent = null;
-		transform_lod1.parent = transform_lod0;
-		transform_lod2.parent = transform_lod0;
+		//transform_lod0.parent = null;
+		//transform_lod1.parent = transform_lod0;
+		//transform_lod2.parent = transform_lod0;
 
 		Destroy (airRay1);
 		Destroy (airRay2);
 
-		if(!transform_lod0.gameObject.GetComponent<Rigidbody>()){
-			transform_lod0.gameObject.AddComponent<Rigidbody>();
+		if(!transform.gameObject.GetComponent<Rigidbody>()){
+			transform.gameObject.AddComponent<Rigidbody>();
 		}
-		Rigidbody mRigidbody = transform_lod0.gameObject.GetComponent<Rigidbody>();
+		Rigidbody mRigidbody = transform.gameObject.GetComponent<Rigidbody>();
 		if(mRigidbody != null){
 			mRigidbody.AddForce (transform.forward * 72000);
 		}
@@ -582,6 +701,16 @@ public class A10aPlan : PojulObject {
 		if(GameInit.currentInstance.ContainsKey((string)tag)){
 			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
 		}
+		if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
+			GameInit.gameObjectInstance.Remove (transform.gameObject);
+		}
+		if("0".Equals(playerId) && GameInit.myThumbnailObjs.Contains(transform.gameObject)){
+			GameInit.myThumbnailObjs.Remove (transform.gameObject);
+		}
+
+		if(playerType == 0){
+			planMove.player = null;
+		}
 
 		Invoke ("destoryAll", 40);
 
@@ -591,6 +720,20 @@ public class A10aPlan : PojulObject {
 		Destroy (navCube);
 		Destroy (transform_lod0.gameObject);
 		Destroy (this.gameObject);
+	}
+
+	void addMissileOfPlayer(){
+		for(int i = 0; i < GameInit.MyCar2.Count; i++){
+			if(GameInit.MyCar2[i] == null){
+				continue;
+			}
+			if( (GameInit.MyCar2[i].position - transform.position).magnitude < 3000){
+				missileCar = GameInit.MyCar2 [i];
+				addMissile ();
+				missileCar = null;
+				break;
+			}
+		}
 	}
 
 	void addMissile(){
@@ -631,6 +774,9 @@ public class A10aPlan : PojulObject {
 	}
 
 	void findMissileCar(){
+		if(playerType == 0){
+			return;
+		}
 		if(MissileAimedTra != null && isAvoidMissile){
 			return;
 		}
@@ -641,9 +787,9 @@ public class A10aPlan : PojulObject {
 			return;
 		}
 		//test
-		if("1".Equals(playerId)){
-			return;
-		}
+		//if("1".Equals(playerId)){
+			//return;
+		//}
 
 		List<Transform> Car2s = new List<Transform> ();
 		if("0".Equals(playerId)){

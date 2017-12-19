@@ -17,7 +17,7 @@ public class ShellType1 : PojulObject {
 	// Update is called once per frame
 	void Update () {
 		if(isShoot){
-			transform.GetComponent<Rigidbody> ().AddForce (transform.up*60.0f);
+			transform.GetComponent<Rigidbody> ().AddForce (transform.up*120.0f);
 			transform.position = transform.position + transform.forward * startSpeed * Time.deltaTime;
 			startSpeed = startSpeed - decaySpeed * Time.deltaTime;
 		}
@@ -34,8 +34,10 @@ public class ShellType1 : PojulObject {
 
 	void OnCollisionEnter(Collision collision){
 		ContactPoint contact = collision.contacts[0];
+		//GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
+			//(contact.point - transform.forward * 10), Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
 		GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
-			contact.point, Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
+			(transform.position - transform.forward * 10), Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
 		bomb2.tag = "bomb2";
 		bomb2.transform.parent = collision.gameObject.transform;
 		Transform root = collision.gameObject.transform.root.GetChild(0);

@@ -13,6 +13,7 @@ public class PojulObject : MonoBehaviour {
 
 	public bool missTarget = false;//for missile
 
+	public int playerType = 1; //0: player; 1:  prefab
 	public string playerId = "";
 	public string enemyId = "";
 	public string type = "";
@@ -22,5 +23,11 @@ public class PojulObject : MonoBehaviour {
 	public Vector3 enemyCenter;
 
 	public virtual void isFired (Collision collision, int type){}
+
+	public virtual void fireMissileOfPlayer (Transform target){}
+
+	public virtual void fireOfPlayer (){}
+
+	public virtual void setPlayType (int playerType){}
 
 }

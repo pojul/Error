@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class GameInit  : MonoBehaviour {
 
+	public static Object locker = new Object();
+
 	public static float mach = 1000;
 
 	public static string goldgatePrefabPath = "Prefabs/goldgate_lod";
@@ -12,22 +14,23 @@ public class GameInit  : MonoBehaviour {
 	public static Hashtable modelpaths = new Hashtable();
 	public static Hashtable modelParams = new Hashtable();
 
-	public static Hashtable prices = new Hashtable();
+	public static Dictionary<string, float> prices = new Dictionary<string, float>();
 	public static List<GameObject> gameObjectInstance = new List <GameObject>();
-	public static Hashtable maxInstance = new Hashtable();
-	public static Hashtable currentInstance = new Hashtable();
+	public static List<GameObject> myThumbnailObjs = new List <GameObject>();
+	public static Dictionary<string, int> maxInstance = new  Dictionary<string, int>();
+	public static Dictionary<string, int> currentInstance = new Dictionary<string, int>();
 	public static Hashtable park0 = new Hashtable(); //我方停车位
 	public static Hashtable park1 = new Hashtable(); //敌方停车位
 	public static Dictionary<string, List<Transform>> coordinateManager0 = new Dictionary<string, List<Transform>>();
 	public static Dictionary<string, List<Transform>> coordinateManager1 = new Dictionary<string, List<Transform>>();
 
-	public static List<Transform>  allNearEnemys_0 = new List<Transform>();
-	public static List<Transform>  allNearEnemys_1 = new List<Transform>();
-	public static Dictionary<int, List<Transform>>  nearEnemys_0 = new Dictionary<int, List<Transform>>();
-	public static Dictionary<int, List<Transform>>  nearEnemys_1 = new Dictionary<int, List<Transform>>();
+	public static Dictionary<int, object[]>  allNearEnemys_0 = new Dictionary<int, object[]>();//Transform, float
+	public static Dictionary<int, object[]>  allNearEnemys_1 = new Dictionary<int, object[]>();
+	public static Dictionary<int, Dictionary<Transform, float>>  nearEnemys_0 = new Dictionary<int, Dictionary<Transform, float>>();
+	public static Dictionary<int, Dictionary<Transform, float>>  nearEnemys_1 = new Dictionary<int, Dictionary<Transform, float>>();
 
-	public static Hashtable Car5Area0 = new Hashtable();
-	public static Hashtable Car5Area1 = new Hashtable();
+	public static Dictionary<int, GameObject> Car5Area0 = new Dictionary<int, GameObject>();
+	public static Dictionary<int, GameObject> Car5Area1 = new Dictionary<int, GameObject>();
 
 	public static Dictionary<string, int> remainMissile = new Dictionary<string, int>();
 
@@ -44,9 +47,10 @@ public class GameInit  : MonoBehaviour {
 	public static Texture2D progress1;
 	public static Texture2D progress2;
 	
-	private GameObject player;
+	public static GameObject player;
 
 	public static float MyMoney = 0;
+	public static float EnemyMoney = 0;
 	
 	public UnityEngine.AI.NavMeshAgent nav;
 
@@ -85,11 +89,15 @@ public class GameInit  : MonoBehaviour {
 	void Start () {
 
 		initData ();
-		InstancePlayer();
+		Invoke("InstancePlayer", 2.0f);
 
 		InvokeRepeating("addMoney", 2.0f, 2.0f);
 
 		InvokeRepeating("gc", 60.0f, 60.0f);
+
+		InvokeRepeating("enemyManager", 0.5f, 0.5f);
+
+		InvokeRepeating("instanceEnemy", 2f, 2f);
 	}
 
 	void gc(){
@@ -101,6 +109,7 @@ public class GameInit  : MonoBehaviour {
 
 	void addMoney(){
 		MyMoney = MyMoney + 1;
+		EnemyMoney = EnemyMoney + 1;
 	}
 
 	void initData(){
@@ -142,28 +151,28 @@ public class GameInit  : MonoBehaviour {
 		prices.Add ("shell1", 1);
 		prices.Add ("transport1", 1);//62
 
-		maxInstance.Add ("0_a10", 20);
-		maxInstance.Add ("1_a10", 20);
-		maxInstance.Add ("0_car2", 20);//12
-		maxInstance.Add ("1_car2", 12);
-		maxInstance.Add ("0_car3", 40);//16
-		maxInstance.Add ("1_car3", 40);//16
+		maxInstance.Add ("0_a10", 2);
+		maxInstance.Add ("1_a10", 2);
+		maxInstance.Add ("0_car2", 2);//12
+		maxInstance.Add ("1_car2", 2);
+		maxInstance.Add ("0_car3", 6);//16
+		maxInstance.Add ("1_car3", 6);//16
 		maxInstance.Add ("0_car4", 100);//16
 		maxInstance.Add ("1_car4", 100);//16
-		maxInstance.Add ("0_car5", 3);
-		maxInstance.Add ("1_car5", 3);
+		maxInstance.Add ("0_car5", 2);
+		maxInstance.Add ("1_car5", 2);
 		maxInstance.Add ("0_car6", 8);
 		maxInstance.Add ("1_car6", 8);
-		maxInstance.Add ("0_missile1",8);
-		maxInstance.Add ("1_missile1",8);
+		maxInstance.Add ("0_missile1",6);
+		maxInstance.Add ("1_missile1",6);
 		maxInstance.Add ("0_missile2", 2);
 		maxInstance.Add ("1_missile2", 2);
-		maxInstance.Add ("0_missile3", 14);
-		maxInstance.Add ("1_missile3", 14);
+		maxInstance.Add ("0_missile3", 7);
+		maxInstance.Add ("1_missile3", 7);
 		maxInstance.Add ("0_shell1", 100000);
 		maxInstance.Add ("1_shell1", 100000);
-		maxInstance.Add ("0_transport1", 6);
-		maxInstance.Add ("1_transport1", 6);
+		maxInstance.Add ("0_transport1", 2);
+		maxInstance.Add ("1_transport1", 2);
 
 		currentInstance.Add ("0_a10", 0);
 		currentInstance.Add ("1_a10", 0);
@@ -241,9 +250,7 @@ public class GameInit  : MonoBehaviour {
 		string tag = (playerId + "_" + type);
 		if ("missile1".Equals (type) || "missile2".Equals (type) || "missile3".Equals (type)) {
 			currentInstance [tag] = (int)currentInstance [tag] + 1;
-			//Debug.Log ("gqb------>instanceGameobject1 tag remainMissile: " + remainMissile[tag]);
 			remainMissile[tag] = remainMissile[tag] + 1;
-			//Debug.Log ("gqb------>instanceGameobject2 tag remainMissile: " + remainMissile[tag]);
 			return;
 		}
 
@@ -256,22 +263,96 @@ public class GameInit  : MonoBehaviour {
 		prefab.tag = tag;
 		gameObjectInstance.Add (prefab);
 		currentInstance [prefab.tag] = (int)currentInstance [prefab.tag] + 1;
-
+		if("0".Equals(playerId)){
+			myThumbnailObjs.Add (prefab);
+		}
 	}
 
 
 
 	void InstancePlayer(){
-		player = (GameObject)Instantiate(Resources.Load((string)modelpaths["a10"]), 
+		/*player = (GameObject)Instantiate(Resources.Load((string)modelpaths["a10"]), 
 			new Vector3(0, 125, -60000), Quaternion.Euler(0, 0, 0)) as GameObject;
-		player.tag = "0_player";
-		((A10aPlan)player.GetComponent<A10aPlan>()).setPlayType (0);
+		player.tag = "0_a10";
+		player.GetComponent<PojulObject>().setPlayType (0); 
+		//((A10aPlan)player.GetComponent<A10aPlan>()).setPlayType (0);
 		player.AddComponent<planMove> ();
+
+		gameObjectInstance.Add (player);
+		myThumbnailObjs.Add (player);*/
+
+		player = (GameObject)Instantiate(Resources.Load((string)modelpaths["car3"]), 
+			new Vector3(0, 125, -60000), Quaternion.Euler(0, 0, 0)) as GameObject;
+		player.tag = "0_car3";
+		player.GetComponent<PojulObject>().setPlayType (0); 
+		//((A10aPlan)player.GetComponent<A10aPlan>()).setPlayType (0);
+		//player.AddComponent<planMove> ();
+
+		gameObjectInstance.Add (player);
+		myThumbnailObjs.Add (player);
 	}
 
 	// Update is called once per frame
 	void Update () {
-		
+
+		//enemyBehavor ();
+
+	}
+
+	void instanceEnemy(){
+		if(EnemyMoney > prices["a10"] && currentInstance["1_a10"] < maxInstance["1_a10"]){
+			instanceGameobject ("1", "a10");
+			EnemyMoney = EnemyMoney - prices ["a10"];
+		}
+
+		if(EnemyMoney > prices["missile3"]){
+			if(currentInstance["1_a10"] >= maxInstance["1_a10"] && currentInstance["1_car5"] >= maxInstance["1_car5"] 
+				&& currentInstance["1_missile3"] < maxInstance["1_missile3"]){
+				instanceGameobject ("1", "missile3");
+				EnemyMoney = EnemyMoney - prices ["missile3"];
+			}else if(currentInstance["1_missile3"] < (maxInstance["1_missile3"]/2) ){
+				instanceGameobject ("1", "missile3");
+				EnemyMoney = EnemyMoney - prices ["missile3"];
+			}
+		}
+
+		if(EnemyMoney > prices["car5"] && currentInstance["1_car5"] < maxInstance["1_car5"]){
+			instanceGameobject ("1", "car5");
+			EnemyMoney = EnemyMoney - prices["car5"];
+		}
+
+		if(EnemyMoney > prices["missile1"]){
+			if(currentInstance["1_a10"] >= maxInstance["1_a10"] && currentInstance["1_car5"] >= maxInstance["1_car5"] 
+				&& currentInstance["1_missile1"] < maxInstance["1_missile1"]){
+				instanceGameobject ("1", "missile1");
+				EnemyMoney = EnemyMoney - prices ["missile1"];
+			}else if(currentInstance["1_missile1"] < (maxInstance["1_missile1"]/2) ){
+				instanceGameobject ("1", "missile1");
+				EnemyMoney = EnemyMoney - prices ["missile1"];
+			}
+		}
+
+		if(EnemyMoney > prices["car2"] && currentInstance["1_car2"] < maxInstance["1_car2"]){
+			instanceGameobject ("1", "car2");
+			EnemyMoney = EnemyMoney - prices ["car2"];
+		}
+
+		if (currentInstance ["1_a10"] >= maxInstance ["1_a10"] && currentInstance ["1_car5"] >= maxInstance ["1_car5"]) {
+			if (EnemyMoney > prices ["car3"] && currentInstance["1_car3"] < maxInstance["1_car3"]) {
+				instanceGameobject ("1", "car3");
+				EnemyMoney = EnemyMoney - prices ["car3"];
+			}
+			if(EnemyMoney > prices ["missile2"] && currentInstance["1_missile2"] < maxInstance["1_missile2"]){
+				instanceGameobject ("1", "missile2");
+				EnemyMoney = EnemyMoney - prices ["missile2"];
+			}
+		}
+
+	}
+
+
+	void enemyManager(){
+
 	}
 
 }

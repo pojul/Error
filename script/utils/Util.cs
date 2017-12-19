@@ -40,7 +40,7 @@ public class Util : MonoBehaviour {
 		}else if("1".Equals(playId)){
 			bool matchArea = false;
 			while (!matchArea) {
-				if(times > 4){
+				if(times > 50){
 					areaid = Random.Range(5, 8);
 					break;
 				}
@@ -115,29 +115,45 @@ public class Util : MonoBehaviour {
 	}
 
 	public static void AddNearEnemys(Transform mTransform, string playerId){
-		Dictionary<int, List<Transform>> nearEnemys = null;
-		List<Transform> allNearEnemys = null;
-		if("0".Equals(playerId)){
-			nearEnemys = GameInit.nearEnemys_0;
-			allNearEnemys = GameInit.allNearEnemys_0;
-		}else if("1".Equals(playerId)){
-			nearEnemys = GameInit.nearEnemys_1;
-			allNearEnemys = GameInit.allNearEnemys_1;
+		lock(GameInit.locker){
+			if(mTransform == null){
+				return;
+			}
+			Dictionary<int, Dictionary<Transform, float>> nearEnemys = null;
+			Dictionary<int, object[]> allNearEnemys = null;
+			if("0".Equals(playerId)){
+				nearEnemys = GameInit.nearEnemys_0;
+				allNearEnemys = GameInit.allNearEnemys_0;
+			}else if("1".Equals(playerId)){
+				nearEnemys = GameInit.nearEnemys_1;
+				allNearEnemys = GameInit.allNearEnemys_1;
+			}
+			if(allNearEnemys.ContainsKey(mTransform.GetHashCode())){
+				allNearEnemys [mTransform.GetHashCode()][1] = Time.time;
+				int[] keys = new int[nearEnemys.Keys.Count];
+				nearEnemys.Keys.CopyTo (keys, 0);
+				for (int i = 0; i < keys.Length; i++) {
+					if(nearEnemys[keys[i]].ContainsKey(mTransform)){
+						nearEnemys[keys[i]][mTransform] = Time.time;
+						break;
+					}
+				}
+				return;
+			}
+			object[] objs = new object[2];
+			objs [0] = mTransform;
+			objs [1] = Time.time;
+			allNearEnemys.Add (mTransform.GetHashCode(), objs);
+			int radioAreaId = getRadioAreaId (mTransform);
+			if (nearEnemys.ContainsKey (radioAreaId)) {
+				nearEnemys [radioAreaId].Add (mTransform, Time.time);
+				//nearEnemys [radioAreaId].Add (mTransform);
+			} else {
+				Dictionary<Transform, float> transforms = new  Dictionary<Transform, float>();
+				transforms.Add (mTransform, Time.time);
+				nearEnemys.Add (radioAreaId, transforms);
+			}
 		}
-		if(allNearEnemys.Contains(mTransform)){
-			return;
-		}
-		allNearEnemys.Add (mTransform);
-		int radioAreaId = getRadioAreaId (mTransform);
-		if (nearEnemys.ContainsKey (radioAreaId)) {
-			nearEnemys [radioAreaId].Add (mTransform);
-
-		} else {
-			List<Transform> transforms = new List<Transform>();
-			transforms.Add (mTransform);
-			nearEnemys.Add (radioAreaId, transforms);
-		}
-
 	}
 
 	public static int getRadioAreaId(Transform mTransform){

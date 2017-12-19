@@ -27,13 +27,13 @@ public class CarType2 : PojulObject {
 
 	private bool isMoving = false;
 
-	private float height = 68.0f;
+	private float height = 46; //68.0f;
 	private float maxMoveSpeed = GameInit.mach * 0.6f;
 	private Vector3 park;
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 
-	public int[] maxMissiles = {4, 3, 7};
+	public int[] maxMissiles = {4, 3, 5};
 
 	public int[] currentMissiles = {0, 0, 0};
 
@@ -166,7 +166,7 @@ public class CarType2 : PojulObject {
 		}
 		int needNum = maxMissiles[which] - currentMissiles[which];
 		int canSupplyNum = GameInit.remainMissile[type];
-		Debug.Log ("gqb------>needNum: " + needNum + "; canSupplyNum: " + canSupplyNum);
+		//Debug.Log ("gqb------>needNum: " + needNum + "; canSupplyNum: " + canSupplyNum);
 		if (canSupplyNum <= needNum) {
 			currentMissiles [which] = currentMissiles [which] + canSupplyNum;
 			GameInit.remainMissile [type] = 0;
@@ -177,6 +177,10 @@ public class CarType2 : PojulObject {
 	}
 
 	void exchange(CarType5 mCarType5){
+		if(mCarType5.isDestoryed){
+			return;
+		}
+
 		int needNum = mCarType5.maxMountMissle - mCarType5.currentMountMissle;
 		int canSupplyNum = currentMissiles[0];
 
@@ -197,7 +201,7 @@ public class CarType2 : PojulObject {
 		if(supplyCar5 != null){
 			return;
 		}
-		Hashtable Car5s = new Hashtable();
+		Dictionary<int, GameObject> Car5s = new Dictionary<int, GameObject>();
 		if("0".Equals (playerId)) {
 			Car5s = GameInit.Car5Area0;
 		}else if("1".Equals (playerId)){
@@ -206,7 +210,7 @@ public class CarType2 : PojulObject {
 		int currentPriority = 4;
 		GameObject tempSupplyCar5 = null;
 		foreach(int key in Car5s.Keys){
-			GameObject car5 = (GameObject)Car5s[key];
+			GameObject car5 = Car5s[key];
 			if(car5 == null){
 				continue;
 			}
@@ -309,6 +313,14 @@ public class CarType2 : PojulObject {
 			if(sliderHealth.value <= 0 && !isDestoryed){
 				isDestoryed = true;
 				DestoryAll (collision, 120000.0f);
+				GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMissiles [0];
+				currentMissiles [0] = 0;
+
+				GameInit.currentInstance [(playerId + "_missile2")] = GameInit.currentInstance [(playerId + "_missile2")] - currentMissiles [1];
+				currentMissiles [1] = 0;
+
+				GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMissiles [2];
+				currentMissiles [2] = 0;
 				return;
 			}
 		}
@@ -358,6 +370,12 @@ public class CarType2 : PojulObject {
 
 		if(GameInit.currentInstance.ContainsKey((string)tag)){
 			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
+		}
+		if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
+			GameInit.gameObjectInstance.Remove (transform.gameObject);
+		}
+		if("0".Equals(playerId) && GameInit.myThumbnailObjs.Contains(transform.gameObject)){
+			GameInit.myThumbnailObjs.Remove (transform.gameObject);
 		}
 	}
 
