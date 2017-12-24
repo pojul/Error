@@ -22,7 +22,7 @@ public class PojulObject : MonoBehaviour {
 	public Vector3 myCenter;
 	public Vector3 enemyCenter;
 
-	public virtual void isFired (Collision collision, int type){}
+	public virtual void isFired (RaycastHit hit, Collision collision, int type){}
 
 	public virtual void fireMissileOfPlayer (Transform target){}
 

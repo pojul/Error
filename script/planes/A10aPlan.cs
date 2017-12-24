@@ -33,7 +33,7 @@ public class A10aPlan : PojulObject {
 
 	private float maxMoveSpeed = GameInit.mach;
 	private float moveSpeed = 0.0f;
-	private float rolateSpeed = 30f;
+	private float rolateSpeed = 70f;
 	private GameObject navCube;
 	private UnityEngine.AI.NavMeshAgent nav;
 
@@ -57,6 +57,9 @@ public class A10aPlan : PojulObject {
 	private Transform missileCar;
 
 	private Rigidbody mPlayerRigidbody;
+	int fireIndex = 0;
+	private float lastFireTime = 0;
+	private bool isInFire = false;
 
 	//血量条
 	public Slider sliderHealth;
@@ -159,6 +162,12 @@ public class A10aPlan : PojulObject {
 
 		if(playerType == 1){
 			airMoveAuto ();
+
+			if ((Time.time - lastFireTime) > 0.12f && isInFire) {
+				lastFireTime = Time.time;
+				fire ();
+			}
+
 		}else if(playerType == 0){
 			planMove.currentMountMissle = currentMountMissle;
 			//Debug.Log ("gqb------>fireAim: " + UImanager.fireAim);
@@ -369,7 +378,43 @@ public class A10aPlan : PojulObject {
 				fireMissile ();
 			}
 		}
-		//Debug.Log ("gqb------>d angle x: " + Mathf.Min(dx1, dx2) + "; d angle y: " + Mathf.Min(dy1, dy2) + "; distance: " + distance);
+
+		if(dx < 20 && dy < 25 && distance < 6000){
+			isInFire = true;
+		}else {
+			isInFire = false;
+		}
+
+		//Debug.Log ("gqb------>d angle x: " + dx + "; d angle y: " + dy + "; distance: " + distance);
+		//
+	}
+
+	void fire(){
+		if(isDestoryed){
+			return;	
+		}
+		if(fireIndex > 7){
+			fireIndex = 0;
+		}
+		if(fires[fireIndex] == null){
+			return;
+		}
+
+		GameObject fireEffect = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bulletFire"), 
+			fires[fireIndex].position , fires[fireIndex].rotation ) as GameObject;
+		fireEffect.tag = "bulletFire";
+		fireEffect.transform.parent = transform;
+
+		GameObject bullet = (GameObject)Instantiate(Resources.Load("Prefabs/arms/bullet"),
+			fires[fireIndex].position  + fires[fireIndex].forward * 0.5f, fires[fireIndex].rotation ) as GameObject;
+		Bullet mBullet = bullet.GetComponent<Bullet> ();
+		mBullet.shoot (planMove.speed);
+
+		fireIndex = fireIndex + 1;
+	}
+
+	public override void fireOfPlayer(){
+		fire ();
 	}
 
 	void fireMissile(){
@@ -635,6 +680,9 @@ public class A10aPlan : PojulObject {
 	}
 
 	void updateCurrentMountMissle(){
+		if(isDestoryed){
+			return;
+		}
 		int temptMountMissle = 0;
 		for (int i = 0; i < missilePoses.Count; i++) {
 			if(missiles [missilePoses[i]] != null){
@@ -644,7 +692,7 @@ public class A10aPlan : PojulObject {
 		currentMountMissle = temptMountMissle;
 	}
 
-	public override void isFired(Collision collision, int type){
+	public override void isFired(RaycastHit hit, Collision collision, int type){
 
 		//test
 		if(playerType == 0){
@@ -657,12 +705,24 @@ public class A10aPlan : PojulObject {
 		if(type ==3 || type ==2){
 			isDestoryed = true;
 			isPanDestoryed = true;
-			inflame(collision);
+			inflame(72000);
 			return;
+		}
+		if (type == 4) {
+			sliderHealth.value = sliderHealth.value - 3.8f;
+			if(sliderHealth.value <= 0){
+				isDestoryed = true;
+				isPanDestoryed = true;
+				GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
+					transform.position, Quaternion.FromToRotation(Vector3.up, hit.normal)) as GameObject;
+				bomb2.tag = "bomb2";
+				bomb2.transform.parent = transform;
+				inflame(72000);
+			}
 		}
 	}
 
-	void inflame(Collision collision){
+	void inflame(float force){
 
 		GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMountMissle;
 		currentMountMissle = 0;
@@ -683,7 +743,7 @@ public class A10aPlan : PojulObject {
 		}
 		Rigidbody mRigidbody = transform.gameObject.GetComponent<Rigidbody>();
 		if(mRigidbody != null){
-			mRigidbody.AddForce (transform.forward * 72000);
+			mRigidbody.AddForce (transform.forward * force);
 		}
 		if(mAudioSource != null){
 			mAudioSource.Stop ();

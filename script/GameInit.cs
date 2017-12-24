@@ -89,7 +89,7 @@ public class GameInit  : MonoBehaviour {
 	void Start () {
 
 		initData ();
-		Invoke("InstancePlayer", 2.0f);
+		//Invoke("InstancePlayer", 2.0f);
 
 		InvokeRepeating("addMoney", 2.0f, 2.0f);
 
@@ -133,6 +133,7 @@ public class GameInit  : MonoBehaviour {
 		modelpaths.Add ("missile3", "Prefabs/arms/missile_type3");
 		modelpaths.Add ("missile4", "Prefabs/arms/missile_type4");
 		modelpaths.Add ("shell1", "Prefabs/arms/shell_type1");
+		modelpaths.Add ("bullet", "Prefabs/arms/bullet");
 		modelpaths.Add ("transport1", "Prefabs/arms/transport_type1");
 
 		backgroundProgress = (Texture2D)Resources.Load ("icon/progress1/progress1a");

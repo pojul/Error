@@ -147,7 +147,7 @@ public class MissileType1 : PojulObject {
 			mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 		}
 		if(mPojulObject != null){
-			mPojulObject.isFired(collision, 3);
+			mPojulObject.isFired(new RaycastHit() ,collision, 3);
 		}
 
 		Destroy(transform.gameObject.GetComponent<Rigidbody> ());

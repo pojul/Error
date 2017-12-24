@@ -284,7 +284,7 @@ public class CarType4 : PojulObject {
 		nav= navCube.GetComponent<UnityEngine.AI.NavMeshAgent> ();
 	}
 
-	public override void isFired(Collision collision, int type){
+	public override void isFired(RaycastHit hit, Collision collision, int type){
 		if(type ==2){
 			sliderHealth.value = sliderHealth.value - 36;
 			if(sliderHealth.value <= 0 && !isDestoryed){

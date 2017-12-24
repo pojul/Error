@@ -117,17 +117,19 @@ public class CarType3 : PojulObject {
 			enemyId = "1";
 			transform.position = new Vector3 (transform.position.x, height, transform.position.z);
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
-			mRectTransform.sizeDelta = new Vector2 (0, 0);
 		}else if("1".Equals(playerId)){
 			mPatrolArea = new RadiusArea (Random.Range(5,8));
 			myCenter = new Vector3 (0,0,60000);
 			enemyCenter = new Vector3 (0,0,-60000);
 			enemyId = "0";
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.698f, 0.255f, 0.157f);
-			mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
 			/*transform.position = new Vector3 (-40000,
 				25, 
 				-51000);*/
+		}
+
+		if(playerType == 1){
+			mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
 		}
 		sliderHealth.value = sliderHealth.maxValue;
 
@@ -206,8 +208,8 @@ public class CarType3 : PojulObject {
 			}
 			planMove.player = transform;
 			planMove.speed = speed;
-			planMove.maxSpeed = 360;
-			planMove.maxAccelerate = 1.5f;
+			planMove.maxSpeed = 600;
+			planMove.maxAccelerate = 1.2f;
 			PlanControls.rorateSpeed = 35f;
 			if(fireTransform == null){
 				fireTransform = transform.FindChild ("car_type3_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
@@ -240,6 +242,8 @@ public class CarType3 : PojulObject {
 			if(transform.gameObject.GetComponent<planMove> ()){
 				Destroy (transform.gameObject.GetComponent<planMove> ());
 			}
+			mAnimator_lod0.speed = 5f;
+			mAnimator_lod1.speed = 5f;
 			planMove.player = null;
 			WorldUIManager.fireAimTra = null;
 			WorldUIManager.fireAimDistance = 0.0f;
@@ -255,7 +259,16 @@ public class CarType3 : PojulObject {
 
 	void behaviorListener(){
 
+		if(isDestoryed){
+			return;
+		}
+
 		if (playerType == 0) {
+			float aniSpeed =  planMove.speed * 1.0f / maxMoveSpeed;
+			if(Mathf.Abs(aniSpeed - mAnimator_lod0.speed) > 0.1){
+				mAnimator_lod0.speed = aniSpeed;
+				mAnimator_lod1.speed = aniSpeed;
+			}
 			return;
 		}
 
@@ -432,7 +445,7 @@ public class CarType3 : PojulObject {
 		fire ();
 	}
 
-	public override void isFired(Collision collision, int type){
+	public override void isFired(RaycastHit hit, Collision collision, int type){
 		if(isDestoryed){
 			return;
 		}
@@ -441,7 +454,7 @@ public class CarType3 : PojulObject {
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
 				isPanDestoryed = true;
-				DestoryAll (collision);
+				DestoryAll (collision.contacts[0].point, 30000.0f);
 				return;
 			}
 			if(collision.gameObject.name.Equals("pan") && !isPanDestoryed){
@@ -451,12 +464,23 @@ public class CarType3 : PojulObject {
 		}else if(type ==3){
 			isDestoryed = true;
 			isPanDestoryed = true;
-			DestoryAll (collision);
+			DestoryAll (collision.contacts[0].point, 30000.0f);
 			return;
+		}else if (type == 4) {
+			sliderHealth.value = sliderHealth.value - 0.8f;
+			if(sliderHealth.value <= 0){
+				isDestoryed = true;
+				isPanDestoryed = true;
+				GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
+					transform.position, Quaternion.FromToRotation(Vector3.up, hit.normal)) as GameObject;
+				bomb2.tag = "bomb2";
+				bomb2.transform.parent = transform;
+				DestoryAll (transform.position, 1000.0f);
+			}
 		}
 	}
 
-	void DestoryAll(Collision collision){
+	void DestoryAll(Vector3 point, float force){
 		if(panTransform_lod0 != null){
 			panTransform_lod0.parent = null;
 			panTransform_lod1.parent = panTransform_lod0;
@@ -497,13 +521,13 @@ public class CarType3 : PojulObject {
 				lunzis [i].gameObject.GetComponent<Rigidbody> ().mass = 0.8f;
 			}
 		}
-		Vector3 explosionPos = new Vector3 (collision.contacts[0].point.x, 
-			(collision.contacts[0].point.y - 200), 
-			collision.contacts[0].point.z);
+		Vector3 explosionPos = new Vector3 (point.x, 
+			(point.y - 200), 
+			point.z);
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, 200.0f);
 		foreach (Collider hit in colliders){
 			if (hit.GetComponent<Rigidbody>()){
-				hit.GetComponent<Rigidbody>().AddExplosionForce(30000.0f, explosionPos, 200.0f);
+				hit.GetComponent<Rigidbody>().AddExplosionForce(force, explosionPos, 200.0f);
 			}  
 		}
 		Invoke ("destoryAll", 30);

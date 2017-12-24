@@ -88,7 +88,7 @@ public class TestScript : PojulObject {
 		transform.position = transform.position + transform.forward * 250 * Time.deltaTime;
 	}
 
-	public override void isFired(Collision collision, int type){
+	public override void isFired(RaycastHit hit, Collision collision, int type){
 
 		if(type ==2){
 			if(collision.gameObject.name.Equals("pan") && !isPanDestoryed){

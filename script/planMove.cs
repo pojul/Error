@@ -13,7 +13,7 @@ public class planMove : MonoBehaviour {
 	//public float velocity = 0.0f;
 	public static float maxAccelerate = 1.5f;
 	public static float accelerate = 0.0f;
-	public static float maxSpeed = 1100;
+	public static float maxSpeed = 1000;
 	private float piRate = 2* Mathf.PI/360;
 
 	public static float dzMainCamera = 220;
@@ -64,9 +64,11 @@ public class planMove : MonoBehaviour {
 					-(PlanControls.newPoint2Rolation + 360));
 				transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rolSpeed);
 
-				Camera.main.transform.position = transform.position +  (-transform.forward * dzMainCamera + transform.up * dyMainCamera);
-				Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, 
-					Quaternion.LookRotation(transform.position - Camera.main.transform.position), 3.5f * Time.deltaTime);
+				if(!UImanager.isCamreaMoveTo){
+					Camera.main.transform.position = transform.position +  (-transform.forward * dzMainCamera + transform.up * dyMainCamera);
+					Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, 
+						Quaternion.LookRotation(transform.position - Camera.main.transform.position), 3.5f * Time.deltaTime);
+				}
 			}else if("car3".Equals(type)){
 				float rolX = transform.rotation.eulerAngles.x;
 				if(transform.position.y >= 0){
@@ -85,7 +87,9 @@ public class planMove : MonoBehaviour {
 				dRotate3 = 0;
 				//((CarType3)mPojulObject).rotatePao (rotate2);
 
-				((CarType3)mPojulObject).rotateCamera ();
+				if (!UImanager.isCamreaMoveTo) {
+					((CarType3)mPojulObject).rotateCamera ();
+				}
 
 				if(transform.position.y < -1800){
 					mPojulObject.isDestoryed = true;
@@ -95,7 +99,7 @@ public class planMove : MonoBehaviour {
 			}
 
 			if(mRigidbody != null && transform.position.y >= 0){
-				mRigidbody.AddForce (transform.forward * speed * 4);
+				mRigidbody.AddForce (transform.forward * speed * 2f);
 				//Debug.Log ("gqb------>" + mRigidbody.velocity.magnitude);
 			}
 				

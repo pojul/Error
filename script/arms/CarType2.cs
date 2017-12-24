@@ -307,12 +307,15 @@ public class CarType2 : PojulObject {
 		nav= navCube.GetComponent<UnityEngine.AI.NavMeshAgent> ();
 	}
 
-	public override void isFired(Collision collision, int type){
+	public override void isFired(RaycastHit hit, Collision collision, int type){
+		if(isDestoryed){
+			return;
+		}
 		if(type ==2){
 			sliderHealth.value = sliderHealth.value - 68;
-			if(sliderHealth.value <= 0 && !isDestoryed){
+			if(sliderHealth.value <= 0){
 				isDestoryed = true;
-				DestoryAll (collision, 120000.0f);
+				DestoryAll (collision.contacts[0].point, 120000.0f);
 				GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMissiles [0];
 				currentMissiles [0] = 0;
 
@@ -323,10 +326,31 @@ public class CarType2 : PojulObject {
 				currentMissiles [2] = 0;
 				return;
 			}
+		}else if(type ==4){
+			sliderHealth.value = sliderHealth.value - 2.6f;
+			if(sliderHealth.value <= 0){
+				isDestoryed = true;
+
+				GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
+					transform.position, Quaternion.FromToRotation(Vector3.up, hit.normal)) as GameObject;
+				bomb2.tag = "bomb2";
+				bomb2.transform.parent = transform;
+
+				DestoryAll (transform.position, 10000.0f);
+
+				GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMissiles [0];
+				currentMissiles [0] = 0;
+
+				GameInit.currentInstance [(playerId + "_missile2")] = GameInit.currentInstance [(playerId + "_missile2")] - currentMissiles [1];
+				currentMissiles [1] = 0;
+
+				GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMissiles [2];
+				currentMissiles [2] = 0;
+			}
 		}
 	}
 
-	void DestoryAll(Collision collision, float power){
+	void DestoryAll(Vector3 point, float power){
 		mainTransform_lod0.parent = null;
 		mainTransform_lod1.parent = mainTransform_lod0;
 		mainTransform_lod2.parent = mainTransform_lod0;
@@ -349,9 +373,9 @@ public class CarType2 : PojulObject {
 				lunzi_lod0.gameObject.GetComponent<Rigidbody> ().mass = 0.8f;
 			}
 		}
-		Vector3 explosionPos = new Vector3 (collision.contacts[0].point.x, 
-			(collision.contacts[0].point.y - 300), 
-			collision.contacts[0].point.z);
+		Vector3 explosionPos = new Vector3 (point.x, 
+			(point.y - 300), 
+			point.z);
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, 200.0f);
 		foreach (Collider hit in colliders){
 			if (hit.GetComponent<Rigidbody>()){

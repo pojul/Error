@@ -198,7 +198,7 @@ public class TankFire : PojulObject {
 		}
 	}
 		
-	public override void isFired(Collision collision, int type){
+	public override void isFired(RaycastHit hit, Collision collision, int type){
 	}
 
 }

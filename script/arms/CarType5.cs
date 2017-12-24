@@ -365,26 +365,40 @@ public class CarType5 : PojulObject {
 		nav= navCube.GetComponent<UnityEngine.AI.NavMeshAgent> ();
 	}
 
-	public override void isFired(Collision collision, int type){
+	public override void isFired(RaycastHit hit, Collision collision, int type){
 		if(isDestoryed){
 			return;
 		}
-		if(type ==2){
+		if(type == 2){
 			sliderHealth.value = sliderHealth.value - 58;
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
-				DestoryAll (collision, 120000.0f);
+				DestoryAll (collision.contacts[0].point, 120000.0f);
 				return;
 			}
-		}else if(type ==3){
+		}else if(type == 3){
 			isDestoryed = true;
 			isPanDestoryed = true;
-			DestoryAll (collision, 120000.0f);
+			DestoryAll (collision.contacts[0].point, 120000.0f);
 			return;
+		}else if (type == 4) {
+			sliderHealth.value = sliderHealth.value - 2.6f;
+			if(sliderHealth.value <= 0){
+				isDestoryed = true;
+				isPanDestoryed = true;
+
+				GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
+					transform.position, Quaternion.FromToRotation(Vector3.up, hit.normal)) as GameObject;
+				bomb2.tag = "bomb2";
+				bomb2.transform.parent = transform;
+
+				DestoryAll (transform.position, 10000.0f);
+				return;
+			}
 		}
 	}
 
-	void DestoryAll(Collision collision, float power){
+	void DestoryAll(Vector3 point, float power){
 
 		GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMountMissle;
 		currentMountMissle = 0;
@@ -420,9 +434,9 @@ public class CarType5 : PojulObject {
 			}
 		}
 
-		Vector3 explosionPos = new Vector3 (collision.contacts[0].point.x, 
-			(collision.contacts[0].point.y - 300), 
-			collision.contacts[0].point.z);
+		Vector3 explosionPos = new Vector3 (point.x, 
+			(point.y - 300), 
+			point.z);
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, 200.0f);
 		foreach (Collider hit in colliders){
 			if (hit.GetComponent<Rigidbody>()){

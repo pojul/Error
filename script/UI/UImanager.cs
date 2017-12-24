@@ -14,6 +14,8 @@ public class UImanager : MonoBehaviour {
 	public Image aimNext;
 	public Image fire;
 	public Image missileAim;
+	public Image mselect;
+	public Image buy;
 
 	public Image thubmnailPoint;
 
@@ -29,6 +31,10 @@ public class UImanager : MonoBehaviour {
 	public Sprite fireBg1;
 	public Sprite fireBg2;
 	public Sprite fireBg3;
+	public Sprite mselect1;
+	public Sprite mselect2;
+	public Sprite buy1;
+	public Sprite buy2;
 
 
 	private Dictionary<int, object[]> thubmnailPoints = new Dictionary<int, object[]> ();//GameObject, Image
@@ -41,6 +47,49 @@ public class UImanager : MonoBehaviour {
 
 	private string playerType = "";
 	private bool canFire = true;
+	private float lastFireTime = 0;
+	private bool isFireDown = false;
+	private bool isSelectMode = false;
+	public static bool isCamreaMoveTo = false;
+	public static Vector3 currentCamreaMoveTo = new Vector3(0, 11000, -60000);
+	private float lastCamreaMoveToTime = 0;
+	private Vector2 touch1;
+	private Vector2 touch2;
+	private bool touch1Ended = false;
+	private bool touch2Ended = false;
+	private float lastTouch1Time = 0;
+	private float lastTouch2Time = 0;
+	private float lastTouchTime = 0;
+
+	private bool showShopWin = false;
+	private Rect shopWinRect = new Rect (Screen.width*2.5f/10, Screen.height*2/10, Screen.width*5/10, Screen.height*6/10);
+	private GUIStyle shopWinStyle;
+	private Vector2 scrollPosition = Vector2.zero;
+	private float closeBtX = Screen.width*5/10-Screen.height*2/10;
+	private float closeBtY = 0;
+	private float closeBtWidth = Screen.height*2/10;
+	private float closeBtHeight = Screen.height / 10;
+
+	private float scollViewX = 0;
+	private float scollViewY = Screen.height*1/10;
+	private float scollViewWidth = Screen.width*5f/10;
+	private float scollViewHeight = Screen.height*6/10;
+	private Rect scollViewRect = new Rect(0, 0, Screen.width*6/10, Screen.height*18.0f/10);
+
+	private float itemImgX = Screen.height/20;
+	private float itemImgWidth = Screen.height * 3 / 10;
+	private float itemImgHeight = Screen.height * 1.6f / 10;
+	private float itemSpace = Screen.height * 1.7f / 10;
+	public Texture2D[] armImgs = new Texture2D[10];
+	public string[] armNames = new string[10];
+	private GUIStyle[] itemImgStys = new GUIStyle[10];
+	private float itemBuyX = Screen.width * 5 / 10 - Screen.height * 3 / 10;
+	private float itemBuyWidth = Screen.height*2/10;
+	private float itemBuyheight = Screen.height/10;
+	private float itemPricex = Screen.height * 7f / 20;
+	private float itemPricewidth = Screen.height * 2 / 10;
+	private float itemPriceheight = Screen.height * 1.6f / 10;
+	public string[] buyStatus = new string[3];
 
 	// Use this for initialization
 	void Start () {
@@ -53,10 +102,10 @@ public class UImanager : MonoBehaviour {
 
 		fire.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.12f, Screen.height * 0.12f);
 		fire.rectTransform.position = new Vector3 ((Screen.width - fire.rectTransform.sizeDelta .x * 0.56f), 
-			fire.rectTransform.sizeDelta .y * 2.4f,fire.rectTransform.position.z);
+			fire.rectTransform.sizeDelta .y * 2.2f,fire.rectTransform.position.z);
 
 		aimNext.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.12f, Screen.height * 0.12f);
-		aimNext.rectTransform.position = new Vector3 ((Screen.width - aimNext.rectTransform.sizeDelta .x * 2.4f), 
+		aimNext.rectTransform.position = new Vector3 ((Screen.width - aimNext.rectTransform.sizeDelta .x * 2.2f), 
 			aimNext.rectTransform.sizeDelta .y * 0.56f,aimNext.rectTransform.position.z);
 
 		fireMissile.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.18f, Screen.height * 0.18f);
@@ -75,6 +124,20 @@ public class UImanager : MonoBehaviour {
 		accelerate.value = accelerate.maxValue * 0.5f;
 		accelerate.handleRect.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.height * 0.06f, Screen.height * 0.05f);;
 
+		buy.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.11f, Screen.height * 0.11f);
+		buy.rectTransform.position = new Vector3 (buy.rectTransform.sizeDelta .x * 0.5f, 
+			buy.rectTransform.sizeDelta .y * 5f,buy.rectTransform.position.z);
+
+		mselect.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.11f, Screen.height * 0.11f);
+		mselect.rectTransform.position = new Vector3 (mselect.rectTransform.sizeDelta .x * 0.5f, 
+			mselect.rectTransform.sizeDelta .y * 4f,mselect.rectTransform.position.z);
+
+		for (int i = 0; i < armImgs.Length; i++) {
+			itemImgStys [i] = new GUIStyle ();
+			itemImgStys [i].normal.background = armImgs [i];
+		}
+
+
 		InvokeRepeating("updateThubmnail", 0.5f, 0.5f);
 
 		InvokeRepeating("updateMissileAim", 0.2f, 0.2f);
@@ -83,6 +146,23 @@ public class UImanager : MonoBehaviour {
 
 	void Update(){
 
+		if(isSelectMode){
+			listenerScreenTap ();
+		}
+
+		if(isCamreaMoveTo){
+			Camera.main.transform.position = Vector3.Slerp (new Vector3(Camera.main.transform.position.x, 11000, 
+					Camera.main.transform.position.z), currentCamreaMoveTo, Time.deltaTime * 2);
+		}
+
+		if(planMove.player != null && "a10".Equals(playerType) && isFireDown){
+			PojulObject mPojulObject = planMove.player.gameObject.GetComponent<PojulObject> ();
+			if (mPojulObject != null && (Time.time - lastFireTime) > 0.12f) {
+				lastFireTime = Time.time;
+				mPojulObject.fireOfPlayer ();
+			}
+		}
+
 		if(missileAimedTra != null){
 			missileAim.enabled = true;
 			Vector2 screenPos = Camera.main.WorldToScreenPoint (missileAimedTra.position);
@@ -90,6 +170,49 @@ public class UImanager : MonoBehaviour {
 				screenPos.y, missileAim.rectTransform.position.z);
 		} else {
 			missileAim.enabled = false;
+		}
+	}
+
+	void listenerScreenTap(){
+		if (Application.isMobilePlatform) {
+			if (Input.touchCount > 0 && Input.touches [0].phase == TouchPhase.Began) {
+				touch1 = Input.touches [0].position;
+				lastTouch1Time = Time.time;
+				touch1Ended = false;
+			}
+			if (Input.touchCount > 1 && Input.touches [1].phase == TouchPhase.Began) {
+				touch2 = Input.touches [1].position;
+				lastTouch2Time = Time.time;
+				touch2Ended = false;
+			}
+			if (Input.touchCount > 0 && Input.touches [0].phase == TouchPhase.Ended && !touch1Ended) {
+				onEndTouch (Input.touches [0].position);
+			}
+			if (Input.touchCount > 1 && Input.touches [1].phase == TouchPhase.Ended && !touch2Ended) {
+				onEndTouch (Input.touches [1].position);
+			}
+		} else {
+			if(Input.GetMouseButtonDown(0)){
+				lastTouchTime = Time.time;
+			}else if(Input.GetMouseButtonUp(0)){
+				if((Time.time - lastTouchTime) < 0.3f){
+					//Debug.Log ("gqb------>touch x: " + Input.mousePosition.x + "; y: " + Input.mousePosition.y + "; z: " + Input.mousePosition.z );
+					Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+					RaycastHit hit;
+					if(Physics.Raycast(ray, out hit)){
+						Vector3 v3 = hit.point;
+						Debug.Log ("gqb------>touchworld x: " + v3.x + "; y: " + v3.y + "; z: " + v3.z );
+					}
+				}
+			}
+		}
+	}
+
+	void onEndTouch(Vector2 touch){
+		if((touch - touch1).magnitude < 1 && (Time.time - lastTouch1Time) < 0.5f){
+			Debug.Log ("gqb------>touch1");
+		}else if((touch - touch2).magnitude < 1 && (Time.time - lastTouch2Time) < 0.5f){
+			Debug.Log ("gqb------>touch2");
 		}
 	}
 
@@ -268,7 +391,7 @@ public class UImanager : MonoBehaviour {
 
 	public void OnFireMissileClick(){
 		//Debug.Log ("gqb------>OnFireMissileClick");
-		if(planMove.player == null || missileAimedTra == null || planMove.currentMountMissle <= 0){
+		if(isSelectMode || planMove.player == null || missileAimedTra == null || planMove.currentMountMissle <= 0){
 			return;
 		}
 		PojulObject mPojulObject = planMove.player.gameObject.GetComponent<PojulObject> ();
@@ -279,14 +402,14 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void OnFireMissileDown(){
-		if(missileAimedTra == null || planMove.currentMountMissle <= 0){
+		if(isSelectMode || missileAimedTra == null || planMove.currentMountMissle <= 0){
 			return;
 		}
 		fireMissile.sprite = fireMissileBg2;
 	}
 
 	public void OnFireMissileUp(){
-		if(missileAimedTra == null || planMove.currentMountMissle <= 0){
+		if(isSelectMode || missileAimedTra == null || planMove.currentMountMissle <= 0){
 			return;
 		}
 		fireMissile.sprite = fireMissileBg1;
@@ -294,7 +417,7 @@ public class UImanager : MonoBehaviour {
 
 	public void OnAimNextClick(){
 		//Debug.Log ("gqb------>OnAimNextClick");
-		if(planMove.player == null || missileAimedTra == null){
+		if(isSelectMode || planMove.player == null || missileAimedTra == null){
 			return;
 		}
 		int index = planMove.nearEnemy.IndexOf (missileAimedTra);
@@ -327,14 +450,23 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void OnAimNextDown(){
+		if(isSelectMode){
+			return;
+		}
 		aimNext.sprite = aimNextBg2;
 	}
 
 	public void OnAimNextUp(){
+		if(isSelectMode){
+			return;
+		}
 		aimNext.sprite = aimNextBg1;
 	}
 
 	public void OnFireClick(){
+		if(isSelectMode){
+			return;
+		}
 		if(planMove.player != null && "car3".Equals(playerType) && canFire){
 			PojulObject mPojulObject = planMove.player.gameObject.GetComponent<PojulObject> ();
 			if(mPojulObject != null){
@@ -348,17 +480,25 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void OnFireDown(){
+		if(isSelectMode){
+			return;
+		}
 		if(!canFire){
 			return;
 		}
 		fire.sprite = fireBg2;
+		isFireDown = true;
 	}
 
 	public void OnFireUp(){
+		if(isSelectMode){
+			return;
+		}
 		if(!canFire){
 			return;
 		}
 		fire.sprite = fireBg1;
+		isFireDown = false;
 	}
 
 	void car3CanFire(){
@@ -366,9 +506,82 @@ public class UImanager : MonoBehaviour {
 		canFire = true;
 	}
 
-	void updateMissileAim(){
+	public void OnMselectClick(){
+		isSelectMode = !isSelectMode;
+		if (isSelectMode) {
+			mselect.sprite = mselect2;
+		} else {
+			mselect.sprite = mselect1;
+		}
+	}
 
-		if(planMove.player == null){
+	public void OnMselectDown(){
+		mselect.sprite = mselect2;
+	}
+
+	public void OnMselectUp(){
+		if (isSelectMode) {
+			mselect.sprite = mselect2;
+		} else {
+			mselect.sprite = mselect1;
+		}
+	}
+
+	public void OnBuyClick(){
+		if(isSelectMode){
+			return;
+		}
+		showShopWin = true;
+	}
+
+	public void OnBuyDown(){
+		if(isSelectMode){
+			return;
+		}
+		buy.sprite = buy2;
+	}
+
+	public void OnBuyUp(){
+		if(isSelectMode){
+			return;
+		}
+		buy.sprite = buy1;
+	}
+
+	public void OnThubmnailDown(BaseEventData rawdata){
+		MainCameraMoveTo (((PointerEventData)rawdata).position);
+		Camera.main.transform.rotation =  Quaternion.Euler(90 , 
+			0,
+			0);
+		isCamreaMoveTo = true;
+	}
+
+	public void OnThubmnailMove(BaseEventData rawdata){
+		if((Time.time - lastCamreaMoveToTime) > 0.05){
+			MainCameraMoveTo (((PointerEventData)rawdata).position);
+			lastCamreaMoveToTime = Time.time;
+		}
+	}
+
+	public void OnThubmnailUp(BaseEventData rawdata){
+		isCamreaMoveTo = false;
+	}
+
+	void MainCameraMoveTo(Vector2 position){
+		float x = position.x * 240000.0f / thubmnail.rectTransform.sizeDelta.x - 120000;
+		float z = 120000 - (Screen.height - position.y) * 240000.0f / thubmnail.rectTransform.sizeDelta.y;
+		if(z > 0){
+			return;
+		}
+		float distance = (Camera.main.transform.position - new Vector3 (x, Camera.main.transform.position.y, z)).magnitude;
+		if(distance > 200){
+			currentCamreaMoveTo = new Vector3 (x, 11000, z);
+		}
+
+	}
+
+	void updateMissileAim(){
+		if (planMove.player == null) {
 			missileAimedTra = null;
 			fireMissile.sprite = fireMissileBg3;
 			return;
@@ -437,6 +650,50 @@ public class UImanager : MonoBehaviour {
 			fireMissile.rectTransform.localScale = new Vector3 (0,0,0);
 			aimNext.rectTransform.localScale = new Vector3 (0, 0, 0);
 		}
+	}
+
+	void OnGUI(){
+		draw ();
+	}
+
+	void draw(){
+		if(showShopWin){
+			shopWinRect = GUI.Window (1, shopWinRect, shopWin, "arms shop");
+		}
+	}
+
+	void shopWin(int shopWin){
+		if(GUI.Button(new Rect(closeBtX, 0, closeBtWidth, closeBtHeight), "close")){
+			showShopWin = false;
+		}
+
+		GUI.skin.scrollView = shopWinStyle;
+		scrollPosition = GUI.BeginScrollView(new Rect(scollViewX, scollViewY, scollViewWidth, scollViewHeight),
+			scrollPosition, scollViewRect);
+
+		for(int i = 0;i< armImgs.Length; i++){
+			string str = GameInit.prices[armNames[i]] + "/" + GameInit.MyMoney.ToString ();
+			string buyStr = buyStatus [0];
+			if((int)GameInit.prices[armNames[i]] > GameInit.MyMoney){
+				buyStr = buyStatus [1];
+			}
+			if((int)GameInit.currentInstance[("0_"+armNames[i])] >= (int)GameInit.maxInstance[("0_"+armNames[i])]){
+				buyStr = buyStatus [2];
+			}
+
+			if(GUI.Button(new Rect(itemImgX, itemSpace*i, itemImgWidth, itemImgHeight), "", itemImgStys[i])){
+			}
+			if(GUI.Button(new Rect(itemPricex, itemSpace*i, itemPricewidth, itemPriceheight), str)){
+			}
+			if(GUI.Button(new Rect(itemBuyX, (itemSpace*i + Screen.height * 0.3f / 10), itemBuyWidth, itemBuyheight), buyStr)){
+				if(buyStatus [0].Equals(buyStr)){
+					GameInit.instanceGameobject ("0", armNames[i]);
+					GameInit.MyMoney = GameInit.MyMoney - (int)GameInit.prices [armNames [i]];
+				}
+			}
+		}
+		GUI.EndScrollView();
+
 	}
 
 }

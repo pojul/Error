@@ -41,8 +41,15 @@ public class ShellType1 : PojulObject {
 		bomb2.tag = "bomb2";
 		bomb2.transform.parent = collision.gameObject.transform;
 		Transform root = collision.gameObject.transform.root.GetChild(0);
-		if(root.GetComponent<PojulObject> ()){
-			((PojulObject)root.GetComponent<PojulObject> ()).isFired(collision, 2);
+		PojulObject mPojulObject = root.GetComponent<PojulObject> ();
+
+		if(mPojulObject == null && collision.gameObject.transform != null){
+			root = collision.gameObject.transform;
+			mPojulObject = root.gameObject.GetComponent<PojulObject> ();
+		}
+
+		if(mPojulObject != null){
+			mPojulObject.isFired(new RaycastHit(), collision, 2);
 		}
 
 		destory ();

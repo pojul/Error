@@ -90,7 +90,6 @@ public class MissileType3 : PojulObject {
 		type = strs [1];
 		this.target = target;
 		this.speed = startSpeed;
-
 		initBlaze ();
 
 		Invoke ("startDecay", 5);
@@ -141,7 +140,7 @@ public class MissileType3 : PojulObject {
 			mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 		}
 		if(mPojulObject != null){
-			mPojulObject.isFired(collision, 3);
+			mPojulObject.isFired(new RaycastHit(), collision, 3);
 		}
 		destory ();
 	}
