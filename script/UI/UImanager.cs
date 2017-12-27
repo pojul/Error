@@ -16,12 +16,18 @@ public class UImanager : MonoBehaviour {
 	public Image missileAim;
 	public Image mselect;
 	public Image buy;
+	public Image touchMove;
+
 
 	public Image thubmnailPoint;
+	public Text text;
+	private Image cameraThubmnailPoint;
 
 	public Sprite redThubmnailPoint;
 	public Sprite blueThubmnailPoint;
 	public Sprite yellowThubmnailPoint;
+	public Sprite selectedThubmnailPoint;
+	public Sprite cameraThubmnailBg;
 
 	public Sprite fireMissileBg1;
 	public Sprite fireMissileBg2;
@@ -51,7 +57,8 @@ public class UImanager : MonoBehaviour {
 	private bool isFireDown = false;
 	private bool isSelectMode = false;
 	public static bool isCamreaMoveTo = false;
-	public static Vector3 currentCamreaMoveTo = new Vector3(0, 11000, -60000);
+	public static bool isCamreaHeightMove = false;
+	public static Vector3 currentCamreaMoveTo = new Vector3(0, 12000, -60000);
 	private float lastCamreaMoveToTime = 0;
 	private Vector2 touch1;
 	private Vector2 touch2;
@@ -60,6 +67,10 @@ public class UImanager : MonoBehaviour {
 	private float lastTouch1Time = 0;
 	private float lastTouch2Time = 0;
 	private float lastTouchTime = 0;
+	private Vector3 touchMoveDown;
+	private float cameraY = 12000;
+	private float frontCameraY = 12000;
+	private Transform selectedTra;
 
 	private bool showShopWin = false;
 	private Rect shopWinRect = new Rect (Screen.width*2.5f/10, Screen.height*2/10, Screen.width*5/10, Screen.height*6/10);
@@ -91,6 +102,31 @@ public class UImanager : MonoBehaviour {
 	private float itemPriceheight = Screen.height * 1.6f / 10;
 	public string[] buyStatus = new string[3];
 
+	private float armShopItemImgHeight = Screen.height * 0.16f;
+	private float armShopItemImgWidth = Screen.height * 0.3f;
+	private float armShopItemPriceHeight = Screen.height * 0.16f;
+	private float armShopItemPriceWidth = Screen.height * 0.2f;
+
+	private float armShopItemBuyheight = Screen.height* 0.1f;
+	private float armShopItemSpace = Screen.height * 0.01f;
+
+	public Image armShopPanel;
+	public Image armShopTitle;
+	public Image armShopClose;
+	public GameObject armShopScrollView;
+	public GameObject armShopContent;
+
+	public Image[] armShopImgs = new Image[10];
+	public Text[] armShopPrices = new Text[10];
+	public Image[] armShopBuys = new Image[10];
+	public Sprite[] armShopBgs = new Sprite[10];
+
+
+	//public ScrollView
+
+	public Sprite armShopClose1;
+	public Sprite armShopClose2;
+
 	// Use this for initialization
 	void Start () {
 
@@ -99,6 +135,11 @@ public class UImanager : MonoBehaviour {
 		thubmnail.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.32f, Screen.height * 0.32f);
 		thubmnail.rectTransform.position = new Vector3 (thubmnail.rectTransform.sizeDelta .x * 0.5f, 
 			(Screen.height - thubmnail.rectTransform.sizeDelta .y * 0.5f),thubmnail.rectTransform.position.z);
+
+		cameraThubmnailPoint = (Image)Instantiate (thubmnailPoint);
+		cameraThubmnailPoint.GetComponent<Transform> ().SetParent (mainUI.GetComponent<Transform> (), true);
+		cameraThubmnailPoint.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.01f, Screen.height * 0.01f);
+		cameraThubmnailPoint.sprite = cameraThubmnailBg;
 
 		fire.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.12f, Screen.height * 0.12f);
 		fire.rectTransform.position = new Vector3 ((Screen.width - fire.rectTransform.sizeDelta .x * 0.56f), 
@@ -137,11 +178,76 @@ public class UImanager : MonoBehaviour {
 			itemImgStys [i].normal.background = armImgs [i];
 		}
 
+		touchMove.rectTransform.sizeDelta = new Vector2 ( (Screen.width - Screen.height * 0.64f), Screen.height);
+		touchMove.rectTransform.position = new Vector3 ((Screen.height * 0.32f + touchMove.rectTransform.sizeDelta .x * 0.5f), 
+			touchMove.rectTransform.sizeDelta .y * 0.5f ,touchMove.rectTransform.position.z);
+
+		initArmShop ();
 
 		InvokeRepeating("updateThubmnail", 0.5f, 0.5f);
 
 		InvokeRepeating("updateMissileAim", 0.2f, 0.2f);
 		InvokeRepeating("clearNullThubmnail", 2f, 2f);
+	}
+
+	void initArmShop(){
+		armShopPanel.rectTransform.sizeDelta = new Vector2 (Screen.height * 1.12f, Screen.height * 0.7f);
+		armShopPanel.rectTransform.position = new Vector3 (
+			(armShopPanel.rectTransform.sizeDelta .x * 0.5f + (Screen.width - Screen.height * 1.12f)*0.5f), 
+			(Screen.height - armShopPanel.rectTransform.sizeDelta .y * 0.5f - Screen.height * 0.15f), 
+			armShopPanel.rectTransform.position.z);
+
+		armShopTitle.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.28435f, Screen.height * 0.11f);
+		armShopTitle.rectTransform.position = new Vector3 (
+			(armShopPanel.rectTransform.position.x), 
+			(armShopPanel.rectTransform.position.y + (armShopPanel.rectTransform.sizeDelta.y - armShopTitle.rectTransform.sizeDelta.y)*0.5f), 
+			armShopTitle.rectTransform.position.z);
+
+		armShopClose.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.19682f, Screen.height * 0.11f);
+		armShopClose.rectTransform.position = new Vector3 (
+			(armShopPanel.rectTransform.position.x + (armShopPanel.rectTransform.sizeDelta.x - armShopClose.rectTransform.sizeDelta.x)*0.5f - Screen.height * 0.01f), 
+			(armShopPanel.rectTransform.position.y + (armShopPanel.rectTransform.sizeDelta.y - armShopClose.rectTransform.sizeDelta.y)*0.5f - Screen.height * 0.01f), 
+			armShopClose.rectTransform.position.z);
+
+		RectTransform armShopScrollViewRect = armShopScrollView.GetComponent<RectTransform> ();
+		armShopScrollViewRect.sizeDelta = new Vector2 (Screen.height * 1.11f, Screen.height * 0.56f);
+		armShopScrollViewRect.position = new Vector3 (
+			(armShopPanel.rectTransform.position.x), 
+			(armShopPanel.rectTransform.position.y - (armShopPanel.rectTransform.sizeDelta.y - armShopScrollViewRect.sizeDelta.y)*0.5f + Screen.height * 0.01f), 
+			armShopScrollViewRect.position.z);
+
+		RectTransform armShopContentRect = armShopContent.GetComponent<RectTransform> ();
+		armShopContentRect.sizeDelta = new Vector2 (armShopContentRect.sizeDelta.x, (armShopItemImgHeight*10 + armShopItemSpace*9));
+
+		for(int i = 0; i< armShopImgs.Length; i++){
+			armShopImgs[i] = (Image)Instantiate (thubmnailPoint);
+			armShopImgs[i].GetComponent<Transform> ().SetParent (armShopContent.GetComponent<Transform> (), true);
+			armShopImgs[i].rectTransform.sizeDelta = new Vector2 (armShopItemImgWidth, armShopItemImgHeight);
+			armShopImgs [i].rectTransform.position = new Vector3 (
+				(armShopContentRect.position.x - ((armShopScrollViewRect.sizeDelta.x - armShopImgs [i].rectTransform.sizeDelta.x)*0.5f) + Screen.height * 0.05f), 
+				(armShopContentRect.position.y - armShopItemImgHeight *0.5f - (armShopItemImgHeight + armShopItemSpace)*i),
+				armShopImgs[i].rectTransform.position.z);
+			armShopImgs[i].sprite = armShopBgs[i];
+
+			armShopPrices[i] = (Text)Instantiate (text);
+			armShopPrices[i].GetComponent<Transform> ().SetParent (armShopContent.GetComponent<Transform> (), true);
+			armShopPrices[i].rectTransform.sizeDelta = new Vector2 (armShopItemPriceWidth, armShopItemPriceHeight);
+			armShopPrices [i].rectTransform.position = new Vector3 (
+				(armShopContentRect.position.x - ((armShopScrollViewRect.sizeDelta.x - armShopPrices [i].rectTransform.sizeDelta.x)*0.5f) + Screen.height * 0.45f), 
+				(armShopContentRect.position.y - armShopItemImgHeight *0.5f - (armShopItemImgHeight + armShopItemSpace)*i),
+				armShopImgs[i].rectTransform.position.z);
+			string str = GameInit.prices[armNames[i]] + "/" + GameInit.MyMoney.ToString ();
+			armShopPrices [i].text = str;
+
+
+		}
+
+		//armShopScrollBarRect.sizeDelta.y = 100;
+
+
+		//armShopScrollViewRect.sizeDelta = new Vector2 (armShopScrollViewRect.sizeDelta.x, 1000);
+		//armShopScrollViewRect.sizeDelta = new Vector2 (100, 1000);
+
 	}
 
 	void Update(){
@@ -150,9 +256,16 @@ public class UImanager : MonoBehaviour {
 			listenerScreenTap ();
 		}
 
-		if(isCamreaMoveTo){
-			Camera.main.transform.position = Vector3.Slerp (new Vector3(Camera.main.transform.position.x, 11000, 
-					Camera.main.transform.position.z), currentCamreaMoveTo, Time.deltaTime * 2);
+		if(planMove.player == null && cameraThubmnailPoint.enabled){
+			updatyXZ (Camera.main.transform, cameraThubmnailPoint);
+		}
+
+		if(isCamreaMoveTo || isCamreaHeightMove){
+			Camera.main.transform.position = Vector3.Slerp (new Vector3(Camera.main.transform.position.x, frontCameraY, 
+				Camera.main.transform.position.z), 
+				new Vector3(currentCamreaMoveTo.x, cameraY, currentCamreaMoveTo.z), Time.deltaTime * 2);
+			//Camera.main.transform.position = Vector3.Slerp (Camera.main.transform.position, currentCamreaMoveTo, Time.deltaTime * 2);
+
 		}
 
 		if(planMove.player != null && "a10".Equals(playerType) && isFireDown){
@@ -179,6 +292,7 @@ public class UImanager : MonoBehaviour {
 				touch1 = Input.touches [0].position;
 				lastTouch1Time = Time.time;
 				touch1Ended = false;
+				//Debug.Log ("gqb------>touch Began x: " + Input.touches [0].position.x + "; y: " + Input.touches [0].position.y);
 			}
 			if (Input.touchCount > 1 && Input.touches [1].phase == TouchPhase.Began) {
 				touch2 = Input.touches [1].position;
@@ -186,10 +300,13 @@ public class UImanager : MonoBehaviour {
 				touch2Ended = false;
 			}
 			if (Input.touchCount > 0 && Input.touches [0].phase == TouchPhase.Ended && !touch1Ended) {
+				//Debug.Log ("gqb------>end touch x: " + Input.touches [0].position.x + "; y: " + Input.touches [0].position.y);
 				onEndTouch (Input.touches [0].position);
+				touch1Ended = true;
 			}
 			if (Input.touchCount > 1 && Input.touches [1].phase == TouchPhase.Ended && !touch2Ended) {
 				onEndTouch (Input.touches [1].position);
+				touch2Ended = true;
 			}
 		} else {
 			if(Input.GetMouseButtonDown(0)){
@@ -201,18 +318,93 @@ public class UImanager : MonoBehaviour {
 					RaycastHit hit;
 					if(Physics.Raycast(ray, out hit)){
 						Vector3 v3 = hit.point;
-						Debug.Log ("gqb------>touchworld x: " + v3.x + "; y: " + v3.y + "; z: " + v3.z );
+						onScreenHit (hit);
+						//Debug.Log (hit.collider.transform.name + "gqb------>touchworld x: " + v3.x + "; y: " + v3.y + "; z: " + v3.z );
 					}
 				}
 			}
 		}
 	}
 
-	void onEndTouch(Vector2 touch){
-		if((touch - touch1).magnitude < 1 && (Time.time - lastTouch1Time) < 0.5f){
-			Debug.Log ("gqb------>touch1");
-		}else if((touch - touch2).magnitude < 1 && (Time.time - lastTouch2Time) < 0.5f){
-			Debug.Log ("gqb------>touch2");
+	void onEndTouch(Vector2 tempTouch){
+		bool needRay = false;
+		if((tempTouch - touch1).magnitude < 5 && (Time.time - lastTouch1Time) < 0.3f){
+			needRay = true;
+		}else if((tempTouch - touch2).magnitude < 5 && (Time.time - lastTouch2Time) < 0.3f){
+			needRay = true;
+		}
+		if(needRay){
+			Ray ray = Camera.main.ScreenPointToRay (new Vector3(tempTouch.x, tempTouch.y, 0));
+			RaycastHit hit;
+			if(Physics.Raycast(ray, out hit)){
+				Vector3 v3 = hit.point;
+				onScreenHit (hit);
+				//Debug.Log (hit.collider.transform.name + "gqb------>touchworld x: " + v3.x + "; y: " + v3.y + "; z: " + v3.z );
+			}
+		}
+	}
+
+	void onScreenHit(RaycastHit hit){
+
+		Vector3 hitPoint = new Vector3 (hit.point.x, 6000, hit.point.z);
+
+		if (!hit.transform.root.CompareTag ("Untagged") ||
+		   (hit.transform.root.childCount > 0 && !hit.transform.root.GetChild (0).CompareTag ("Untagged"))) {
+			Transform root = hit.transform.root.GetChild(0);
+			PojulObject mPojulObject = root.GetComponent<PojulObject> ();
+			if(mPojulObject == null && hit.transform != null){
+				root = hit.transform;
+				mPojulObject = root.gameObject.GetComponent<PojulObject> ();
+			}
+			if(mPojulObject != null){
+				if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
+					selectedTra.GetComponent<PojulObject> ().isSelected = false;
+				}
+				selectedTra = root;
+				mPojulObject.isSelected = true;
+				//Debug.Log (hit.collider.transform.name + "gqb------>onScreenHit1");
+			}
+		} else {
+			Collider[] colliders = Physics.OverlapSphere (hitPoint, 7000);
+			float minDistance = 100000;
+			Transform selected = null;
+			for (int i = 0; i < colliders.Length; i++) {
+				if (colliders [i].transform.root.childCount <= 0) {
+					continue;
+				}
+				Transform tempTransform = colliders [i].transform.root.GetChild (0);
+				string tag = tempTransform.tag;
+				if (tag.Equals ("Untagged")) {
+					if (colliders [i].transform == null) {
+						continue;
+					}
+					if (colliders [i].transform.tag.Equals ("Untagged")) {
+						continue;
+					}
+					tempTransform = colliders [i].transform;
+				}
+				tag = tempTransform.tag;
+				string[] strs = tempTransform.tag.Split ('_');
+				//Debug.Log (tag + "gqb------>onScreenHit0000");
+				if (strs.Length == 2) {
+					float tempDistance = (tempTransform.position - hit.point).magnitude;
+					if (tempDistance < minDistance) {
+						selected = tempTransform;
+						minDistance = tempDistance;
+					}
+				}
+			}
+			if(selected != null){
+				if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
+					selectedTra.GetComponent<PojulObject> ().isSelected = false;
+				}
+				if(selected.GetComponent<PojulObject>()){
+					selectedTra = selected;
+					selected.GetComponent<PojulObject> ().isSelected = true;
+					//Debug.Log (selected.name + "gqb------>onScreenHit2");
+				}
+			}
+
 		}
 	}
 
@@ -249,7 +441,11 @@ public class UImanager : MonoBehaviour {
 				if(mPojulObject.playerType == 0){
 					tempImage.sprite = yellowThubmnailPoint;
 				}else if(mPojulObject.playerType == 1){
-					tempImage.sprite = blueThubmnailPoint;
+					if (mPojulObject.isSelected) {
+						tempImage.sprite = selectedThubmnailPoint;
+					} else {
+						tempImage.sprite = blueThubmnailPoint;
+					}
 				}
 				updatyXZ (GameInit.myThumbnailObjs[i], 0);
 			}
@@ -297,10 +493,22 @@ public class UImanager : MonoBehaviour {
 						enemythubmnailPoints.Remove (allNearEnemyObj.GetHashCode());
 					}
 				}
-
 			}
 		}
 
+	}
+
+	void updatyXZ(Transform key, Image img){
+		float x = key.position.x;
+		float y = key.position.z;
+		if(Mathf.Abs(x) > 120000 || Mathf.Abs(y) > 120000){
+			return;
+		}
+		float pointX = 0.0f;
+		float pointY = 0.0f;
+		pointX = thubmnail.rectTransform.sizeDelta.x * (120000 + x)*1.0f / 240000;
+		pointY =Screen.height - thubmnail.rectTransform.sizeDelta.y * (120000 - y)*1.0f / 240000;
+		img.rectTransform.position = new Vector3(pointX, pointY, img.rectTransform.position.z);
 	}
 
 	void updatyXZ(GameObject key, int type){
@@ -373,6 +581,11 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void AcceleratePointerUp(BaseEventData data){
+		if(planMove.player == null  && accelerate.enabled){
+			//accelerate.value = accelerate.maxValue * 0.5f;
+			isCamreaHeightMove = false;
+			return;
+		}
 		PointerEventData data1 = data as PointerEventData;
 		if(accelerate != null && accelerate.enabled){
 			accelerate.value = accelerate.maxValue * 0.5f;
@@ -382,6 +595,18 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void AcceleratePointerMove(BaseEventData data){
+		if(planMove.player == null){
+			//Debug.Log ("gqb------>AcceleratePointerMove dy: " + dy);
+			//if(/*dy > 200 && */dy < 21800){
+			isCamreaHeightMove = true;
+			if(!isCamreaMoveTo){
+				currentCamreaMoveTo = new Vector3 (Camera.main.transform.position.x, cameraY, Camera.main.transform.position.z);
+			}
+			frontCameraY = cameraY;
+			cameraY = accelerate.value * 120 + 100;
+
+			return;
+		}
 		PointerEventData data1 = data as PointerEventData;
 		if(accelerate != null && accelerate.enabled){
 			planMove.accelerate = planMove.maxAccelerate * (accelerate.value - accelerate.maxValue * 0.5f)  /(accelerate.maxValue * 0.5f);
@@ -550,6 +775,7 @@ public class UImanager : MonoBehaviour {
 
 	public void OnThubmnailDown(BaseEventData rawdata){
 		MainCameraMoveTo (((PointerEventData)rawdata).position);
+		Camera.main.transform.position = new Vector3 (Camera.main.transform.position.x, cameraY, Camera.main.transform.position.z);
 		Camera.main.transform.rotation =  Quaternion.Euler(90 , 
 			0,
 			0);
@@ -557,6 +783,7 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void OnThubmnailMove(BaseEventData rawdata){
+		isCamreaMoveTo = true;
 		if((Time.time - lastCamreaMoveToTime) > 0.05){
 			MainCameraMoveTo (((PointerEventData)rawdata).position);
 			lastCamreaMoveToTime = Time.time;
@@ -575,10 +802,35 @@ public class UImanager : MonoBehaviour {
 		}
 		float distance = (Camera.main.transform.position - new Vector3 (x, Camera.main.transform.position.y, z)).magnitude;
 		if(distance > 200){
-			currentCamreaMoveTo = new Vector3 (x, 11000, z);
+			//Debug.Log ("gqb------>y: " + Camera.main.transform.position.y);
+			currentCamreaMoveTo = new Vector3 (x, cameraY, z);
 		}
-
 	}
+
+	public void OnTouchMoveDown(BaseEventData rawdata){
+		if(planMove.player != null){
+			return;
+		}
+		touchMoveDown = ((PointerEventData)rawdata).position;
+	}
+
+	public void OnTouchMoveMove(BaseEventData rawdata){
+		if(planMove.player != null){
+			return;
+		}
+		float dx = ((PointerEventData)rawdata).position.x - touchMoveDown.x;
+		float dz = ((PointerEventData)rawdata).position.y - touchMoveDown.y;
+		Camera.main.transform.position = new Vector3 ((Camera.main.transform.position.x - dx*1.5f),
+			cameraY, (Camera.main.transform.position.z - dz*1.5f));
+		touchMoveDown = ((PointerEventData)rawdata).position;
+	}
+
+	public void OnTouchMoveUp(BaseEventData rawdata){
+		if(planMove.player != null){
+			return;
+		}
+	}
+
 
 	void updateMissileAim(){
 		if (planMove.player == null) {
@@ -694,6 +946,24 @@ public class UImanager : MonoBehaviour {
 		}
 		GUI.EndScrollView();
 
+	}
+
+	public void OnArmShopCloseClick(){
+		
+	}
+
+	public void OnArmShopCloseDown(){
+		if(armShopClose.enabled){
+			armShopClose.sprite = armShopClose2;
+		}
+	}
+
+	public void OnArmShopCloseUp(){
+		armShopClose.sprite = armShopClose1;
+	}
+
+	void onArmShopShow(){
+		
 	}
 
 }

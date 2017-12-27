@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PojulObject : MonoBehaviour {
 
+	public bool isSelected = false;
+
 	public bool isDestoryed = false;
 	public bool isPanDestoryed = false;
 
