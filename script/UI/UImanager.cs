@@ -71,65 +71,47 @@ public class UImanager : MonoBehaviour {
 	private float cameraY = 12000;
 	private float frontCameraY = 12000;
 	private Transform selectedTra;
+	private float scrollPos = 0.0f;
 
 	private bool showShopWin = false;
-	private Rect shopWinRect = new Rect (Screen.width*2.5f/10, Screen.height*2/10, Screen.width*5/10, Screen.height*6/10);
-	private GUIStyle shopWinStyle;
-	private Vector2 scrollPosition = Vector2.zero;
-	private float closeBtX = Screen.width*5/10-Screen.height*2/10;
-	private float closeBtY = 0;
-	private float closeBtWidth = Screen.height*2/10;
-	private float closeBtHeight = Screen.height / 10;
-
-	private float scollViewX = 0;
-	private float scollViewY = Screen.height*1/10;
-	private float scollViewWidth = Screen.width*5f/10;
-	private float scollViewHeight = Screen.height*6/10;
-	private Rect scollViewRect = new Rect(0, 0, Screen.width*6/10, Screen.height*18.0f/10);
-
-	private float itemImgX = Screen.height/20;
-	private float itemImgWidth = Screen.height * 3 / 10;
-	private float itemImgHeight = Screen.height * 1.6f / 10;
-	private float itemSpace = Screen.height * 1.7f / 10;
-	public Texture2D[] armImgs = new Texture2D[10];
 	public string[] armNames = new string[10];
-	private GUIStyle[] itemImgStys = new GUIStyle[10];
-	private float itemBuyX = Screen.width * 5 / 10 - Screen.height * 3 / 10;
-	private float itemBuyWidth = Screen.height*2/10;
-	private float itemBuyheight = Screen.height/10;
-	private float itemPricex = Screen.height * 7f / 20;
-	private float itemPricewidth = Screen.height * 2 / 10;
-	private float itemPriceheight = Screen.height * 1.6f / 10;
-	public string[] buyStatus = new string[3];
-
 	private float armShopItemImgHeight = Screen.height * 0.16f;
 	private float armShopItemImgWidth = Screen.height * 0.3f;
 	private float armShopItemPriceHeight = Screen.height * 0.16f;
-	private float armShopItemPriceWidth = Screen.height * 0.2f;
-
-	private float armShopItemBuyheight = Screen.height* 0.1f;
+	private float armShopItemPriceWidth = Screen.height * 0.48f;
+	private float armShopItemBuyheight = Screen.height* 0.09f;
+	private float armShopItemBuywidth = Screen.height* 0.17f;
 	private float armShopItemSpace = Screen.height * 0.01f;
-
 	public Image armShopPanel;
 	public Image armShopTitle;
 	public Image armShopClose;
 	public GameObject armShopScrollView;
 	public GameObject armShopContent;
-
 	public Image[] armShopImgs = new Image[10];
 	public Text[] armShopPrices = new Text[10];
-	public Image[] armShopBuys = new Image[10];
+	public List<Image> armShopBuys = new List<Image>();
+	private List<GameObject> armShopBuyObjs = new List<GameObject>();
 	public Sprite[] armShopBgs = new Sprite[10];
-
-
-	//public ScrollView
+	private bool[] couldArmBuy = new bool[10];
 
 	public Sprite armShopClose1;
 	public Sprite armShopClose2;
+	public Sprite armShopBuy1;
+	public Sprite armShopBuy2;
+	public Sprite armShopBuy3;
+
+
+	private bool showArmInfo = false;
+	public Image armInfoPanel;
+	public Image armInfoClose;
+	public Image armInfoTitle;
+	public Image armInfoContent;
+
+	public Sprite armInfoClose1;
+	public Sprite armInfoClose2;
 
 	// Use this for initialization
 	void Start () {
-
 		fireAim = fireAimPre;
 
 		thubmnail.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.32f, Screen.height * 0.32f);
@@ -172,17 +154,13 @@ public class UImanager : MonoBehaviour {
 		mselect.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.11f, Screen.height * 0.11f);
 		mselect.rectTransform.position = new Vector3 (mselect.rectTransform.sizeDelta .x * 0.5f, 
 			mselect.rectTransform.sizeDelta .y * 4f,mselect.rectTransform.position.z);
-
-		for (int i = 0; i < armImgs.Length; i++) {
-			itemImgStys [i] = new GUIStyle ();
-			itemImgStys [i].normal.background = armImgs [i];
-		}
-
+		
 		touchMove.rectTransform.sizeDelta = new Vector2 ( (Screen.width - Screen.height * 0.64f), Screen.height);
 		touchMove.rectTransform.position = new Vector3 ((Screen.height * 0.32f + touchMove.rectTransform.sizeDelta .x * 0.5f), 
 			touchMove.rectTransform.sizeDelta .y * 0.5f ,touchMove.rectTransform.position.z);
 
 		initArmShop ();
+		initArmInfo ();
 
 		InvokeRepeating("updateThubmnail", 0.5f, 0.5f);
 
@@ -218,6 +196,7 @@ public class UImanager : MonoBehaviour {
 
 		RectTransform armShopContentRect = armShopContent.GetComponent<RectTransform> ();
 		armShopContentRect.sizeDelta = new Vector2 (armShopContentRect.sizeDelta.x, (armShopItemImgHeight*10 + armShopItemSpace*9));
+		scrollPos = armShopContentRect.position.y;
 
 		for(int i = 0; i< armShopImgs.Length; i++){
 			armShopImgs[i] = (Image)Instantiate (thubmnailPoint);
@@ -236,17 +215,47 @@ public class UImanager : MonoBehaviour {
 				(armShopContentRect.position.x - ((armShopScrollViewRect.sizeDelta.x - armShopPrices [i].rectTransform.sizeDelta.x)*0.5f) + Screen.height * 0.45f), 
 				(armShopContentRect.position.y - armShopItemImgHeight *0.5f - (armShopItemImgHeight + armShopItemSpace)*i),
 				armShopImgs[i].rectTransform.position.z);
-			string str = GameInit.prices[armNames[i]] + "/" + GameInit.MyMoney.ToString ();
-			armShopPrices [i].text = str;
 
+			armShopBuys[i].rectTransform.sizeDelta = new Vector2 (armShopItemBuywidth, armShopItemBuyheight);
+			armShopBuys [i].rectTransform.position = new Vector3 (
+				(armShopContentRect.position.x + ((armShopScrollViewRect.sizeDelta.x - armShopBuys [i].rectTransform.sizeDelta.x)*0.5f) - Screen.height * 0.05f), 
+				(armShopContentRect.position.y - armShopItemImgHeight *0.5f - (armShopItemImgHeight + armShopItemSpace)*i),
+				armShopBuys[i].rectTransform.position.z);
 
+			EventTriggerListener.Get(armShopBuys[i].gameObject).onClick = OnArmShopItemClick;
+			EventTriggerListener.Get(armShopBuys[i].gameObject).onDown = OnArmShopItemDown;
+			EventTriggerListener.Get(armShopBuys[i].gameObject).onUp = OnArmShopItemUp;
+			armShopBuyObjs.Add (armShopBuys[i].gameObject);
+
+			couldArmBuy [i] = false;
 		}
+		armShopPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+	}
 
-		//armShopScrollBarRect.sizeDelta.y = 100;
+	void initArmInfo(){
+		armInfoPanel.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.9f, Screen.height * 0.55f);
+		armInfoPanel.rectTransform.position = new Vector3 (
+			Screen.width * 0.5f,
+			Screen.height * 0.5f, 
+			armInfoPanel.rectTransform.position.z);
+		
+		armInfoClose.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.17582f, Screen.height * 0.09f);
+		armInfoClose.rectTransform.position = new Vector3 (
+			(armInfoPanel.rectTransform.position.x + (armInfoPanel.rectTransform.sizeDelta.x - armInfoClose.rectTransform.sizeDelta.x)*0.5f - Screen.height * 0.005f), 
+			(armInfoPanel.rectTransform.position.y + (armInfoPanel.rectTransform.sizeDelta.y - armInfoClose.rectTransform.sizeDelta.y)*0.5f - Screen.height * 0.005f), 
+			armInfoClose.rectTransform.position.z);
 
+		armInfoTitle.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.2425f, Screen.height * 0.1f);
+		armInfoTitle.rectTransform.position = new Vector3 (
+			(armInfoPanel.rectTransform.position.x), 
+			(armInfoPanel.rectTransform.position.y + (armInfoPanel.rectTransform.sizeDelta.y - armInfoTitle.rectTransform.sizeDelta.y)*0.5f), 
+			armInfoTitle.rectTransform.position.z);
 
-		//armShopScrollViewRect.sizeDelta = new Vector2 (armShopScrollViewRect.sizeDelta.x, 1000);
-		//armShopScrollViewRect.sizeDelta = new Vector2 (100, 1000);
+		armInfoContent.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.87f, Screen.height * 0.44f);
+		armInfoContent.rectTransform.position = new Vector3 (
+			(armInfoPanel.rectTransform.position.x), 
+			(armInfoPanel.rectTransform.position.y - (armInfoPanel.rectTransform.sizeDelta.y - armInfoContent.rectTransform.sizeDelta.y)*0.5f + Screen.height * 0.012f), 
+			armInfoContent.rectTransform.position.z);
 
 	}
 
@@ -357,11 +366,7 @@ public class UImanager : MonoBehaviour {
 				mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 			}
 			if(mPojulObject != null){
-				if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
-					selectedTra.GetComponent<PojulObject> ().isSelected = false;
-				}
-				selectedTra = root;
-				mPojulObject.isSelected = true;
+				onArmSelected (root);
 				//Debug.Log (hit.collider.transform.name + "gqb------>onScreenHit1");
 			}
 		} else {
@@ -395,17 +400,30 @@ public class UImanager : MonoBehaviour {
 				}
 			}
 			if(selected != null){
-				if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
-					selectedTra.GetComponent<PojulObject> ().isSelected = false;
-				}
-				if(selected.GetComponent<PojulObject>()){
-					selectedTra = selected;
-					selected.GetComponent<PojulObject> ().isSelected = true;
-					//Debug.Log (selected.name + "gqb------>onScreenHit2");
-				}
+				onArmSelected (selected);
 			}
 
 		}
+	}
+
+	void onArmSelected(Transform tra){
+		if(showShopWin){
+			return;
+		}
+		if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
+			selectedTra.GetComponent<PojulObject> ().isSelected = false;
+		}
+		if(tra.GetComponent<PojulObject>()){
+			selectedTra = tra;
+			tra.GetComponent<PojulObject> ().isSelected = true;
+		}
+
+		showArmInfos ();
+
+	}
+
+	void showArmInfos(){
+		
 	}
 
 	void updateThubmnail(){
@@ -449,17 +467,10 @@ public class UImanager : MonoBehaviour {
 				}
 				updatyXZ (GameInit.myThumbnailObjs[i], 0);
 			}
-
-			//enemys
-			//foreach(Transform mTransform in GameInit.allNearEnemys_1.Keys){
-
-			//}
+				
 			int[] keys = new int[GameInit.allNearEnemys_0.Keys.Count];
 			GameInit.allNearEnemys_0.Keys.CopyTo (keys, 0);
 			for (int i = 0; i < keys.Length; i++) {
-				//Debug.Log (GameInit.allNearEnemys_0.Count + "; gqb------>allNearEnemys_0: " + enemythubmnailPoints.Count);
-				//Debug.Log (GameInit.allNearEnemys_0.Count + "; gqb------>allNearEnemys_0: " + keys[i] + 
-				//"; dt: " + (Time.time - GameInit.allNearEnemys_0[keys[i]]));
 				object[] allNearEnemysObjs = GameInit.allNearEnemys_0 [keys [i]];
 				Transform allNearEnemyTra = (Transform)allNearEnemysObjs [0];
 				if(allNearEnemyTra == null){
@@ -737,6 +748,10 @@ public class UImanager : MonoBehaviour {
 			mselect.sprite = mselect2;
 		} else {
 			mselect.sprite = mselect1;
+			if(selectedTra!= null && selectedTra.GetComponent<PojulObject>()){
+				selectedTra.GetComponent<PojulObject> ().isSelected = false;
+				selectedTra = null;
+			}
 		}
 	}
 
@@ -757,6 +772,9 @@ public class UImanager : MonoBehaviour {
 			return;
 		}
 		showShopWin = true;
+		armShopPanel.rectTransform.localScale = new Vector3 (1, 1, 1);
+		RectTransform tempRectTransform = armShopContent.GetComponent<RectTransform> ();
+		tempRectTransform.position = new Vector3 (tempRectTransform.position.x, scrollPos,tempRectTransform.position.z);
 	}
 
 	public void OnBuyDown(){
@@ -820,8 +838,8 @@ public class UImanager : MonoBehaviour {
 		}
 		float dx = ((PointerEventData)rawdata).position.x - touchMoveDown.x;
 		float dz = ((PointerEventData)rawdata).position.y - touchMoveDown.y;
-		Camera.main.transform.position = new Vector3 ((Camera.main.transform.position.x - dx*1.5f),
-			cameraY, (Camera.main.transform.position.z - dz*1.5f));
+		Camera.main.transform.position = new Vector3 ((Camera.main.transform.position.x - dx*2f),
+			cameraY, (Camera.main.transform.position.z - dz*2f));
 		touchMoveDown = ((PointerEventData)rawdata).position;
 	}
 
@@ -833,6 +851,9 @@ public class UImanager : MonoBehaviour {
 
 
 	void updateMissileAim(){
+
+		updateBuyArmStatus ();
+
 		if (planMove.player == null) {
 			missileAimedTra = null;
 			fireMissile.sprite = fireMissileBg3;
@@ -873,6 +894,31 @@ public class UImanager : MonoBehaviour {
 
 	}
 
+	void updateBuyArmStatus(){
+		
+		if(showShopWin){
+			for(int i = 0; i < armShopImgs.Length; i++){
+				string str = GameInit.prices[armNames[i]] + "/" + GameInit.MyMoney.ToString ();
+				if ((int)GameInit.currentInstance [("0_" + armNames [i])] >= (int)GameInit.maxInstance [("0_" + armNames [i])]) {
+					couldArmBuy [i] = false;
+					str = str + " max number";
+					armShopBuys [i].sprite = armShopBuy3;
+				} else if ((int)GameInit.prices [armNames [i]] > GameInit.MyMoney) {
+					couldArmBuy [i] = false;
+					str = str + " not enough gold";
+					armShopBuys [i].sprite = armShopBuy3;
+				} else {
+					couldArmBuy [i] = true;
+					if(armShopBuys [i].sprite == armShopBuy3){
+						armShopBuys [i].sprite = armShopBuy1;
+					}
+				}
+				armShopPrices [i].text = str;
+			}
+		}
+	}
+
+
 	float[] getMissileAimRotation(Transform target){
 		if(planMove.player == null){
 			return new float[]{ 1000, 1000 };
@@ -904,52 +950,9 @@ public class UImanager : MonoBehaviour {
 		}
 	}
 
-	void OnGUI(){
-		draw ();
-	}
-
-	void draw(){
-		if(showShopWin){
-			shopWinRect = GUI.Window (1, shopWinRect, shopWin, "arms shop");
-		}
-	}
-
-	void shopWin(int shopWin){
-		if(GUI.Button(new Rect(closeBtX, 0, closeBtWidth, closeBtHeight), "close")){
-			showShopWin = false;
-		}
-
-		GUI.skin.scrollView = shopWinStyle;
-		scrollPosition = GUI.BeginScrollView(new Rect(scollViewX, scollViewY, scollViewWidth, scollViewHeight),
-			scrollPosition, scollViewRect);
-
-		for(int i = 0;i< armImgs.Length; i++){
-			string str = GameInit.prices[armNames[i]] + "/" + GameInit.MyMoney.ToString ();
-			string buyStr = buyStatus [0];
-			if((int)GameInit.prices[armNames[i]] > GameInit.MyMoney){
-				buyStr = buyStatus [1];
-			}
-			if((int)GameInit.currentInstance[("0_"+armNames[i])] >= (int)GameInit.maxInstance[("0_"+armNames[i])]){
-				buyStr = buyStatus [2];
-			}
-
-			if(GUI.Button(new Rect(itemImgX, itemSpace*i, itemImgWidth, itemImgHeight), "", itemImgStys[i])){
-			}
-			if(GUI.Button(new Rect(itemPricex, itemSpace*i, itemPricewidth, itemPriceheight), str)){
-			}
-			if(GUI.Button(new Rect(itemBuyX, (itemSpace*i + Screen.height * 0.3f / 10), itemBuyWidth, itemBuyheight), buyStr)){
-				if(buyStatus [0].Equals(buyStr)){
-					GameInit.instanceGameobject ("0", armNames[i]);
-					GameInit.MyMoney = GameInit.MyMoney - (int)GameInit.prices [armNames [i]];
-				}
-			}
-		}
-		GUI.EndScrollView();
-
-	}
-
 	public void OnArmShopCloseClick(){
-		
+		armShopPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+		showShopWin = false;
 	}
 
 	public void OnArmShopCloseDown(){
@@ -962,8 +965,41 @@ public class UImanager : MonoBehaviour {
 		armShopClose.sprite = armShopClose1;
 	}
 
-	void onArmShopShow(){
+	public void OnArmShopItemClick(GameObject obj){
+		int index = armShopBuyObjs.IndexOf (obj);
+		if(index < 0 || !couldArmBuy[index]){
+			return;
+		}
+		GameInit.instanceGameobject ("0", armNames[index]);
+		GameInit.MyMoney = GameInit.MyMoney - (int)GameInit.prices [armNames [index]];
+	}
+
+	public void OnArmShopItemDown(GameObject obj){
+		int index = armShopBuyObjs.IndexOf (obj);
+		if(index < 0 || !couldArmBuy[index]){
+			return;
+		}
+		armShopBuys [index].sprite = armShopBuy2;
+	}
+
+	public void OnArmShopItemUp(GameObject obj){
+		int index = armShopBuyObjs.IndexOf (obj);
+		if(index < 0 || !couldArmBuy[index]){
+			return;
+		}
+		armShopBuys [index].sprite = armShopBuy1;
+	}
+
+	public void OnArmInfoCloseClick(){
 		
+	}
+
+	public void OnArmInfoCloseDown(){
+		armInfoClose.sprite = armInfoClose2;
+	}
+
+	public void OnArmInfoCloseUp(){
+		armInfoClose.sprite = armInfoClose1;
 	}
 
 }
