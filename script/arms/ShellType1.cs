@@ -17,7 +17,7 @@ public class ShellType1 : PojulObject {
 	// Update is called once per frame
 	void Update () {
 		if(isShoot){
-			transform.GetComponent<Rigidbody> ().AddForce (transform.up*120.0f);
+			transform.GetComponent<Rigidbody> ().AddForce (transform.up*125.0f);
 			transform.position = transform.position + transform.forward * startSpeed * Time.deltaTime;
 			startSpeed = startSpeed - decaySpeed * Time.deltaTime;
 		}

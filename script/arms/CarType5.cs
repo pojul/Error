@@ -38,7 +38,7 @@ public class CarType5 : PojulObject {
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 
-	private RadiusArea mPatrolArea;
+	public RadiusArea mPatrolArea;
 
 	private Transform target;
 
@@ -374,12 +374,14 @@ public class CarType5 : PojulObject {
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
 				DestoryAll (collision.contacts[0].point, 120000.0f);
+				destoryData ();
 				return;
 			}
 		}else if(type == 3){
 			isDestoryed = true;
 			isPanDestoryed = true;
 			DestoryAll (collision.contacts[0].point, 120000.0f);
+			destoryData ();
 			return;
 		}else if (type == 4) {
 			sliderHealth.value = sliderHealth.value - 2.6f;
@@ -393,16 +395,13 @@ public class CarType5 : PojulObject {
 				bomb2.transform.parent = transform;
 
 				DestoryAll (transform.position, 10000.0f);
+				destoryData ();
 				return;
 			}
 		}
 	}
 
 	void DestoryAll(Vector3 point, float power){
-
-		GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMountMissle;
-		currentMountMissle = 0;
-
 		mainTransform_lod0.parent = null;
 		mainTransform_lod1.parent = mainTransform_lod0;
 		mainTransform_lod2.parent = mainTransform_lod0;
@@ -452,7 +451,11 @@ public class CarType5 : PojulObject {
 		if(aim != null){
 			Destroy (aim.gameObject);
 		}
+	}
 
+	public void destoryData(){
+		GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMountMissle;
+		currentMountMissle = 0;
 		if("0".Equals(playerId)){
 			if (GameInit.Car5Area0.ContainsValue(this.gameObject)) {
 				GameInit.Car5Area0.Remove (mPatrolArea.areaId);
@@ -472,10 +475,9 @@ public class CarType5 : PojulObject {
 		if("0".Equals(playerId) && GameInit.myThumbnailObjs.Contains(transform.gameObject)){
 			GameInit.myThumbnailObjs.Remove (transform.gameObject);
 		}
-
 	}
 
-	void destoryAll(){
+	public void destoryAll(){
 
 		if(mainTransform_lod0 != null){
 			Destroy (mainTransform_lod0.gameObject);

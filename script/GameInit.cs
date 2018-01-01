@@ -140,11 +140,11 @@ public class GameInit  : MonoBehaviour {
 		progress1 = (Texture2D)Resources.Load ("icon/progress1/progress1c");
 		progress2 = (Texture2D)Resources.Load ("icon/progress1/progress1d");
 
-		prices.Add ("a10", 1);
-		prices.Add ("car2", 1);//6
-		prices.Add ("car3", 1);//21
+		prices.Add ("a10", 8);
+		prices.Add ("car2", 4);//6
+		prices.Add ("car3", 6);//21
 		prices.Add ("car4", 1);//23
-		prices.Add ("car5", 1);//28
+		prices.Add ("car5", 6);//28
 		prices.Add ("car6", 20);
 		prices.Add ("missile1", 1);//33
 		prices.Add ("missile2", 1);//29

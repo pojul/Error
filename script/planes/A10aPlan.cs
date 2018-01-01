@@ -37,7 +37,7 @@ public class A10aPlan : PojulObject {
 	private GameObject navCube;
 	private UnityEngine.AI.NavMeshAgent nav;
 
-	private RadiusArea mPatrolArea;
+	public RadiusArea mPatrolArea;
 	private RadiusArea mAttackPatrolArea;
 
 	private Transform target;
@@ -169,6 +169,8 @@ public class A10aPlan : PojulObject {
 			}
 
 		}else if(playerType == 0){
+			navCube.transform.position = new Vector3 (transform.position.x ,navCube.transform.position.y, transform.position.z);
+			navCube.transform.rotation = transform.rotation;
 			planMove.currentMountMissle = currentMountMissle;
 			//Debug.Log ("gqb------>fireAim: " + UImanager.fireAim);
 		}
@@ -222,6 +224,10 @@ public class A10aPlan : PojulObject {
 			sliderHealth.GetComponent<RectTransform> ().sizeDelta = new Vector2(0,0);
 			if(nav != null){
 				nav.enabled = false;
+				transform.rotation = navCube.transform.rotation;
+				PlanControls.newPoint3Rolation = -(transform.rotation.eulerAngles.x + 360);
+				PlanControls.newPoint1Rolation = transform.rotation.eulerAngles.y;
+				PlanControls.newPoint2Rolation = -(int)(transform.rotation.eulerAngles.z + 360);
 			}
 			if(mAudioSource != null){
 				mAudioSource.volume = 0.1f;
@@ -757,7 +763,13 @@ public class A10aPlan : PojulObject {
 		if(aim != null){
 			Destroy (aim.gameObject);
 		}
+		destoryData ();
 
+		Invoke ("destoryAll", 40);
+
+	}
+
+	public void destoryData(){
 		if(GameInit.currentInstance.ContainsKey((string)tag)){
 			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
 		}
@@ -771,12 +783,9 @@ public class A10aPlan : PojulObject {
 		if(playerType == 0){
 			planMove.player = null;
 		}
-
-		Invoke ("destoryAll", 40);
-
 	}
 
-	void destoryAll(){
+	public void destoryAll(){
 		Destroy (navCube);
 		Destroy (transform_lod0.gameObject);
 		Destroy (this.gameObject);

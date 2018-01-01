@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class planMove : MonoBehaviour {
 	
-	public static float speed = 1000;
+	public static float speed;
 	public static Transform player;
-	public static int currentMountMissle = 0;
+	public static int currentMountMissle;
 
 	public static List<Transform> nearEnemy = new List<Transform>();
 
 	//public float velocity = 0.0f;
-	public static float maxAccelerate = 1.5f;
-	public static float accelerate = 0.0f;
-	public static float maxSpeed = 1000;
+	public static float maxAccelerate;
+	public static float accelerate;
+	public static float maxSpeed;
 	private float piRate = 2* Mathf.PI/360;
 
 	public static float dzMainCamera = 220;

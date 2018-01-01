@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class PojulObject : MonoBehaviour {
 
+	public bool isSelling = false;
 	public bool isSelected = false;
+	public bool isAttackArmy = false;
 
 	public bool isDestoryed = false;
 	public bool isPanDestoryed = false;

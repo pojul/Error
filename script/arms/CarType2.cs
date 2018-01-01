@@ -316,14 +316,7 @@ public class CarType2 : PojulObject {
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
 				DestoryAll (collision.contacts[0].point, 120000.0f);
-				GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMissiles [0];
-				currentMissiles [0] = 0;
-
-				GameInit.currentInstance [(playerId + "_missile2")] = GameInit.currentInstance [(playerId + "_missile2")] - currentMissiles [1];
-				currentMissiles [1] = 0;
-
-				GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMissiles [2];
-				currentMissiles [2] = 0;
+				destoryData ();
 				return;
 			}
 		}else if(type ==4){
@@ -337,17 +330,38 @@ public class CarType2 : PojulObject {
 				bomb2.transform.parent = transform;
 
 				DestoryAll (transform.position, 10000.0f);
-
-				GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMissiles [0];
-				currentMissiles [0] = 0;
-
-				GameInit.currentInstance [(playerId + "_missile2")] = GameInit.currentInstance [(playerId + "_missile2")] - currentMissiles [1];
-				currentMissiles [1] = 0;
-
-				GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMissiles [2];
-				currentMissiles [2] = 0;
+				destoryData ();
 			}
 		}
+	}
+
+	public void destoryData(){
+		GameInit.currentInstance [(playerId + "_missile1")] = GameInit.currentInstance [(playerId + "_missile1")] - currentMissiles [0];
+		currentMissiles [0] = 0;
+
+		GameInit.currentInstance [(playerId + "_missile2")] = GameInit.currentInstance [(playerId + "_missile2")] - currentMissiles [1];
+		currentMissiles [1] = 0;
+
+		GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMissiles [2];
+		currentMissiles [2] = 0;
+
+		if(GameInit.currentInstance.ContainsKey((string)tag)){
+			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
+		}
+		if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
+			GameInit.gameObjectInstance.Remove (transform.gameObject);
+		}
+		if("0".Equals(playerId) && GameInit.myThumbnailObjs.Contains(transform.gameObject)){
+			GameInit.myThumbnailObjs.Remove (transform.gameObject);
+		}
+
+		if ("0".Equals (playerId)) {
+			GameInit.park0 [park] = 0;
+		}else{
+			GameInit.park1 [park] = 0;
+		}
+
+
 	}
 
 	void DestoryAll(Vector3 point, float power){
@@ -391,19 +405,9 @@ public class CarType2 : PojulObject {
 		if(aim != null){
 			Destroy (aim.gameObject);
 		}
-
-		if(GameInit.currentInstance.ContainsKey((string)tag)){
-			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
-		}
-		if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
-			GameInit.gameObjectInstance.Remove (transform.gameObject);
-		}
-		if("0".Equals(playerId) && GameInit.myThumbnailObjs.Contains(transform.gameObject)){
-			GameInit.myThumbnailObjs.Remove (transform.gameObject);
-		}
 	}
 
-	void destoryAll(){
+	public void destoryAll(){
 		if ("0".Equals (playerId)) {
 			GameInit.MyCar2.Remove (transform);
 		} else if("1".Equals (playerId)){
