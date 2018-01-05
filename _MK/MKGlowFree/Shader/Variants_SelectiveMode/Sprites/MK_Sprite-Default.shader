@@ -18,13 +18,13 @@
 		
 	}
 
-SubShader
+	SubShader
 	{
 		Tags
 		{ 
 			"Queue"="Transparent" 
 			"IgnoreProjector"="True" 
-			"RenderType"="MKGlow" 
+			"RenderType"="MKGlowSprite" 
 			"PreviewType"="Plane"
 			"CanUseSpriteAtlas"="True"
 		}

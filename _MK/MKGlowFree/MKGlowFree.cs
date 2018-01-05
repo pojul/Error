@@ -1,7 +1,14 @@
-using UnityEngine;
-using System;
-using System.Reflection;
+//////////////////////////////////////////////////////
+// MK Glow Free	    			                    //
+//					                                //
+// Created by Michael Kremmel                       //
+// www.michaelkremmel.de | www.michaelkremmel.store //
+// Copyright © 2017 All rights reserved.            //
+//////////////////////////////////////////////////////
+
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace MK.Glow
 {
@@ -10,46 +17,73 @@ namespace MK.Glow
     [RequireComponent(typeof(Camera))]
     public class MKGlowFree : MonoBehaviour
     {
-        public enum MKGlowType
+        #region C
+        private static float[] gaussFilter = new float[11]
         {
-            Selective = 0,
-            Fullscreen = 1,
-        }
-        #region Get/Set
-        private GameObject GlowCameraObject
+            0.50f, 0.5398f, 0.5793f, 0.6179f, 0.6554f, 0.6915f, 0.7257f, 0.7580f, 0.7881f, 0.8159f, 0.8413f
+        };
+        private const float GLOW_INTENSITY_MULT = 12.5f;
+        private const float BLUR_SPREAD_INNTER_MULT = 10.0f;
+        private const float BLUR_SPREAD_OUTER_MULT = 50.0f;
+        #endregion
+
+        #region P
+#if UNITY_EDITOR
+#pragma warning disable 414
+        [SerializeField]
+        private bool showMainBehavior = true;
+        [SerializeField]
+        private bool showInnerGlowBehavior = false;
+#pragma warning restore 414
+#endif
+        private RenderTextureFormat rtFormat = RenderTextureFormat.Default;
+
+        [SerializeField]
+        private Shader blurShader;
+        [SerializeField]
+        private Shader compositeShader;
+        [SerializeField]
+        private Shader selectiveRenderShader;
+
+        private Material compositeMaterial;
+        private Material blurMaterial;
+
+        [SerializeField]
+        private Camera Cam
         {
-            get
-            {
-                if (!glowCameraObject)
-                {
-                    glowCameraObject = new GameObject("glowCameraObject");
-                    glowCameraObject.hideFlags = HideFlags.HideAndDontSave;
-                    glowCameraObject.AddComponent<Camera>();
-                    GlowCamera.orthographic = false;
-                    GlowCamera.enabled = false;
-                    GlowCamera.renderingPath = RenderingPath.VertexLit;
-                    GlowCamera.hideFlags = HideFlags.HideAndDontSave;
-                }
-                return glowCameraObject;
-            }
+            get { return GetComponent<Camera>(); }
         }
-        private Camera GlowCamera
-        {
-            get
-            {
-                if (glowCamera == null)
-                {
-                    glowCamera = GlowCameraObject.GetComponent<Camera>();
-                }
-                return glowCamera;
-            }
-        }
+
+        [SerializeField]
+        [Tooltip("recommend: -1")]
+        private LayerMask glowLayer = -1;
+        [SerializeField]
+        [Tooltip("Selective = to specifically bring objects to glow, Fullscreen = complete screen glows")]
+        private GlowType glowType = GlowType.Selective;
+        [SerializeField]
+        [Tooltip("The glows coloration")]
+        private Color glowTint = new Color(1, 1, 1, 0);
+        [SerializeField]
+        [Tooltip("Inner width of the glow effect")]
+        private float blurSpreadInner = 0.6f;
+        [SerializeField]
+        [Tooltip("Number of used blurs. Lower iterations = better performance")]
+        private int blurIterations = 5;
+        [SerializeField]
+        [Tooltip("The global inner luminous intensity")]
+        private float glowIntensityInner = 0.40f;
+        [SerializeField]
+        [Tooltip("Downsampling steps of the blur. Higher samples = better performance, but gains more flickering")]
+        private int samples = 2;
+        #endregion
+
+        #region GET_SET
         public LayerMask GlowLayer
         {
             get { return glowLayer; }
             set { glowLayer = value; }
         }
-        public MKGlowType GlowType
+        public GlowType GlowType
         {
             get { return glowType; }
             set { glowType = value; }
@@ -72,337 +106,235 @@ namespace MK.Glow
                 blurIterations = Mathf.Clamp(value, 0, 10);
             }
         }
-        public float GlowIntensity
+        public float GlowIntensityInner
         {
-            get { return glowIntensity; }
-            set { glowIntensity = value; }
+            get { return glowIntensityInner; }
+            set { glowIntensityInner = value; }
         }
-        public float BlurSpread
+        public float BlurSpreadInner
         {
-            get { return blurSpread; }
-            set { blurSpread = value; }
-        }
-        public float Threshold
-        {
-            get { return threshold; }
-            set { threshold = value; }
-        }
-
-        private Material BlurMaterial
-        {
-            get
-            {
-                if (blurMaterial == null)
-                {
-                    blurMaterial = new Material(blurShader);
-                    blurMaterial.hideFlags = HideFlags.HideAndDontSave;
-                }
-                return blurMaterial;
-            }
-        }
-
-        private Material CompositeMaterial
-        {
-            get
-            {
-                if (compositeMaterial == null)
-                {
-                    compositeMaterial = new Material(compositeShader);
-                    compositeMaterial.hideFlags = HideFlags.HideAndDontSave;
-                }
-                return compositeMaterial;
-            }
+            get { return blurSpreadInner; }
+            set { blurSpreadInner = value; }
         }
         #endregion
-
-
-        #region Constants
-        private static float[] gaussFilter = new float[11]
-        {
-            0.402f,0.623f,0.877f,1.120f,1.297f,1.362f,1.297f,1.120f,0.877f,0.623f,0.402f,
-        };
-        #endregion
-
-
-        #region shaders
-        [SerializeField]
-        private Shader blurShader;
-        [SerializeField]
-        private Shader compositeShader;
-        [SerializeField]
-        private Shader glowRenderShader;
-        #endregion
-
-
-        #region privates
-        private bool isStereo = false;
-        private Material compositeMaterial;
-        private Material blurMaterial;
-
-        private Camera glowCamera;
-        private GameObject glowCameraObject;
-        private RenderTexture glowTexture;
-
-        [SerializeField]
-        [Tooltip("recommend: -1")]
-        private LayerMask glowLayer = -1;
-
-        [SerializeField]
-        private Camera renderCamera;
-
-        [SerializeField]
-        [Tooltip("Selective = to specifically bring objects to glow, Fullscreen = complete screen glows")]
-        private MKGlowType glowType = MKGlowType.Selective;
-        [SerializeField]
-        [Tooltip("The glows coloration")]
-        private Color glowTint = new Color(1, 1, 1, 0);
-        [SerializeField]
-        [Tooltip("Width of the glow effect")]
-        private float blurSpread = 0.25f;
-        [SerializeField]
-        [Tooltip("Number of used blurs")]
-        private int blurIterations = 7;
-        [SerializeField]
-        [Tooltip("The global luminous intensity")]
-        private float glowIntensity = 0.55f;
-        [SerializeField]
-        [Tooltip("Downsampling steps of the blur")]
-        private int samples = 3;
-        [SerializeField]
-        [Tooltip("Threshold for glow")]
-        private float threshold = 1.0f;
-        #endregion
-
-        private void Main()
-        {
-            isStereo = GlowCamera.stereoEnabled;
-            if (glowRenderShader == null)
-            {
-                enabled = false;
-                Debug.LogWarning("Failed to load MKGlow Render Shader");
-                return;
-            }
-            if (compositeShader == null)
-            {
-                enabled = false;
-                Debug.LogWarning("Failed to load MKGlow Composite Shader");
-                return;
-            }
-
-            if (blurShader == null)
-            {
-                enabled = false;
-                Debug.LogWarning("Failed to load MKGlow Blur Shader");
-                return;
-            }
-
-            if (renderCamera == null)
-            {
-                enabled = false;
-                Debug.LogWarning("Failed to load render camera");
-                return;
-            }
-
-            if (!SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Default) || !SystemInfo.supportsImageEffects)
-            {
-                enabled = false;
-                Debug.LogWarning("Glow not supported by platform");
-                return;
-            }
-        }
 
         private void Reset()
         {
-            isStereo = Camera.main.stereoEnabled;
-            glowLayer = -1;
-            SetupShaders();
-            if (renderCamera == null)
-                renderCamera = GetComponent<Camera>();
+            GlowInitialize();
         }
 
-        private void OnEnable()
+        private void Awake()
         {
-            isStereo = Camera.main.stereoEnabled;
+            GlowInitialize();
+        }
+
+        public void GlowInitialize()
+        {
+            Cleanup();
             SetupShaders();
-            if (renderCamera == null)
-                renderCamera = GetComponent<Camera>();
+            SetupMaterials();
         }
 
         private void SetupShaders()
         {
             if (!blurShader)
-                blurShader = Shader.Find("Hidden/MKGlowBlur");
+                blurShader = Shader.Find("Hidden/MK/Glow/Blur");
 
             if (!compositeShader)
-                compositeShader = Shader.Find("Hidden/MKGlowComposite");
+                compositeShader = Shader.Find("Hidden/MK/Glow/Composite");
 
-            if (!glowRenderShader)
-                glowRenderShader = Shader.Find("Hidden/MKGlowRender");
+            if (!selectiveRenderShader)
+                selectiveRenderShader = Shader.Find("Hidden/MK/Glow/SelectiveRender");
+        }
+
+        private void Cleanup()
+        {
+            DestroyImmediate(selectiveGlowCamera);
+            DestroyImmediate(SelectiveGlowCameraObject);
+        }
+
+        private void OnEnable()
+        {
+            GlowInitialize();
         }
 
         private void OnDisable()
         {
-            if (compositeMaterial)
+            Cleanup();
+        }
+
+        private void OnDestroy()
+        {
+            Cleanup();
+        }
+
+#if UNITY_2017_2_OR_NEWER
+        RenderTexture GetTemporaryRT(int width, int height, VRTextureUsage vrUsage)
+        {
+            return RenderTexture.GetTemporary(width, height, 0, rtFormat, RenderTextureReadWrite.Default, 1, RenderTextureMemoryless.None, vrUsage);
+        }
+#else
+        RenderTexture GetTemporaryRT(int width, int height)
+        {
+            return RenderTexture.GetTemporary(width, height, 0, rtFormat, RenderTextureReadWrite.Default, 1);
+        }
+#endif
+
+        private void Blur(RenderTexture main, RenderTexture tmpMain)
+        {
+            for (int i = 1; i <= blurIterations; i++)
             {
-                DestroyImmediate(compositeMaterial);
+                float offsetInner = i * (blurSpreadInner * BLUR_SPREAD_INNTER_MULT) / blurIterations / samples;
+                offsetInner *= gaussFilter[i];
+
+                blurMaterial.SetFloat("_Offset", offsetInner);
+                Graphics.Blit(main, tmpMain, blurMaterial);
+                blurMaterial.SetFloat("_Offset", offsetInner);
+                Graphics.Blit(tmpMain, main, blurMaterial);
             }
-            if (blurMaterial)
+        }
+
+        private void SetupMaterials()
+        {
+            if (blurMaterial == null)
             {
-                DestroyImmediate(blurMaterial);
+                blurMaterial = new Material(blurShader);
+                blurMaterial.hideFlags = HideFlags.HideAndDontSave;
             }
-
-            if (glowCamera)
-                DestroyImmediate(GlowCamera);
-
-            if (glowCameraObject)
-                DestroyImmediate(GlowCameraObject);
-
-            if (glowTexture)
+            if (compositeMaterial == null)
             {
-                RenderTexture.ReleaseTemporary(glowTexture);
-                DestroyImmediate(glowTexture);
+                compositeMaterial = new Material(compositeShader);
+                compositeMaterial.hideFlags = HideFlags.HideAndDontSave;
+            }
+        }
+
+        private Camera selectiveGlowCamera;
+        private GameObject selectiveGlowCameraObject;
+
+        private GameObject SelectiveGlowCameraObject
+        {
+            get
+            {
+                if (!selectiveGlowCameraObject)
+                {
+                    selectiveGlowCameraObject = new GameObject("selectiveGlowCameraObject");
+                    selectiveGlowCameraObject.AddComponent<Camera>();
+                    selectiveGlowCameraObject.hideFlags = HideFlags.HideAndDontSave;
+                    SelectiveGlowCamera.orthographic = false;
+                    SelectiveGlowCamera.enabled = false;
+                    SelectiveGlowCamera.renderingPath = RenderingPath.VertexLit;
+                    SelectiveGlowCamera.hideFlags = HideFlags.HideAndDontSave;
+                }
+                return selectiveGlowCameraObject;
+            }
+        }
+        private Camera SelectiveGlowCamera
+        {
+            get
+            {
+                if (selectiveGlowCamera == null)
+                {
+                    selectiveGlowCamera = SelectiveGlowCameraObject.GetComponent<Camera>();
+                }
+                return selectiveGlowCamera;
             }
         }
 
         private void SetupGlowCamera()
         {
-            isStereo = Camera.main.stereoEnabled;
-            GlowCamera.CopyFrom(GetComponent<Camera>());
-            GlowCamera.clearFlags = CameraClearFlags.SolidColor;
-            GlowCamera.rect = new Rect(0, 0, 1, 1);
-            GlowCamera.backgroundColor = new Color(0, 0, 0, 0);
-            GlowCamera.cullingMask = glowLayer;
-            GlowCamera.targetTexture = glowTexture;
-            if (GlowCamera.actualRenderingPath != RenderingPath.VertexLit)
-                GlowCamera.renderingPath = RenderingPath.VertexLit;
+            SelectiveGlowCamera.CopyFrom(Cam);
+            SelectiveGlowCamera.depthTextureMode = DepthTextureMode.None;
+            SelectiveGlowCamera.targetTexture = glowTexRaw;
+
+            SelectiveGlowCamera.clearFlags = CameraClearFlags.SolidColor;
+            SelectiveGlowCamera.rect = new Rect(0, 0, 1, 1);
+            SelectiveGlowCamera.backgroundColor = new Color(0, 0, 0, 0);
+            SelectiveGlowCamera.cullingMask = glowLayer;
+            SelectiveGlowCamera.renderingPath = RenderingPath.VertexLit;
         }
 
-        private void OnPreRender()
+        private void FullScreenGlow(RenderTexture src, RenderTexture dest, RenderTexture glowTexInner, RenderTexture tmpGlowTex)
         {
-            if (!gameObject.activeSelf || !enabled)
-                return;
+            Graphics.Blit(src, glowTexInner);
 
-            if (glowTexture != null)
-            {
-                RenderTexture.ReleaseTemporary(glowTexture);
-                glowTexture = null;
-            }
+            Blur(glowTexInner, tmpGlowTex);
+            compositeMaterial.SetTexture("_MKGlowTexInner", glowTexInner);
 
-            if (GlowType == MKGlowType.Selective)
-            {
-                glowTexture = RenderTexture.GetTemporary((int)((GetComponent<Camera>().pixelWidth) / samples), (int)((GetComponent<Camera>().pixelHeight) / samples), 16, RenderTextureFormat.Default);
-                SetupGlowCamera();
-                GlowCamera.RenderWithShader(glowRenderShader, "RenderType");
-            }
-            else
-            {
-                if (GlowCamera)
-                    DestroyImmediate(GlowCamera);
-                if (GlowCameraObject)
-                    DestroyImmediate(GlowCameraObject);
-            }
-
-            BlurMaterial.color = new Color(glowTint.r, glowTint.g, glowTint.b, glowIntensity);
+            Graphics.Blit(src, dest, compositeMaterial, 1);
         }
 
-        protected virtual void OnRenderImage(RenderTexture src, RenderTexture dest)
+        private RenderTexture glowTexRaw;
+        private int srcWidth, srcHeight;
+
+        private void SelectiveGlow(RenderTexture src, RenderTexture dest, RenderTexture glowTexInner, RenderTexture tmpGlowTex)
         {
-            if (!gameObject.activeSelf || !enabled)
-                return;
+            Graphics.Blit(glowTexRaw, glowTexInner);
 
-            if (GlowType == MKGlowType.Selective)
+            Blur(glowTexInner, tmpGlowTex);
+
+            compositeMaterial.SetTexture("_MKGlowTexInner", glowTexInner);
+            Graphics.Blit(src, dest, compositeMaterial);
+        }
+
+#if UNITY_2017_2_OR_NEWER
+        private VRTextureUsage srcVRUsage = VRTextureUsage.TwoEyes;
+#endif
+        private void OnPostRender()
+        {
+            switch (glowType)
             {
-                PerformSelectiveGlow(src, dest);
+                case GlowType.Selective:
+                    RenderTexture.ReleaseTemporary(glowTexRaw);
+#if UNITY_2017_2_OR_NEWER
+                    glowTexRaw = RenderTexture.GetTemporary((int)((Cam.pixelWidth) / samples), (int)((Cam.pixelHeight) / samples), 16, rtFormat, RenderTextureReadWrite.Default, 1, RenderTextureMemoryless.None, srcVRUsage);
+#else
+                    glowTexRaw = RenderTexture.GetTemporary((int)((Cam.pixelWidth) / samples), (int)((Cam.pixelHeight) / samples), 16, rtFormat, RenderTextureReadWrite.Default, 1);
+#endif
+                    SetupGlowCamera();
+                    SelectiveGlowCamera.RenderWithShader(selectiveRenderShader, "RenderType");
+                    break;
+                case GlowType.Fullscreen:
+                    break;
             }
-            else if (GlowType == MKGlowType.Fullscreen)
+            blurMaterial.SetFloat("_VRMult", Cam.stereoEnabled ? 0.5f : 1.0f);
+            compositeMaterial.SetFloat("_GlowIntensityInner", glowIntensityInner * ((glowType != GlowType.Fullscreen) ? GLOW_INTENSITY_MULT * blurSpreadInner : 10.0f));
+            compositeMaterial.SetColor("_GlowTint", glowTint);
+        }
+
+        private void OnRenderImage(RenderTexture src, RenderTexture dest)
+        {
+            rtFormat = src.format;
+            srcWidth = src.width / samples;
+            srcHeight = src.height / samples;
+
+#if UNITY_2017_2_OR_NEWER
+            srcVRUsage = src.vrUsage;
+
+            RenderTexture glowTexInner = GetTemporaryRT(srcWidth, srcHeight, src.vrUsage);
+            RenderTexture tmpGlowTex = GetTemporaryRT(srcWidth, srcHeight, src.vrUsage);
+#else
+            RenderTexture glowTexInner = GetTemporaryRT(srcWidth, srcHeight);
+            RenderTexture tmpGlowTex = GetTemporaryRT(srcWidth, srcHeight);
+#endif
+
+            switch (glowType)
             {
-                PerformFullScreenGlow(src, dest);
-            }
-        }
-
-        private void PerformBlur(RenderTexture src, RenderTexture dest)
-        {
-            float off = BlurSpread;
-            BlurMaterial.SetTexture("_MainTex", src);
-            BlurMaterial.SetFloat("_ShiftX", off);
-            if (isStereo)
-                off *= 0.5f;
-            BlurMaterial.SetFloat("_ShiftY", off);
-            Graphics.Blit(src, dest, BlurMaterial);
-        }
-
-        private void PerformBlur(RenderTexture src, RenderTexture dest, int iteration)
-        {
-            float offset = iteration * BlurSpread;
-            offset *= gaussFilter[iteration];
-
-            BlurMaterial.SetTexture("_MainTex", src);
-            BlurMaterial.SetFloat("_ShiftX", offset);
-            if (isStereo)
-                offset *= 0.5f;
-            BlurMaterial.SetFloat("_ShiftY", offset);
-            Graphics.Blit(src, dest, BlurMaterial);
-        }
-
-        private void PerformGlow(RenderTexture glowBuffer, RenderTexture dest, RenderTexture src)
-        {
-            CompositeMaterial.SetTexture("_MKGlowTex", glowBuffer);
-            if (glowType == MKGlowType.Fullscreen)
-                Graphics.Blit(src, dest, CompositeMaterial, 0);
-            else
-                Graphics.Blit(src, dest, CompositeMaterial, 1);
-        }
-
-        protected void PerformSelectiveGlow(RenderTexture source, RenderTexture dest)
-        {
-            Vector2 TextureSize;
-            TextureSize.x = source.width / Samples;
-            TextureSize.y = source.height / Samples;
-
-            RenderTexture glowBuffer = RenderTexture.GetTemporary((int)TextureSize.x, (int)TextureSize.y, 0, RenderTextureFormat.Default);
-
-            PerformBlur(glowTexture, glowBuffer);
-
-            for (int i = 0; i < BlurIterations; i++)
-            {
-                RenderTexture glowBufferSecond = RenderTexture.GetTemporary((int)TextureSize.x, (int)TextureSize.y, 0, RenderTextureFormat.Default);
-                PerformBlur(glowBuffer, glowBufferSecond, i);
-                RenderTexture.ReleaseTemporary(glowBuffer);
-                glowBuffer = glowBufferSecond;
+                case GlowType.Selective:
+                    SelectiveGlow(src, dest, glowTexInner, tmpGlowTex);
+                    break;
+                case GlowType.Fullscreen:
+                    FullScreenGlow(src, dest, glowTexInner, tmpGlowTex);
+                    break;
             }
 
-            PerformGlow(glowBuffer, dest, source);
-
-            RenderTexture.ReleaseTemporary(glowBuffer);
-
-            if (glowTexture != null)
-            {
-                RenderTexture.ReleaseTemporary(glowTexture);
-                glowTexture = null;
-            }
+            RenderTexture.ReleaseTemporary(glowTexInner);
+            RenderTexture.ReleaseTemporary(tmpGlowTex);
         }
+    }
 
-        protected void PerformFullScreenGlow(RenderTexture source, RenderTexture destination)
-        {
-            Vector2 TextureSize;
-            TextureSize.x = source.width / Samples;
-            TextureSize.y = source.height / Samples;
-            RenderTexture glowBuffer = RenderTexture.GetTemporary((int)TextureSize.x, (int)TextureSize.y, 0, RenderTextureFormat.Default);
-
-            PerformBlur(source, glowBuffer);
-
-            for (int i = 0; i < BlurIterations; i++)
-            {
-                RenderTexture glowBufferSecond = RenderTexture.GetTemporary((int)TextureSize.x, (int)TextureSize.y, 0, RenderTextureFormat.Default);
-                PerformBlur(glowBuffer, glowBufferSecond, i);
-                RenderTexture.ReleaseTemporary(glowBuffer);
-                glowBuffer = glowBufferSecond;
-            }
-            Graphics.Blit(source, destination);
-
-            PerformGlow(glowBuffer, destination, source);
-
-            RenderTexture.ReleaseTemporary(glowBuffer);
-        }
+    public enum GlowType
+    {
+        Selective = 0,
+        Fullscreen = 1
     }
 }

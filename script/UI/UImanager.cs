@@ -9,6 +9,7 @@ public class UImanager : MonoBehaviour {
 	public Canvas mainUI;
 	public Image thubmnail;
 	public Slider accelerate;
+	public Image textBg;
 
 	public Image fireMissile;
 	public Image aimNext;
@@ -18,6 +19,7 @@ public class UImanager : MonoBehaviour {
 	public Image buy;
 	public Image touchMove;
 	public Image leave;
+	public Image attack;
 
 
 	public Image thubmnailPoint;
@@ -44,6 +46,8 @@ public class UImanager : MonoBehaviour {
 	public Sprite buy2;
 	public Sprite leave1;
 	public Sprite leave2;
+	public Sprite attack1;
+	public Sprite attack2;
 
 	private Dictionary<int, object[]> thubmnailPoints = new Dictionary<int, object[]> ();//GameObject, Image
 	private Dictionary<int, object[]> enemythubmnailPoints = new Dictionary<int, object[]> ();
@@ -150,6 +154,53 @@ public class UImanager : MonoBehaviour {
 	public Sprite armInfoSell3;
 	public Sprite armInfoSell4;
 
+	public Image attackPanel;
+	public Image attackClose;
+	public Image attackTitle;
+	public Image attackContent;
+	public Text unAttackArm;
+	public Text attackArm;
+	public GameObject unAttackArmVal;
+	public GameObject attackArmVal;
+	public GameObject unAttackArmVals;
+	public GameObject attackArmVals;
+	public Image attackAdd;
+	public Image attackDeadd;
+	public Image attackArminfo;
+	public Text massArea;
+	public Text attackArea;
+	public Text attackStatus;
+	public Dropdown massAreaVal;
+	public Dropdown attackAreaVal;
+	public Dropdown attackStatusVal;
+	public Text attackNote;
+
+	private RectTransform unAttackArmValsRect;
+	private RectTransform attackArmValsRect;
+	private float attackItemHeight = Screen.height * 0.048f;
+	private bool showAttackWin = false;
+	private float unAttackScrollPos = 0.0f;
+	private float attackScrollPos = 0.0f;
+	private List<Transform> unattacks = new List<Transform> ();
+	private List<PojulObject> unattackSrcs = new List<PojulObject> ();
+	private List<Transform> attacks = new List<Transform> ();
+	private List<PojulObject> attackSrcs = new List<PojulObject> ();
+	private List<GameObject> unAttackTexts = new List<GameObject> ();
+	private List<GameObject> attackTexts = new List<GameObject> ();
+	private Transform attackSelected;
+	private Image attackSelectedBg;
+	private Transform unAttackSelected;
+	private Image unAttackSelectedBg;
+	private Color textSelectedColor = new Color(208/255f, 230/255f, 240/255f, 90/255f);
+	private Color textUnSelectedColor = new Color(33/255f, 140/255f, 189/255f, 0/255f);
+
+	public Sprite attackAdd1;
+	public Sprite attackAdd2;
+	public Sprite attackDeadd1;
+	public Sprite attackDeadd2;
+	public Sprite attackArminfo1;
+	public Sprite attackArminfo2;
+
 	// Use this for initialization
 	void Start () {
 		fireAim = fireAimPre;
@@ -191,20 +242,25 @@ public class UImanager : MonoBehaviour {
 		accelerate.value = accelerate.maxValue * 0.5f;
 		accelerate.handleRect.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.height * 0.06f, Screen.height * 0.05f);;
 
-		buy.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.11f, Screen.height * 0.11f);
+		buy.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.1f, Screen.height * 0.1f);
 		buy.rectTransform.position = new Vector3 (buy.rectTransform.sizeDelta .x * 0.5f, 
-			buy.rectTransform.sizeDelta .y * 5f,buy.rectTransform.position.z);
+			buy.rectTransform.sizeDelta .y * 6,buy.rectTransform.position.z);
 
-		mselect.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.11f, Screen.height * 0.11f);
+		mselect.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.1f, Screen.height * 0.1f);
 		mselect.rectTransform.position = new Vector3 (mselect.rectTransform.sizeDelta .x * 0.5f, 
-			mselect.rectTransform.sizeDelta .y * 4f,mselect.rectTransform.position.z);
-		
+			mselect.rectTransform.sizeDelta .y * 5f,mselect.rectTransform.position.z);
+
+		attack.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.1f, Screen.height * 0.1f);
+		attack.rectTransform.position = new Vector3 (attack.rectTransform.sizeDelta .x * 0.5f, 
+			attack.rectTransform.sizeDelta .y * 4f,attack.rectTransform.position.z);
+
 		touchMove.rectTransform.sizeDelta = new Vector2 ( (Screen.width - Screen.height * 0.64f), Screen.height);
 		touchMove.rectTransform.position = new Vector3 ((Screen.height * 0.32f + touchMove.rectTransform.sizeDelta .x * 0.5f), 
 			touchMove.rectTransform.sizeDelta .y * 0.5f ,touchMove.rectTransform.position.z);
 
 		initArmShop ();
 		initArmInfo ();
+		initAttack();
 
 		InvokeRepeating("updateThubmnail", 0.5f, 0.5f);
 
@@ -399,9 +455,6 @@ public class UImanager : MonoBehaviour {
 		maxMountMissileItemRect2.localPosition = new Vector3 (textSize1*0.8f,maxMountMissileItemRect2.localPosition.y,maxMountMissileItemRect2.localPosition.z);
 		maxMountMissileValue.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
 			.fontSize = textSize1;
-		
-
-
 
 
 		RectTransform supplyPriorityValueRect = supplyPriorityValue.GetComponent<RectTransform> ();
@@ -455,6 +508,233 @@ public class UImanager : MonoBehaviour {
 
 		armInfoPanel.GetComponent<RectTransform> ().localScale = new Vector3 (0,0,0);
 	}
+
+	void initAttack(){
+		attackPanel.rectTransform.sizeDelta = new Vector2 (Screen.height * 1.0f, Screen.height * 0.55f);
+		attackPanel.rectTransform.position = new Vector3 (
+			Screen.width * 0.5f,
+			Screen.height * 0.5f, 
+			attackPanel.rectTransform.position.z);
+
+		attackClose.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.16582f, Screen.height * 0.09f);
+		attackClose.rectTransform.position = new Vector3 (
+			(attackPanel.rectTransform.position.x + (attackPanel.rectTransform.sizeDelta.x - attackClose.rectTransform.sizeDelta.x)*0.5f - Screen.height * 0.005f), 
+			(attackPanel.rectTransform.position.y + (attackPanel.rectTransform.sizeDelta.y - attackClose.rectTransform.sizeDelta.y)*0.5f - Screen.height * 0.005f), 
+			attackClose.rectTransform.position.z);
+
+		attackTitle.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.2425f, Screen.height * 0.1f);
+		attackTitle.rectTransform.position = new Vector3 (
+			(attackPanel.rectTransform.position.x), 
+			(attackPanel.rectTransform.position.y + (attackPanel.rectTransform.sizeDelta.y - attackTitle.rectTransform.sizeDelta.y)*0.5f), 
+			attackTitle.rectTransform.position.z);
+
+		attackContent.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.97f, Screen.height * 0.44f);
+		attackContent.rectTransform.position = new Vector3 (
+			(attackPanel.rectTransform.position.x), 
+			(attackPanel.rectTransform.position.y - (attackPanel.rectTransform.sizeDelta.y - attackContent.rectTransform.sizeDelta.y)*0.5f + Screen.height * 0.012f), 
+			attackContent.rectTransform.position.z);
+
+		unAttackArm.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.4f, attackContent.rectTransform.sizeDelta.y * 0.15f);
+		unAttackArm.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x - (attackContent.rectTransform.sizeDelta.x - unAttackArm.rectTransform.sizeDelta.x)*0.5f + Screen.height*0.02f), 
+			(attackContent.rectTransform.position.y + (attackContent.rectTransform.sizeDelta.y - unAttackArm.rectTransform.sizeDelta.y)*0.5f), 
+			unAttackArm.rectTransform.position.z);
+		unAttackArm.fontSize = (int)(textSize*0.92f);
+
+		attackArm.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.4f, attackContent.rectTransform.sizeDelta.y * 0.15f);
+		attackArm.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x + (attackContent.rectTransform.sizeDelta.x - attackArm.rectTransform.sizeDelta.x)*0.5f - Screen.height * 0.025f), 
+			(attackContent.rectTransform.position.y + (attackContent.rectTransform.sizeDelta.y - attackArm.rectTransform.sizeDelta.y)*0.5f), 
+			attackArm.rectTransform.position.z);
+		attackArm.fontSize = (int)(textSize*0.92f);
+
+		RectTransform unAttackArmValRect = unAttackArmVal.GetComponent<RectTransform> ();
+		unAttackArmValRect.sizeDelta = new Vector2 (Screen.height * 0.35f, attackContent.rectTransform.sizeDelta.y * 0.6f);
+		unAttackArmValRect.position = new Vector3 (
+			(unAttackArm.rectTransform.position.x), 
+			(attackContent.rectTransform.position.y + (attackContent.rectTransform.sizeDelta.y - unAttackArm.rectTransform.sizeDelta.y*2 - unAttackArmValRect.sizeDelta.y)*0.5f), 
+				unAttackArmValRect.position.z);
+
+
+		unAttackArmValsRect = unAttackArmVals.GetComponent<RectTransform> ();
+		unAttackScrollPos = unAttackArmValsRect.position.y;
+		unAttackArmValsRect.sizeDelta = new Vector2 (unAttackArmValsRect.sizeDelta.x, attackItemHeight*10.0f);
+		for(int i = 0; i< 10; i++){
+			//unAttackArmVals
+			Text tempText = (Text)Instantiate (text);
+			tempText.rectTransform.sizeDelta = new Vector2 (unAttackArmValRect.sizeDelta.x, attackItemHeight);
+			tempText.GetComponent<Transform> ().SetParent (unAttackArmVals.GetComponent<Transform> (), true);
+			tempText.rectTransform.localPosition = new Vector3 (
+				0, 
+				-tempText.rectTransform.sizeDelta.y*(i + 0.7f), 
+				tempText.rectTransform.position.z);
+			tempText.fontSize = (int)(textSize * 0.75f);
+			tempText.text = "      ";
+
+			Image tempTextBg = (Image)Instantiate (textBg);
+			tempTextBg.name = "textBg";
+			tempTextBg.rectTransform.sizeDelta = new Vector2 (unAttackArmValRect.sizeDelta.x - 20, attackItemHeight);
+			tempTextBg.GetComponent<Transform> ().SetParent (tempText.GetComponent<Transform> (), true);
+			tempTextBg.rectTransform.localPosition = new Vector3 (
+				0, 
+				0, 
+				tempText.rectTransform.position.z);
+			//tempTextBg.enabled = false;
+
+			unAttackTexts.Add (tempText.gameObject);
+			EventTriggerListener.Get(unAttackTexts[i].gameObject).onClick = OnUnattackItemClick;
+		}
+
+		RectTransform attackArmValRect = attackArmVal.GetComponent<RectTransform> ();
+		attackArmValRect.sizeDelta = new Vector2 (Screen.height * 0.35f, attackContent.rectTransform.sizeDelta.y * 0.6f);
+		attackArmValRect.position = new Vector3 (
+			(attackArm.rectTransform.position.x), 
+			(attackContent.rectTransform.position.y + (attackContent.rectTransform.sizeDelta.y - unAttackArm.rectTransform.sizeDelta.y*2 - unAttackArmValRect.sizeDelta.y )*0.5f), 
+			attackArmValRect.position.z);
+		attackArmValsRect = attackArmVals.GetComponent<RectTransform> ();
+		attackScrollPos = attackArmValsRect.position.y;
+		attackArmValsRect.sizeDelta = new Vector2 (attackArmValsRect.sizeDelta.x, attackItemHeight*10.0f);
+		for(int i = 0; i< 10; i++){
+			//unAttackArmVals
+			Text tempText = (Text)Instantiate (text);
+			tempText.rectTransform.sizeDelta = new Vector2 (attackArmValRect.sizeDelta.x, attackItemHeight);
+			tempText.GetComponent<Transform> ().SetParent (attackArmVals.GetComponent<Transform> (), true);
+			tempText.rectTransform.localPosition = new Vector3 (
+				0, 
+				-tempText.rectTransform.sizeDelta.y*(i + 0.7f), 
+				tempText.rectTransform.position.z);
+			tempText.fontSize = (int)(textSize * 0.75f);
+			tempText.text = "       ";
+
+			Image tempTextBg = (Image)Instantiate (textBg);
+			tempTextBg.name = "textBg";
+			tempTextBg.rectTransform.sizeDelta = new Vector2 (unAttackArmValRect.sizeDelta.x - 20, attackItemHeight);
+			tempTextBg.GetComponent<Transform> ().SetParent (tempText.GetComponent<Transform> (), true);
+			tempTextBg.rectTransform.localPosition = new Vector3 (
+				0, 
+				0, 
+				tempText.rectTransform.position.z);
+			//tempTextBg.enabled = false;
+			attackTexts.Add (tempText.gameObject);
+			EventTriggerListener.Get(attackTexts[i].gameObject).onClick = OnAttackItemClick;
+		}
+
+
+		attackAdd.rectTransform.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.y * 0.15f*1.857f, 
+			attackContent.rectTransform.sizeDelta.y * 0.15f);//1.857
+		attackAdd.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x), 
+			(attackArmValRect.position.y + attackContent.rectTransform.sizeDelta.y * 0.18f), 
+			attackAdd.rectTransform.position.z);
+
+		attackDeadd.rectTransform.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.y * 0.15f*1.857f, 
+			attackContent.rectTransform.sizeDelta.y * 0.15f);//1.857
+		attackDeadd.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x), 
+			(attackArmValRect.position.y), 
+			attackDeadd.rectTransform.position.z);
+
+		attackArminfo.rectTransform.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.y * 0.15f*1.857f, 
+			attackContent.rectTransform.sizeDelta.y * 0.15f);//1.857
+		attackArminfo.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x), 
+			(attackArmValRect.position.y - attackContent.rectTransform.sizeDelta.y * 0.18f), 
+			attackArminfo.rectTransform.position.z);
+
+		massArea.rectTransform.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.x*1.0f/6, attackContent.rectTransform.sizeDelta.y * 0.16f);
+		massArea.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x - attackContent.rectTransform.sizeDelta.x*1.0f/3 - massArea.rectTransform.sizeDelta.x*0.5f + Screen.height*0.02f), 
+			(attackArmValRect.position.y - attackContent.rectTransform.sizeDelta.y * 0.383f), 
+			massArea.rectTransform.position.z);
+		massArea.fontSize = (int)(textSize*0.92f);
+
+
+		attackArea.rectTransform.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.x*1.0f/6, attackContent.rectTransform.sizeDelta.y * 0.16f);
+		attackArea.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x - attackArea.rectTransform.sizeDelta.x*0.5f), 
+			(attackArmValRect.position.y - attackContent.rectTransform.sizeDelta.y * 0.383f), 
+			attackArea.rectTransform.position.z);
+		attackArea.fontSize = (int)(textSize*0.92f);
+
+		attackStatus.rectTransform.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.x*1.0f/6, attackContent.rectTransform.sizeDelta.y * 0.16f);
+		attackStatus.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x + attackContent.rectTransform.sizeDelta.x*1.0f/6 + attackStatus.rectTransform.sizeDelta.x*0.5f), 
+			(attackArmValRect.position.y - attackContent.rectTransform.sizeDelta.y * 0.383f), 
+			attackStatus.rectTransform.position.z);
+		attackStatus.fontSize = (int)(textSize*0.92f);
+
+		RectTransform attackAreaValRect = attackAreaVal.GetComponent<RectTransform> ();
+		attackAreaValRect.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.x*1.0f/6, attackContent.rectTransform.sizeDelta.y * 0.15f);
+		attackAreaValRect.position = new Vector3 (
+			(attackContent.rectTransform.position.x + attackContent.rectTransform.sizeDelta.x*0.35f/6), 
+			(attackStatus.rectTransform.position.y), 
+			attackAreaValRect.position.z);
+		attackAreaVal.transform.FindChild ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
+		attackAreaVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		attackAreaVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((attackAreaValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		RectTransform attackAreaValItemRect = attackAreaVal.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		attackAreaValItemRect.sizeDelta = new Vector2 (attackAreaValItemRect.sizeDelta.x, textSize1*2f);
+		RectTransform attackAreaValItemRect1 = attackAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		attackAreaValItemRect1.sizeDelta = new Vector2 (textSize1*1.2f, textSize1*1.2f);//
+		attackAreaValItemRect1.position = new Vector3 ((attackAreaValItemRect1.position.x - (attackAreaValItemRect1.sizeDelta.x - textSize1*1.5f)*0.4f), 
+			attackAreaValItemRect1.position.y,attackAreaValItemRect1.position.z);
+		RectTransform attackAreaValItemRect2 = attackAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		attackAreaValItemRect2.localPosition = new Vector3 (textSize1*0.8f,attackAreaValItemRect2.localPosition.y,attackAreaValItemRect2.localPosition.z);
+		attackAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+			.fontSize = textSize1;
+
+		RectTransform massAreaValRect = massAreaVal.GetComponent<RectTransform> ();
+		massAreaValRect.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.x*1.0f/6, attackContent.rectTransform.sizeDelta.y * 0.15f);
+		massAreaValRect.position = new Vector3 (
+			(attackContent.rectTransform.position.x - attackContent.rectTransform.sizeDelta.x*1.65f/6), 
+			(attackStatus.rectTransform.position.y), 
+			massAreaValRect.position.z);
+		massAreaVal.transform.FindChild ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
+		massAreaVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		massAreaVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((massAreaValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		RectTransform massAreaValItemRect = massAreaVal.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		massAreaValItemRect.sizeDelta = new Vector2 (massAreaValItemRect.sizeDelta.x, textSize1*2f);
+		RectTransform massAreaValItemRect1 = massAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		massAreaValItemRect1.sizeDelta = new Vector2 (textSize1*1.2f, textSize1*1.2f);//
+		massAreaValItemRect1.position = new Vector3 ((massAreaValItemRect1.position.x - (massAreaValItemRect1.sizeDelta.x - textSize1*1.5f)*0.4f), 
+			massAreaValItemRect1.position.y,massAreaValItemRect1.position.z);
+		RectTransform massAreaValItemRect2 = massAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		massAreaValItemRect2.localPosition = new Vector3 (textSize1*0.8f,massAreaValItemRect2.localPosition.y,massAreaValItemRect2.localPosition.z);
+		massAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+			.fontSize = textSize1;
+
+
+		RectTransform attackStatusValRect = attackStatusVal.GetComponent<RectTransform> ();
+		attackStatusValRect.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.x*1.0f/6, attackContent.rectTransform.sizeDelta.y * 0.15f);
+		attackStatusValRect.position = new Vector3 (
+			(attackContent.rectTransform.position.x + attackContent.rectTransform.sizeDelta.x*2.35f/6), 
+			(attackStatus.rectTransform.position.y), 
+			attackStatusValRect.position.z);
+		attackStatusVal.transform.FindChild ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
+		attackStatusVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		attackStatusVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((attackStatusValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		RectTransform attackStatusValItemRect = attackStatusVal.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		attackStatusValItemRect.sizeDelta = new Vector2 (attackStatusValItemRect.sizeDelta.x, textSize1*2f);
+		RectTransform attackStatusValItemRect1 = attackStatusVal.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		attackStatusValItemRect1.sizeDelta = new Vector2 (textSize1*1.2f, textSize1*1.2f);//
+		attackStatusValItemRect1.position = new Vector3 ((attackStatusValItemRect1.position.x - (attackStatusValItemRect1.sizeDelta.x - textSize1*1.5f)*0.4f), 
+			attackStatusValItemRect1.position.y, attackStatusValItemRect1.position.z);
+		RectTransform attackStatusValItemRect2 = attackStatusVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		attackStatusValItemRect2.localPosition = new Vector3 (textSize1*0.8f,attackStatusValItemRect2.localPosition.y,attackStatusValItemRect2.localPosition.z);
+		attackStatusVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+			.fontSize = textSize1;
+		//attackPanel.GetComponent<RectTransform> ().localScale = new Vector3 (0,0,0);
+
+		attackNote.rectTransform.sizeDelta = new Vector2 (attackContent.rectTransform.sizeDelta.x, attackContent.rectTransform.sizeDelta.y * 0.15f);
+		attackNote.rectTransform.position = new Vector3 (
+			(attackContent.rectTransform.position.x), 
+			(attackStatus.rectTransform.position.y - (attackStatus.rectTransform.sizeDelta.y + attackNote.rectTransform.sizeDelta.y)*0.5f), 
+			attackNote.rectTransform.position.z);
+		attackNote.fontSize = (int)(textSize*0.8f);
+
+		attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+	}
+
 
 	void Update(){
 
@@ -643,6 +923,14 @@ public class UImanager : MonoBehaviour {
 			tra.GetComponent<PojulObject> ().isSelected = true;
 			armInfoPanel.GetComponent<RectTransform> ().localScale = new Vector3 (1,1,1);
 			showArmInfo = true;
+			if(showShopWin){
+				armShopPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+				showShopWin = false;
+			}
+			if(showAttackWin){
+				attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+				showAttackWin = false;
+			}
 
 			if(mPojulObject.isSelling){
 				armInfoSell.sprite = armInfoSell3;
@@ -1102,8 +1390,12 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void OnBuyClick(){
-		if(isSelectMode){
+		if(isSelectMode ||showShopWin){
 			return;
+		}
+		if(showAttackWin){
+			showAttackWin = false;
+			attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
 		}
 		showShopWin = true;
 		armShopPanel.rectTransform.localScale = new Vector3 (1, 1, 1);
@@ -1170,6 +1462,7 @@ public class UImanager : MonoBehaviour {
 		if(planMove.player != null){
 			return;
 		}
+		isOnLeave = false;
 		float dx = ((PointerEventData)rawdata).position.x - touchMoveDown.x;
 		float dz = ((PointerEventData)rawdata).position.y - touchMoveDown.y;
 		Camera.main.transform.position = new Vector3 ((Camera.main.transform.position.x - dx*4.5f),
@@ -1188,6 +1481,7 @@ public class UImanager : MonoBehaviour {
 
 		updateBuyArmStatus ();
 		updateArmInfoStatus ();
+		updateAttackStatus ();
 
 		if (planMove.player == null) {
 			missileAimedTra = null;
@@ -1225,6 +1519,75 @@ public class UImanager : MonoBehaviour {
 
 		if(missileAimedTra == null){
 			fireMissile.sprite = fireMissileBg3;
+		}
+
+	}
+
+	void updateAttackStatus(){
+		if(!showAttackWin){
+			return;
+		}
+		List<Transform> tempUnattacks = new List<Transform> ();
+		List<PojulObject> tempUnattackSrcs = new List<PojulObject> ();
+		List<Transform> tempAttacks = new List<Transform> ();
+		List<PojulObject> tempAttackSrcs = new List<PojulObject> ();
+		//GameInit.attackArms.Remove (null);
+		for(int i=0; i< GameInit.attackArms.Count; i++){
+			if(GameInit.attackArms[i] == null){
+				continue;
+			}
+			PojulObject mPojulObject = GameInit.attackArms [i].GetComponent<PojulObject> ();
+			if(mPojulObject == null){
+				continue;
+			}
+			if(!mPojulObject.isAttackArmy){
+				tempUnattacks.Add (GameInit.attackArms[i]);
+				tempUnattackSrcs.Add (mPojulObject);
+			}else{
+				tempAttacks.Add (GameInit.attackArms[i]);
+				tempAttackSrcs.Add (mPojulObject);
+			}
+		}
+		for(int i=0; i < unAttackArmVals.transform.childCount; i++){
+			Text tempUnattackText = unAttackArmVals.transform.GetChild (i).GetComponent<Text> ();
+			Text tempAttackText = attackArmVals.transform.GetChild (i).GetComponent<Text> ();
+			if(i < tempUnattacks.Count){
+				tempUnattackText.text = "      " + tempUnattacks[i].name;
+			}else{
+				tempUnattackText.text = "      ";
+			}
+
+			if(i < tempAttacks.Count){
+				tempAttackText.text = "      " + tempAttacks[i].name;
+			}else{
+				tempAttackText.text = "      ";
+			}
+		}
+		unattacks = tempUnattacks;
+		unattackSrcs = tempUnattackSrcs;
+		attacks = tempAttacks;
+		attackSrcs = tempAttackSrcs;
+
+		if(unAttackSelectedBg != null){
+			unAttackSelectedBg.color = textUnSelectedColor;
+		}
+		int unAttackIndex = unattacks.IndexOf (unAttackSelected);
+		if (unAttackSelected != null && unAttackIndex >= 0 && unAttackIndex < unAttackArmVals.transform.childCount) {
+			unAttackSelectedBg = unAttackTexts [unAttackIndex].transform.Find ("textBg").gameObject.GetComponent<Image> ();
+			unAttackSelectedBg.color = textSelectedColor;
+		} else {
+			unAttackSelected = null;
+		}
+
+		if(attackSelectedBg != null){
+			attackSelectedBg.color = textUnSelectedColor;
+		}
+		int attackIndex = attacks.IndexOf (attackSelected);
+		if (attackSelected != null && attackIndex >= 0 && attackIndex < unAttackArmVals.transform.childCount) {
+			attackSelectedBg = attackTexts [attackIndex].transform.Find ("textBg").gameObject.GetComponent<Image> ();
+			attackSelectedBg.color = textSelectedColor;
+		} else {
+			attackSelected = null;
 		}
 
 	}
@@ -1523,10 +1886,22 @@ public class UImanager : MonoBehaviour {
 			return;
 		}
 		PojulObject mPojulObject = planMove.player.GetComponent<PojulObject> ();
+		//A10aPlan mA10aPlan = planMove.player.GetComponent<A10aPlan> ();
 		if ("car3".Equals (mPojulObject.type)) {
+			if(planMove.player.transform.position.y < 5){
+				((CarType3)mPojulObject).destoryData ();
+				((CarType3)mPojulObject).destoryAll ();
+				isOnLeave = true;
+				return;
+			}
 			((CarType3)mPojulObject).setPlayType (1);
 			isOnLeave = true;
 		}else if("a10".Equals (mPojulObject.type)){
+			bool isOnNavArea = true;
+			if(!Util.isOnNavArea1(new Vector3(planMove.player.transform.position.x, 0, planMove.player.transform.position.z))){
+				isOnNavArea = false;
+			}
+			((A10aPlan)mPojulObject).isOnNavArea = isOnNavArea;
 			((A10aPlan)mPojulObject).setPlayType (1);
 			isOnLeave = true;
 		}
@@ -1547,6 +1922,133 @@ public class UImanager : MonoBehaviour {
 		leave.sprite = leave1;
 	}
 
+	public void OnAttackClick(){
+		if(isSelectMode || showAttackWin){
+			return;
+		}
+		if(showShopWin){
+			armShopPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+			showShopWin = false;
+		}
+		showAttackWin = true;
+		attackPanel.rectTransform.localScale = new Vector3 (1, 1, 1);
+		unAttackArmValsRect.position = new Vector3 (unAttackArmValsRect.position.x, unAttackScrollPos, unAttackArmValsRect.position.z);
+		attackArmValsRect.position = new Vector3 (attackArmValsRect.position.x, attackScrollPos, attackArmValsRect.position.z);
+	}
 
+	public void OnAttackDown(){
+		if(isSelectMode){
+			return;
+		}
+		attack.sprite = attack2;
+	}
+
+	public void OnAttackUp(){
+		if(isSelectMode){
+			return;
+		}
+		attack.sprite = attack1;
+	}
+
+
+	public void OnAttackCloseClick(){
+		attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+		showAttackWin = false;
+	}
+
+	public void OnAttackCloseDown(){
+		attackClose.sprite = armShopClose2;
+	}
+
+	public void OnAttackCloseUp(){
+		attackClose.sprite = armShopClose1;
+	}
+
+	public void OnAttackAddClick(){
+		if(unAttackSelected != null && unAttackSelected.GetComponent<PojulObject>()){
+			unAttackSelected.GetComponent<PojulObject> ().isAttackArmy = true;
+			unAttackSelected = null;
+			updateAttackStatus ();
+			return;
+		}
+	}
+
+	public void OnAttackAddDown(){
+		attackAdd.sprite = attackAdd2;
+	}
+
+	public void OnAttackAddUp(){
+		attackAdd.sprite = attackAdd1;
+	}
+
+	public void OnAttackDeaddClick(){
+		if(attackSelected != null && attackSelected.GetComponent<PojulObject>()){
+			attackSelected.GetComponent<PojulObject> ().isAttackArmy = false;
+			attackSelected = null;
+			updateAttackStatus ();
+			return;
+		}
+	}
+
+	public void OnAttackDeaddDown(){
+		attackDeadd.sprite = attackDeadd2;
+	}
+
+	public void OnAttackDeaddUp(){
+		attackDeadd.sprite = attackDeadd1;
+	}
+
+	public void OnAttackArminfoClick(){
+		if (unAttackSelected != null) {
+			onArmSelected (unAttackSelected);
+			return;
+		}else if(attackSelected != null){
+			onArmSelected (attackSelected);
+		}
+	}
+
+	public void OnAttackArminfoDown(){
+		attackArminfo.sprite = attackArminfo2;
+	}
+
+	public void OnAttackArminfoUp(){
+		attackArminfo.sprite = attackArminfo1;
+	}
+
+	public void OnUnattackItemClick(GameObject obj){
+		//Debug.Log ("gqb------>OnUnattackItemClick");
+		int index = unAttackTexts.IndexOf (obj);
+		if(index < 0 || index >= unattacks.Count){
+			if(unAttackSelectedBg != null){
+				unAttackSelectedBg.color = textUnSelectedColor;
+			}
+			unAttackSelected = null;
+			return;
+		}
+		if(unAttackSelectedBg != null){
+			unAttackSelectedBg.color = textUnSelectedColor;
+		}
+		unAttackSelectedBg = obj.transform.Find("textBg").gameObject.GetComponent<Image> ();
+		unAttackSelectedBg.color = textSelectedColor;
+		unAttackSelected = unattacks [index];
+	}
+
+	public void OnAttackItemClick(GameObject obj){
+		//Debug.Log ("gqb------>OnAttackItemClick");
+		int index = attackTexts.IndexOf (obj);
+		if(index < 0 || index >= attacks.Count){
+			if(attackSelectedBg != null){
+				attackSelectedBg.color = textUnSelectedColor;
+			}
+			attackSelected = null;
+			return;
+		}
+		if(attackSelectedBg != null){
+			attackSelectedBg.color = textUnSelectedColor;
+		}
+		attackSelectedBg = obj.transform.Find("textBg").gameObject.GetComponent<Image> ();
+		attackSelectedBg.color = textSelectedColor;
+		attackSelected = attacks [index];
+	}
 
 }

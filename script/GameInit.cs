@@ -37,6 +37,8 @@ public class GameInit  : MonoBehaviour {
 	public static List<Transform> MyCar2 = new List<Transform> ();
 	public static List<Transform> EnemyCar2 = new List<Transform> ();
 
+	public static List<Transform> attackArms = new List<Transform>();
+
 	public static Vector3 home1Pos = new Vector3(0, 0, -60000);
 	public static Vector3 home2Pos = new Vector3(0, 0, 60000);//19003//17750
 
@@ -156,8 +158,8 @@ public class GameInit  : MonoBehaviour {
 		maxInstance.Add ("1_a10", 2);
 		maxInstance.Add ("0_car2", 2);//12
 		maxInstance.Add ("1_car2", 2);
-		maxInstance.Add ("0_car3", 6);//16
-		maxInstance.Add ("1_car3", 6);//16
+		maxInstance.Add ("0_car3", 5);//16
+		maxInstance.Add ("1_car3", 5);//16
 		maxInstance.Add ("0_car4", 100);//16
 		maxInstance.Add ("1_car4", 100);//16
 		maxInstance.Add ("0_car5", 2);
@@ -172,8 +174,8 @@ public class GameInit  : MonoBehaviour {
 		maxInstance.Add ("1_missile3", 7);
 		maxInstance.Add ("0_shell1", 100000);
 		maxInstance.Add ("1_shell1", 100000);
-		maxInstance.Add ("0_transport1", 2);
-		maxInstance.Add ("1_transport1", 2);
+		maxInstance.Add ("0_transport1", 1);
+		maxInstance.Add ("1_transport1", 1);
 
 		currentInstance.Add ("0_a10", 0);
 		currentInstance.Add ("1_a10", 0);
@@ -259,6 +261,7 @@ public class GameInit  : MonoBehaviour {
 		if("1".Equals(playerId)){
 			initZ = 60000;
 		}
+			
 		GameObject prefab = (GameObject)Instantiate(Resources.Load((string)modelpaths[type]), 
 			new Vector3(0, 200, initZ), Quaternion.Euler(0, 0, 0)) as GameObject;
 		prefab.tag = tag;
@@ -266,6 +269,9 @@ public class GameInit  : MonoBehaviour {
 		currentInstance [prefab.tag] = (int)currentInstance [prefab.tag] + 1;
 		if("0".Equals(playerId)){
 			myThumbnailObjs.Add (prefab);
+			if(!"car2".Equals (type)){
+				attackArms.Add (prefab.transform);
+			}
 		}
 	}
 

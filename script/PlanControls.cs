@@ -441,7 +441,6 @@ public class PlanControls : MonoBehaviour {
 			}
 			float touchRol = getRolation (x, y, Controls1CenterX, Controls1CenterY);
 			dRol = touchRol - ControToucher1PreRolate;
-
 			dRol = limitMaxRlo(dRol);
 			newPoint1Rolation = newPoint1Rolation + dRol;
 			//updatePoint1ByRolate (2);

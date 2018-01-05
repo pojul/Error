@@ -16,7 +16,7 @@ public class MissileType1 : PojulObject {
 	private float maxSpeed = GameInit.mach * 4.5f;
 	private float acceleration = 40;
 	private float speed = 0;
-	private float aimSpeed = 10f;
+	private float aimSpeed = 13f;
 
 	private Rigidbody mRigidbody;
 

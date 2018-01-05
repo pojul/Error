@@ -2,7 +2,7 @@
 
 Shader "MK/Glow/Selective/Particles/~Additive-Multiply" {
 Properties {
-	_TintColor ("Tint Color", Color) = (0.5,0.5,0.5,0.5)
+	_Color ("Tint Color", Color) = (0.5,0.5,0.5,0.5)
 	_MainTex ("Particle Texture", 2D) = "white" {}
 	_InvFade ("Soft Particles Factor", Range(0.01,3.0)) = 1.0
 
@@ -32,7 +32,7 @@ Category {
 			#include "UnityCG.cginc"
 
 			sampler2D _MainTex;
-			fixed4 _TintColor;
+			fixed4 _Color;
 
 			sampler2D _MKGlowTex;
 			half _MKGlowTexStrength;
@@ -88,10 +88,10 @@ Category {
 				
 				fixed4 tex = tex2D(_MainTex, i.texcoord);
 				fixed4 col;
-				col.rgb = _TintColor.rgb * tex.rgb * i.color.rgb * 2.0f;
+				col.rgb = _Color.rgb * tex.rgb * i.color.rgb * 2.0f;
 				fixed3 d = tex2D(_MKGlowTex, i.texcoord) * _MKGlowTexColor;
 				col.rgb += (d.rgb * _MKGlowTexStrength);
-				col.a = (1 - tex.a) * (_TintColor.a * i.color.a * 2.0f);
+				col.a = (1 - tex.a) * (_Color.a * i.color.a * 2.0f);
 				UNITY_APPLY_FOG_COLOR(i.fogCoord, col, fixed4(0,0,0,0)); // fog towards black due to our blend mode
 				return col;
 			}

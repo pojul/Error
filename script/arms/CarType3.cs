@@ -216,6 +216,7 @@ public class CarType3 : PojulObject {
 			planMove.maxSpeed = 600;
 			planMove.maxAccelerate = 1.2f;
 			PlanControls.rorateSpeed = 35f;
+			planMove.rolSpeed = 7.0f;
 			if(fireTransform == null){
 				fireTransform = transform.FindChild ("car_type3_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
 			}
@@ -403,7 +404,13 @@ public class CarType3 : PojulObject {
 		if(!nav.enabled){
 			return;
 		}
-		nav.destination = navPoint;//target.transform.position;
+		//nav.is
+		try{
+			nav.destination = navPoint;//target.transform.position;
+		}catch(System.Exception e){
+			return;
+		}
+
 		float patrol = Random.Range(maxMoveSpeed*0.5f, maxMoveSpeed);
 		nav.speed = patrol;
 		speed = nav.speed;
@@ -420,7 +427,11 @@ public class CarType3 : PojulObject {
 		if(!nav.enabled){
 			return;
 		}
-		nav.destination = navPoint;//target.transform.position;
+		try{
+			nav.destination = navPoint;//target.transform.position;
+		}catch(System.Exception e){
+			return;
+		}
 		nav.speed = speed;
 		this.speed = nav.speed;
 		nav.acceleration = speed * 2;

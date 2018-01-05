@@ -181,4 +181,20 @@ public class Util : MonoBehaviour {
 		return 0;
 	}
 
+	public static bool isOnNavArea1(Vector3 point){
+		if((point - GameInit.home1Pos).magnitude > 50286){
+			return false;
+		}else{
+			return true;
+		}
+	}
+
+	public static bool isOnNavArea2(Vector3 point){
+		if((point - GameInit.home2Pos).magnitude > 50286 ){
+			return false;
+		}else{
+			return true;
+		}
+	}
+
 }

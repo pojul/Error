@@ -34,8 +34,11 @@ public class A10aPlan : PojulObject {
 	private float maxMoveSpeed = GameInit.mach;
 	private float moveSpeed = 0.0f;
 	private float rolateSpeed = 70f;
+	public bool isOnNavArea = true;
+	private Vector3 backEnemyPos = new Vector3(0, 6f, 8818);
 	private GameObject navCube;
 	private UnityEngine.AI.NavMeshAgent nav;
+	private bool isNavPathPartial = false;
 
 	public RadiusArea mPatrolArea;
 	private RadiusArea mAttackPatrolArea;
@@ -161,7 +164,20 @@ public class A10aPlan : PojulObject {
 		}
 
 		if(playerType == 1){
-			airMoveAuto ();
+
+			if(isNavPathPartial){
+				navCube.transform.position = navCube.transform.position + navCube.transform.forward * 12;
+				navCube.transform.rotation = Quaternion.Euler(0, navCube.transform.rotation.eulerAngles.y, 0);
+				transform.position = new Vector3 (navCube.transform.position.x, transform.position.y, navCube.transform.position.z);
+				transform.rotation = navCube.transform.rotation;
+			}
+
+			if (!isOnNavArea) {
+				outNavMove ();
+				//Debug.Log ("gqb------>des: " + nav.destination);
+			} else {
+				airMoveAuto ();
+			}
 
 			if ((Time.time - lastFireTime) > 0.12f && isInFire) {
 				lastFireTime = Time.time;
@@ -169,8 +185,8 @@ public class A10aPlan : PojulObject {
 			}
 
 		}else if(playerType == 0){
-			navCube.transform.position = new Vector3 (transform.position.x ,navCube.transform.position.y, transform.position.z);
-			navCube.transform.rotation = transform.rotation;
+			navCube.transform.position = new Vector3 (transform.position.x , planeHeight, transform.position.z);
+			navCube.transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
 			planMove.currentMountMissle = currentMountMissle;
 			//Debug.Log ("gqb------>fireAim: " + UImanager.fireAim);
 		}
@@ -180,8 +196,52 @@ public class A10aPlan : PojulObject {
 			transform_lod0.rotation.eulerAngles.z);
 	}
 
+	void outNavMove(){
+		if(Util.isOnNavArea2(new Vector3(transform.position.x,0,transform.position.z))){
+			if(isNavPathPartial){
+				return;
+			}
+			//nav.enabled = false;
+			nav.enabled = true;
+			//Debug.Log ("gqb----->isOnNavArea2");
+			nav.destination = backEnemyPos;//target.transform.position;
+			height = Random.Range(minHeight, maxHeight);
+			moveSpeed = 900;
+			nav.speed = moveSpeed;
+			nav.acceleration = moveSpeed * 0.6f;
+			transform.position = new Vector3 (navCube.transform.position.x, 
+				transform.position.y,
+				navCube.transform.position.z);
+			transform.rotation = Quaternion.Euler( 0, 
+				navCube.transform.rotation.eulerAngles.y,
+				0);
+		}else{
+			nav.enabled = false;
+			if(transform.position.y < 1000){
+				transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90 ,
+					transform.rotation.eulerAngles.y,
+					0), Time.deltaTime * rolateSpeed * 0.02f);
+			}else{
+				transform.rotation = Quaternion.Slerp(transform.rotation,
+					Quaternion.LookRotation(new Vector3(GameInit.home1Pos.x, transform.position.y, GameInit.home1Pos.z) - transform.position), 
+					Time.deltaTime * rolateSpeed * 0.01f);
+			}
+			transform.position = transform.position + transform.forward * 850 * Time.deltaTime;
+			navCube.transform.position = new Vector3 (transform.position.x ,planeHeight, transform.position.z);
+			navCube.transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
+			if(Util.isOnNavArea1(new Vector3(transform.position.x,0,transform.position.z))){
+				nav.enabled = true;
+				isOnNavArea = true;
+			}
+		}
+
+	}
+
 	void airMoveAuto(){
-		if(playerType == 0){
+		if(!nav.enabled){
+			return;
+		}
+		if(playerType == 0 || !isOnNavArea){
 			return;
 		}
 		float dRolX = transform.rotation.eulerAngles.x;
@@ -245,9 +305,10 @@ public class A10aPlan : PojulObject {
 			}
 			planMove.player = transform;
 			planMove.speed = moveSpeed;
-			planMove.maxSpeed = 1000;
+			planMove.maxSpeed = 1200;
 			planMove.maxAccelerate = 1.5f;
 			PlanControls.rorateSpeed = 65f;
+			planMove.rolSpeed = 7.0f;
 			if(fires [0] == null){
 				fires [0] = transform.FindChild ("fire1");
 			}
@@ -259,7 +320,7 @@ public class A10aPlan : PojulObject {
 			*need judge is in nav area
 			*/
 			sliderHealth.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
-			if (nav != null) {
+			if (nav != null && isOnNavArea) {
 				nav.enabled = true;
 			}
 			if (mAudioSource != null) {
@@ -322,15 +383,15 @@ public class A10aPlan : PojulObject {
 		if(MissileAimedTra == null){
 			isTargetInFire ();
 		}
+		//Debug.Log ("gqb------>pathStatus: " + nav.pathStatus);
 
-		if(nav != null && behavior == 1  && 
-			(nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid || nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial) ){
-			startNav(mPatrolArea.getRandomPoint());
-		}
+		if(nav != null && nav.enabled && 
+			(nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial || nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid) && !isNavPathPartial){
+			nav.enabled = false;
+			isNavPathPartial = true;
+			Invoke ("updatePartial", 1.5f);
 
-		if(nav != null && behavior == 3  &&  mAttackPatrolArea != null &&
-			(nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid || nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial) ){
-			startNav(mAttackPatrolArea.getRandomPoint());
+			//Debug.Log ("gqb------>pathStatus: " + nav.pathStatus);
 		}
 
 		if(MissileAimedTra != null && isAvoidMissile){
@@ -345,12 +406,22 @@ public class A10aPlan : PojulObject {
 		}
 
 		if(nav != null && behavior == 1 && !nav.hasPath && !nav.pathPending && mPatrolArea != null){
-			startNav(mPatrolArea.getRandomPoint());
+			if (isOnNavArea) {
+				startNav(mPatrolArea.getRandomPoint());
+			}
 		}else if(nav != null && behavior == 3 && !nav.hasPath && !nav.pathPending && mAttackPatrolArea != null){
 			//while is attacking but no missiles need back to home ,not in eneny area
-			startNav(mAttackPatrolArea.getRandomPoint());
+			if (isOnNavArea) {
+				startNav(mPatrolArea.getRandomPoint());
+			}
 		}
 	}
+
+	void updatePartial(){
+		nav.enabled = true;
+		isNavPathPartial = false;
+	}
+
 
 	public void setAttackPatrolArea(int areaId){
 		mAttackPatrolArea = new RadiusArea (areaId);
@@ -472,7 +543,7 @@ public class A10aPlan : PojulObject {
 		if(navCube == null){
 			createNavCube ();
 		}
-		if(!nav.enabled){
+		if(!nav.enabled || !isOnNavArea){
 			return;
 		}
 		nav.destination = navPoint;//target.transform.position;
@@ -492,7 +563,7 @@ public class A10aPlan : PojulObject {
 		if(navCube == null){
 			createNavCube ();
 		}
-		if(!nav.enabled){
+		if(!nav.enabled || !isOnNavArea){
 			return;
 		}
 		nav.destination = navPoint;//target.transform.position;
@@ -699,7 +770,7 @@ public class A10aPlan : PojulObject {
 	}
 
 	public override void isFired(RaycastHit hit, Collision collision, int type){
-
+		return;
 		//test
 		if(playerType == 0){
 			return;

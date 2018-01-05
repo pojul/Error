@@ -71,15 +71,17 @@ public class planMove : MonoBehaviour {
 				}
 			}else if("car3".Equals(type)){
 				float rolX = transform.rotation.eulerAngles.x;
+				float rolY = transform.rotation.eulerAngles.y;
 				if(transform.position.y >= 0){
 					rolX = 0;
+					rolY = PlanControls.newPoint1Rolation;
 				}else if(transform.position.y < 0){
 					rolX = 90;
-					rolSpeed = 0.012f;
+					rolSpeed = 0.022f;
 				}
 
 				Quaternion targetRotation = Quaternion.Euler(rolX, 
-					PlanControls.newPoint1Rolation,
+					rolY,
 					0);
 				transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rolSpeed);
 
@@ -92,15 +94,20 @@ public class planMove : MonoBehaviour {
 				}
 
 				if(transform.position.y < -1800){
+					//Destroy (this.gameObject);
 					mPojulObject.isDestoryed = true;
-					Destroy (this.gameObject);
+
+					((CarType3)mPojulObject).destoryData ();
+					((CarType3)mPojulObject).destoryAll ();
 				}
 
 			}
 
-			if(mRigidbody != null && transform.position.y >= 0){
+			if(mRigidbody != null && "car3".Equals(type) && transform.position.y >= 0){
 				mRigidbody.AddForce (transform.forward * speed * 2f);
 				//Debug.Log ("gqb------>" + mRigidbody.velocity.magnitude);
+			}else if(mRigidbody != null){
+				mRigidbody.AddForce (transform.forward * speed * 2f);
 			}
 				
 

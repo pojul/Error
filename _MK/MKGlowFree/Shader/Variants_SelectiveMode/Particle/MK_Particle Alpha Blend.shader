@@ -2,7 +2,7 @@
 
 Shader "MK/Glow/Selective/Particles/Alpha Blended" {
 Properties {
-	_TintColor ("Tint Color", Color) = (0.5,0.5,0.5,0.5)
+	_Color ("Tint Color", Color) = (0.5,0.5,0.5,0.5)
 	_MainTex ("Particle Texture", 2D) = "white" {}
 	_InvFade ("Soft Particles Factor", Range(0.01,3.0)) = 1.0
 
@@ -32,7 +32,7 @@ Category {
 			#include "UnityCG.cginc"
 
 			sampler2D _MainTex;
-			fixed4 _TintColor;
+			fixed4 _Color;
 
 			sampler2D _MKGlowTex;
 			half _MKGlowTexStrength;
@@ -68,7 +68,7 @@ Category {
 				o.projPos = ComputeScreenPos (o.vertex);
 				COMPUTE_EYEDEPTH(o.projPos.z);
 				#endif
-				o.color = v.color * _TintColor;
+				o.color = v.color * _Color;
 				o.texcoord = TRANSFORM_TEX(v.texcoord,_MainTex);
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
