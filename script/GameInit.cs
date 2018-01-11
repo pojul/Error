@@ -37,7 +37,12 @@ public class GameInit  : MonoBehaviour {
 	public static List<Transform> MyCar2 = new List<Transform> ();
 	public static List<Transform> EnemyCar2 = new List<Transform> ();
 
-	public static List<Transform> attackArms = new List<Transform>();
+	public static List<Transform> attackArms_0 = new List<Transform>();
+	public static List<Transform> attackArms_1 = new List<Transform>();
+	public static List<Vector3> attackMasses_0 = new List<Vector3> ();
+	public static List<Vector3> attackMasses_1 = new List<Vector3> ();
+	public static List<Vector3> attackAreas_0 = new List<Vector3> ();
+	public static List<Vector3> attackAreas_1 = new List<Vector3> ();
 
 	public static Vector3 home1Pos = new Vector3(0, 0, -60000);
 	public static Vector3 home2Pos = new Vector3(0, 0, 60000);//19003//17750
@@ -59,6 +64,13 @@ public class GameInit  : MonoBehaviour {
 	public RadiusArea mRadiusArea1= new RadiusArea(5);
 
 	public GameObject test;
+	public float enemyGoldScale = 0.5f;
+	public int a10AttackNum = 0;
+	public int car3AttackNum = 0;
+	public int transport1AttackNum = 0;
+	public int attackMountMissile = 0;
+	public Transform attackTra;
+	public int enemyAttackBehavor;
 
 	public static Vector3[] myNavPoint1as = new Vector3[]{new Vector3(3340, 100, -34925), 
 		new Vector3 (32331, 100, -61230), 
@@ -97,7 +109,7 @@ public class GameInit  : MonoBehaviour {
 
 		InvokeRepeating("gc", 60.0f, 60.0f);
 
-		InvokeRepeating("enemyManager", 0.5f, 0.5f);
+		InvokeRepeating("enemyManager", 5f, 5f);
 
 		InvokeRepeating("instanceEnemy", 2f, 2f);
 	}
@@ -152,26 +164,26 @@ public class GameInit  : MonoBehaviour {
 		prices.Add ("missile2", 1);//29
 		prices.Add ("missile3", 1);
 		prices.Add ("shell1", 1);
-		prices.Add ("transport1", 1);//62
+		prices.Add ("transport1", 4);//62
 
 		maxInstance.Add ("0_a10", 2);
 		maxInstance.Add ("1_a10", 2);
-		maxInstance.Add ("0_car2", 2);//12
-		maxInstance.Add ("1_car2", 2);
-		maxInstance.Add ("0_car3", 5);//16
-		maxInstance.Add ("1_car3", 5);//16
+		maxInstance.Add ("0_car2", 1);//12
+		maxInstance.Add ("1_car2", 1);
+		maxInstance.Add ("0_car3", 4);//16
+		maxInstance.Add ("1_car3", 4);//16
 		maxInstance.Add ("0_car4", 100);//16
 		maxInstance.Add ("1_car4", 100);//16
-		maxInstance.Add ("0_car5", 2);
-		maxInstance.Add ("1_car5", 2);
+		maxInstance.Add ("0_car5", 1);
+		maxInstance.Add ("1_car5", 1);
 		maxInstance.Add ("0_car6", 8);
 		maxInstance.Add ("1_car6", 8);
-		maxInstance.Add ("0_missile1",6);
-		maxInstance.Add ("1_missile1",6);
+		maxInstance.Add ("0_missile1",3);
+		maxInstance.Add ("1_missile1",3);
 		maxInstance.Add ("0_missile2", 2);
 		maxInstance.Add ("1_missile2", 2);
-		maxInstance.Add ("0_missile3", 7);
-		maxInstance.Add ("1_missile3", 7);
+		maxInstance.Add ("0_missile3", 6);
+		maxInstance.Add ("1_missile3", 6);
 		maxInstance.Add ("0_shell1", 100000);
 		maxInstance.Add ("1_shell1", 100000);
 		maxInstance.Add ("0_transport1", 1);
@@ -227,11 +239,16 @@ public class GameInit  : MonoBehaviour {
 		park0.Add (new Vector3 (-18000, 0, -82000), 0);
 		park0.Add (new Vector3 (-14000, 0, -82000), 0);
 
-		park1.Add (new Vector3 (-3000, 0, -40000), 0);
-		park1.Add (new Vector3 (-5000, 0, -40000), 0);
-		park1.Add (new Vector3 (-7000, 0, -40000), 0);
-		park1.Add (new Vector3 (-9000, 0, -40000), 0);
-		park1.Add (new Vector3 (-11000, 0, -40000), 0);
+		park1.Add (new Vector3 (-16000, 0, 70000), 0);
+		park1.Add (new Vector3 (-16000, 0, 67000), 0);
+		park1.Add (new Vector3 (-16000, 0, 64000), 0);
+		park1.Add (new Vector3 (-16000, 0, 61000), 0);
+
+		/*park1.Add (new Vector3 (-3000, 0, 40000), 0);
+		park1.Add (new Vector3 (-5000, 0, 40000), 0);
+		park1.Add (new Vector3 (-7000, 0, 40000), 0);
+		park1.Add (new Vector3 (-9000, 0, 40000), 0);
+		park1.Add (new Vector3 (-11000, 0, 40000), 0);
 		park1.Add (new Vector3 (16000, 0, 52000), 0);
 		park1.Add (new Vector3 (16000, 0, 54000), 0);
 		park1.Add (new Vector3 (16000, 0, 56000), 0);
@@ -245,7 +262,24 @@ public class GameInit  : MonoBehaviour {
 		park1.Add (new Vector3 (14000, 0, 78500), 0);
 		park1.Add (new Vector3 (14000, 0, 82500), 0);
 		park1.Add (new Vector3 (18000, 0, 78500), 0);
-		park1.Add (new Vector3 (18000, 0, 82500), 0);
+		park1.Add (new Vector3 (18000, 0, 82500), 0);*/
+
+		attackMasses_0.Add (new Vector3(-32000, 0, -60000));
+		//attackMasses_0.Add (new Vector3(18000, 0, 20000));
+		attackMasses_0.Add (new Vector3(32000, 0, -60000));
+
+		attackMasses_1.Add (new Vector3(-32000, 0, 60000));
+		attackMasses_1.Add (new Vector3(32000, 0, 60000));
+
+		attackAreas_0.Add (new Vector3(18000, 0, 20000));
+		attackAreas_0.Add (new Vector3(-41000, 0, 40000));
+		attackAreas_0.Add (new Vector3(44000, 0, 82000));
+		attackAreas_0.Add (new Vector3(-24000, 0, 102000));
+
+		attackAreas_1.Add (new Vector3(-15000, 0, -18000));
+		attackAreas_1.Add (new Vector3(43000, 0, -40000));
+		attackAreas_1.Add (new Vector3(18000, 0, -106000));
+		attackAreas_1.Add (new Vector3(-42000, 0, -80000));
 
 	}
 
@@ -269,8 +303,13 @@ public class GameInit  : MonoBehaviour {
 		currentInstance [prefab.tag] = (int)currentInstance [prefab.tag] + 1;
 		if("0".Equals(playerId)){
 			myThumbnailObjs.Add (prefab);
-			if(!"car2".Equals (type)){
-				attackArms.Add (prefab.transform);
+			if(!"car2".Equals (type) && !"car5".Equals (type)){
+				attackArms_0.Add (prefab.transform);
+			}
+		}
+		if("1".Equals(playerId)){
+			if(!"car2".Equals (type) && !"car5".Equals (type)){
+				attackArms_1.Add (prefab.transform);
 			}
 		}
 	}
@@ -307,59 +346,241 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	void instanceEnemy(){
-		if(EnemyMoney > prices["a10"] && currentInstance["1_a10"] < maxInstance["1_a10"]){
+		if(EnemyMoney > prices["a10"]*enemyGoldScale && currentInstance["1_a10"] < maxInstance["1_a10"]){
 			instanceGameobject ("1", "a10");
-			EnemyMoney = EnemyMoney - prices ["a10"];
+			EnemyMoney = EnemyMoney - prices ["a10"]*enemyGoldScale;
 		}
 
-		if(EnemyMoney > prices["missile3"]){
+		if(EnemyMoney > prices["missile3"]*enemyGoldScale){
 			if(currentInstance["1_a10"] >= maxInstance["1_a10"] && currentInstance["1_car5"] >= maxInstance["1_car5"] 
 				&& currentInstance["1_missile3"] < maxInstance["1_missile3"]){
 				instanceGameobject ("1", "missile3");
-				EnemyMoney = EnemyMoney - prices ["missile3"];
+				EnemyMoney = EnemyMoney - prices ["missile3"]*enemyGoldScale;
 			}else if(currentInstance["1_missile3"] < (maxInstance["1_missile3"]/2) ){
 				instanceGameobject ("1", "missile3");
-				EnemyMoney = EnemyMoney - prices ["missile3"];
+				EnemyMoney = EnemyMoney - prices ["missile3"]*enemyGoldScale;
 			}
 		}
 
-		if(EnemyMoney > prices["car5"] && currentInstance["1_car5"] < maxInstance["1_car5"]){
+		if(EnemyMoney > prices["car5"]*enemyGoldScale && currentInstance["1_car5"] < maxInstance["1_car5"]){
 			instanceGameobject ("1", "car5");
-			EnemyMoney = EnemyMoney - prices["car5"];
+			EnemyMoney = EnemyMoney - prices["car5"]*enemyGoldScale;
 		}
 
-		if(EnemyMoney > prices["missile1"]){
+		if(EnemyMoney > prices["missile1"]*enemyGoldScale){
 			if(currentInstance["1_a10"] >= maxInstance["1_a10"] && currentInstance["1_car5"] >= maxInstance["1_car5"] 
 				&& currentInstance["1_missile1"] < maxInstance["1_missile1"]){
 				instanceGameobject ("1", "missile1");
-				EnemyMoney = EnemyMoney - prices ["missile1"];
+				EnemyMoney = EnemyMoney - prices ["missile1"]*enemyGoldScale;
 			}else if(currentInstance["1_missile1"] < (maxInstance["1_missile1"]/2) ){
 				instanceGameobject ("1", "missile1");
-				EnemyMoney = EnemyMoney - prices ["missile1"];
+				EnemyMoney = EnemyMoney - prices ["missile1"]*enemyGoldScale;
 			}
 		}
 
-		if(EnemyMoney > prices["car2"] && currentInstance["1_car2"] < maxInstance["1_car2"]){
+		if(EnemyMoney > prices["car2"]*enemyGoldScale && currentInstance["1_car2"] < maxInstance["1_car2"]){
 			instanceGameobject ("1", "car2");
-			EnemyMoney = EnemyMoney - prices ["car2"];
+			EnemyMoney = EnemyMoney - prices ["car2"]*enemyGoldScale;
 		}
 
 		if (currentInstance ["1_a10"] >= maxInstance ["1_a10"] && currentInstance ["1_car5"] >= maxInstance ["1_car5"]) {
-			if (EnemyMoney > prices ["car3"] && currentInstance["1_car3"] < maxInstance["1_car3"]) {
+			if (EnemyMoney > prices ["car3"]*enemyGoldScale && currentInstance["1_car3"] < maxInstance["1_car3"]) {
 				instanceGameobject ("1", "car3");
-				EnemyMoney = EnemyMoney - prices ["car3"];
+				EnemyMoney = EnemyMoney - prices ["car3"]*enemyGoldScale;
 			}
-			if(EnemyMoney > prices ["missile2"] && currentInstance["1_missile2"] < maxInstance["1_missile2"]){
+			/*if(EnemyMoney > prices ["missile2"]*enemyGoldScale && currentInstance["1_missile2"] < maxInstance["1_missile2"]){
 				instanceGameobject ("1", "missile2");
-				EnemyMoney = EnemyMoney - prices ["missile2"];
+				EnemyMoney = EnemyMoney - prices ["missile2"]*enemyGoldScale;
+			}*/
+		}
+
+		if (currentInstance ["1_a10"] >= maxInstance ["1_a10"] && currentInstance ["1_car5"] >= maxInstance ["1_car5"] 
+			&& currentInstance["1_car3"] >= maxInstance["1_car3"]) {
+			if(EnemyMoney > prices ["transport1"]*enemyGoldScale && currentInstance["1_transport1"] < maxInstance["1_transport1"]){
+				instanceGameobject ("1", "transport1");
+				EnemyMoney = EnemyMoney - prices ["transport1"]*enemyGoldScale;
 			}
+		}
+	}
+
+	void updateEnemyAttacksCounts(){
+		UImanager.attacks_1.Remove (null);
+		a10AttackNum = 0;
+		car3AttackNum = 0;
+		transport1AttackNum = 0;
+		attackMountMissile = 0;
+		for(int i = 0; i< UImanager.attacks_1.Count; i++){
+			if(UImanager.attacks_1[i] == null){
+				continue;
+			}
+			PojulObject mPojulObject = UImanager.attacks_1 [i].GetComponent<PojulObject> ();
+			if(mPojulObject == null || mPojulObject.isDestoryed){
+				continue;
+			}
+			if ("a10".Equals (mPojulObject.type)) {
+				a10AttackNum = a10AttackNum + 1;
+				attackMountMissile = ((A10aPlan)mPojulObject).currentMountMissle;
+			} else if("car3".Equals (mPojulObject.type)){
+				car3AttackNum = car3AttackNum + 1;
+			}else if("transport1".Equals (mPojulObject.type)){
+				attackTra = UImanager.attacks_1 [i];
+				transport1AttackNum = transport1AttackNum + 1;
+				((TransportType1)mPojulObject).attackTransports.Remove (null);
+			}
+		}
+	}
+
+	void addEnemyAttacks(){
+		bool needAddA10 = false;
+		bool needAddCar3 = false;
+		bool needAddTransport1 = false;
+		if( (currentInstance ["1_a10"] >= maxInstance ["1_a10"] && a10AttackNum < 1) ){
+			needAddA10 = true;
+		}
+		if( (currentInstance ["1_car3"] >= maxInstance ["1_car3"] && car3AttackNum < 3) ){
+			needAddCar3 = true;
+		}
+		if( (currentInstance ["1_transport1"] >= maxInstance ["1_transport1"] && transport1AttackNum < 1) ){
+			needAddTransport1 = true;
+		}
+		for(int i = 0; i< attackArms_1.Count; i++){
+			if(attackArms_1[i] == null){
+				continue;
+			}
+			PojulObject mPojulObject = attackArms_1[i].GetComponent<PojulObject> ();
+			if(mPojulObject == null || mPojulObject.isDestoryed){
+				continue;
+			}
+			if(mPojulObject.type.Equals("a10") && needAddA10 && !mPojulObject.isAttackArmy){
+				mPojulObject.isAttackArmy = true;
+				mPojulObject.behavior = UImanager.attackBehavorId_1;
+				((A10aPlan)mPojulObject).onBehavorChanged ();
+				UImanager.attacks_1.Add (attackArms_1[i]);
+				a10AttackNum = a10AttackNum + 1;
+				needAddA10 = false;
+			}
+			if (mPojulObject.type.Equals ("car3") && needAddCar3 && !mPojulObject.isAttackArmy) {
+				mPojulObject.isAttackArmy = true;
+				mPojulObject.behavior = UImanager.attackBehavorId_1;
+				UImanager.attacks_1.Add (attackArms_1[i]);
+				car3AttackNum = car3AttackNum + 1;
+				if(car3AttackNum >= 3){
+					needAddCar3 = false;
+				}
+			}
+			if (mPojulObject.type.Equals ("transport1") && needAddTransport1 && !mPojulObject.isAttackArmy) {
+				mPojulObject.isAttackArmy = true;
+				mPojulObject.behavior = UImanager.attackBehavorId_1;
+				UImanager.attacks_1.Add (attackArms_1[i]);
+				transport1AttackNum = transport1AttackNum + 1;
+				needAddTransport1 = false;
+			}
+
 		}
 
 	}
 
-
 	void enemyManager(){
+		updateEnemyAttacksCounts ();
+		enemyAttackBehavor = UImanager.attackBehavorId_1;
+		//Debug.Log ("gqb------>enemyManager111 attackBehavorId_1: " + UImanager.attackBehavorId_1);
+		if (UImanager.attackBehavorId_1 == 1) {
+			for (int i = 0; i < UImanager.attacks_0.Count; i++) {
+				if (UImanager.attacks_0 [i] != null && Util.isOnNavArea2 (UImanager.attacks_0 [i].position)) {
+					return;
+				}
+			}
+			//Debug.Log ("gqb------>enemyManager222");
+			if (a10AttackNum >= 1 && car3AttackNum >= 3 && transport1AttackNum >= 1) {
+				UImanager.attackBehavorId_1 = 2;
+				onEnemyBehavorChanged ();
+			} else {
+				addEnemyAttacks ();
+			}
+		} else if (UImanager.attackBehavorId_1 == 2) {
+			if (a10AttackNum < 1 || car3AttackNum < 3 || transport1AttackNum < 1) {
+				//addEnemyAttacks ();
+				UImanager.attackBehavorId_1 = 1;
+				onEnemyBehavorChanged ();
+				return;
+			}
+			if (isEnemyAttackReady()) {
+				UImanager.attackBehavorId_1 = 3;
+				onEnemyBehavorChanged ();
+			}
+		} else if (UImanager.attackBehavorId_1 == 3) {
+			if ( car3AttackNum < 1 ) {
+				UImanager.attackBehavorId_1 = 1;
+				UImanager.massId_1 = Random.Range (0, 1);
+				int attackListId = Random.Range (0, 1);
+				if(UImanager.massId_1 == 0){
+					UImanager.attackAreaId_1 = new int[]{1,4}[attackListId];
+				}else if(UImanager.massId_1 == 1){
+					UImanager.attackAreaId_1 = new int[]{2,3}[attackListId];
+				}
+				onEnemyBehavorChanged ();
+			}
+		}
+	}
 
+	bool isEnemyAttackReady(){
+		//Debug.Log ("gqb------>isEnemyAttackReady00000");
+		if(attackMountMissile < 2){
+			return false;
+		}
+		//Debug.Log ("gqb------>isEnemyAttackReady11111");
+		if(attackTra == null || (new Vector3(attackTra.position.x, 0, attackTra.position.z) - attackMasses_1[UImanager.massId_1]).magnitude > 10 ){
+			return false;
+		}
+		//Debug.Log ("gqb------>isEnemyAttackReady22222");
+		List<Vector3> enemyMasses = new List<Vector3> ();
+		enemyMasses.Add (new Vector3 ((attackMasses_1[UImanager.massId_1].x - 600), 
+			300, 
+			attackMasses_1[UImanager.massId_1].z
+		));
+		enemyMasses.Add (new Vector3 ((attackMasses_1[UImanager.massId_1].x - 600), 
+			300, 
+			(attackMasses_1[UImanager.massId_1].z - 1*600)
+		));
+		enemyMasses.Add (new Vector3 ((attackMasses_1[UImanager.massId_1].x - 600), 
+			300, 
+			(attackMasses_1[UImanager.massId_1].z - 2*600)
+		));
+		RaycastHit hit;
+		for(int i = 0; i < enemyMasses.Count; i++){
+			bool isHit = Physics.Raycast (enemyMasses[i], Vector3.down, out hit, 500.0f);
+			if(!isHit){
+				return false;
+			}
+			if(hit.transform.root.childCount <= 0 || hit.transform.root.GetChild(0).tag.Equals("Untagged")){
+				return false;
+			}
+			PojulObject mPojulObject = hit.transform.root.GetChild (0).GetComponent<PojulObject> ();
+			if(mPojulObject == null){
+				return false;
+			}
+			if (mPojulObject.playerType == 0 || mPojulObject.isDestoryed) {
+				return false;
+			}
+		}
+		Debug.Log ("gqb------>isEnemyAttackReady33333");
+		return true;
+	}
+
+	void onEnemyBehavorChanged(){
+		for (int i = 0; i < UImanager.attacks_1.Count; i++) {
+			if(UImanager.attacks_1[i] == null){
+				continue;
+			}
+			PojulObject mPojulObject = UImanager.attacks_1 [i].GetComponent<PojulObject> ();
+			if(mPojulObject == null || mPojulObject.isDestoryed){
+				continue;
+			}
+			mPojulObject.behavior = UImanager.attackBehavorId_1;
+			if ("a10".Equals (mPojulObject.type)) {
+				((A10aPlan)mPojulObject).onBehavorChanged ();
+			}
+		}
 	}
 
 }

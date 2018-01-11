@@ -78,7 +78,7 @@ public class UImanager : MonoBehaviour {
 	private float frontCameraY = 12000;
 	private Transform selectedTra;
 	private float scrollPos = 0.0f;
-	private bool isOnLeave = false;
+	public static bool isOnLeave = false;
 	private float onLeaveHeight = 12000;
 
 	private bool showShopWin = false;
@@ -119,7 +119,6 @@ public class UImanager : MonoBehaviour {
 	private float sellingInv = 0.0f;
 	private int sellingNoteIndex = 0;
 	private string[] sellingNotes = new string[]{".  ", ".. ", "..."};
-
 
 	public Image armInfoPanel;
 	public Image armInfoClose;
@@ -181,18 +180,28 @@ public class UImanager : MonoBehaviour {
 	private bool showAttackWin = false;
 	private float unAttackScrollPos = 0.0f;
 	private float attackScrollPos = 0.0f;
-	private List<Transform> unattacks = new List<Transform> ();
-	private List<PojulObject> unattackSrcs = new List<PojulObject> ();
-	private List<Transform> attacks = new List<Transform> ();
-	private List<PojulObject> attackSrcs = new List<PojulObject> ();
+	public static List<Transform> unattacks_0 = new List<Transform> ();
+	private List<PojulObject> unattackSrcs_0 = new List<PojulObject> ();
+	public static List<Transform> attacks_0 = new List<Transform> ();
+	private List<PojulObject> attackSrcs_0 = new List<PojulObject> ();
 	private List<GameObject> unAttackTexts = new List<GameObject> ();
 	private List<GameObject> attackTexts = new List<GameObject> ();
+
+	public static List<Transform> unattacks_1 = new List<Transform> ();
+	public static List<Transform> attacks_1 = new List<Transform> ();
+
 	private Transform attackSelected;
 	private Image attackSelectedBg;
 	private Transform unAttackSelected;
 	private Image unAttackSelectedBg;
 	private Color textSelectedColor = new Color(208/255f, 230/255f, 240/255f, 90/255f);
 	private Color textUnSelectedColor = new Color(33/255f, 140/255f, 189/255f, 0/255f);
+	public static int massId_0 = 0;
+	public static int attackAreaId_0 = 0;
+	public static int attackBehavorId_0 = 1;
+	public static int massId_1 = 0;
+	public static int attackAreaId_1 = 1;
+	public static int attackBehavorId_1 = 1;
 
 	public Sprite attackAdd1;
 	public Sprite attackAdd2;
@@ -916,6 +925,14 @@ public class UImanager : MonoBehaviour {
 		mPojulObject = tra.GetComponent<PojulObject> ();
 		if("car2".Equals(mPojulObject.type) || "car3".Equals(mPojulObject.type) || "car5".Equals(mPojulObject.type)
 			|| "a10".Equals(mPojulObject.type)){
+			if(showAttackWin){
+				if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
+					selectedTra.GetComponent<PojulObject> ().isSelected = false;
+					selectedTra = null;
+				}
+				attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+				showAttackWin = false;
+			}
 			if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
 				selectedTra.GetComponent<PojulObject> ().isSelected = false;
 			}
@@ -926,10 +943,6 @@ public class UImanager : MonoBehaviour {
 			if(showShopWin){
 				armShopPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
 				showShopWin = false;
-			}
-			if(showAttackWin){
-				attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
-				showAttackWin = false;
 			}
 
 			if(mPojulObject.isSelling){
@@ -982,7 +995,7 @@ public class UImanager : MonoBehaviour {
 				armInfoArms.text = "";
 				armInfoSellNote.text = (int)(GameInit.prices["car3"]*0.5f*((CarType3)mPojulObject).sliderHealth.value/((CarType3)mPojulObject).sliderHealth.maxValue)
 					+ " golds";
-				if (planMove.player != null) {
+				if (planMove.player != null || mPojulObject.behavior == 5) {
 					armInfoControl.sprite = armInfoControl3;
 				} else {
 					armInfoControl.sprite = armInfoControl1;
@@ -1086,6 +1099,13 @@ public class UImanager : MonoBehaviour {
 						tempImage.sprite = blueThubmnailPoint;
 					}
 				}
+
+				if (mPojulObject.behavior == 5) {
+					tempImage.rectTransform.localScale = new Vector3 (0, 0, 0);
+				} else {
+					tempImage.rectTransform.localScale = new Vector3 (1, 1, 1);
+				}
+
 				updatyXZ (GameInit.myThumbnailObjs[i], 0);
 			}
 				
@@ -1394,6 +1414,10 @@ public class UImanager : MonoBehaviour {
 			return;
 		}
 		if(showAttackWin){
+			if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
+				selectedTra.GetComponent<PojulObject> ().isSelected = false;
+				selectedTra = null;
+			}
 			showAttackWin = false;
 			attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
 		}
@@ -1531,20 +1555,20 @@ public class UImanager : MonoBehaviour {
 		List<PojulObject> tempUnattackSrcs = new List<PojulObject> ();
 		List<Transform> tempAttacks = new List<Transform> ();
 		List<PojulObject> tempAttackSrcs = new List<PojulObject> ();
-		//GameInit.attackArms.Remove (null);
-		for(int i=0; i< GameInit.attackArms.Count; i++){
-			if(GameInit.attackArms[i] == null){
+		GameInit.attackArms_0.Remove (null);
+		for(int i=0; i< GameInit.attackArms_0.Count; i++){
+			if(GameInit.attackArms_0[i] == null){
 				continue;
 			}
-			PojulObject mPojulObject = GameInit.attackArms [i].GetComponent<PojulObject> ();
+			PojulObject mPojulObject = GameInit.attackArms_0 [i].GetComponent<PojulObject> ();
 			if(mPojulObject == null){
 				continue;
 			}
 			if(!mPojulObject.isAttackArmy){
-				tempUnattacks.Add (GameInit.attackArms[i]);
+				tempUnattacks.Add (GameInit.attackArms_0[i]);
 				tempUnattackSrcs.Add (mPojulObject);
 			}else{
-				tempAttacks.Add (GameInit.attackArms[i]);
+				tempAttacks.Add (GameInit.attackArms_0[i]);
 				tempAttackSrcs.Add (mPojulObject);
 			}
 		}
@@ -1563,15 +1587,15 @@ public class UImanager : MonoBehaviour {
 				tempAttackText.text = "      ";
 			}
 		}
-		unattacks = tempUnattacks;
-		unattackSrcs = tempUnattackSrcs;
-		attacks = tempAttacks;
-		attackSrcs = tempAttackSrcs;
+		unattacks_0 = tempUnattacks;
+		unattackSrcs_0 = tempUnattackSrcs;
+		attacks_0 = tempAttacks;
+		attackSrcs_0 = tempAttackSrcs;
 
 		if(unAttackSelectedBg != null){
 			unAttackSelectedBg.color = textUnSelectedColor;
 		}
-		int unAttackIndex = unattacks.IndexOf (unAttackSelected);
+		int unAttackIndex = unattacks_0.IndexOf (unAttackSelected);
 		if (unAttackSelected != null && unAttackIndex >= 0 && unAttackIndex < unAttackArmVals.transform.childCount) {
 			unAttackSelectedBg = unAttackTexts [unAttackIndex].transform.Find ("textBg").gameObject.GetComponent<Image> ();
 			unAttackSelectedBg.color = textSelectedColor;
@@ -1582,7 +1606,7 @@ public class UImanager : MonoBehaviour {
 		if(attackSelectedBg != null){
 			attackSelectedBg.color = textUnSelectedColor;
 		}
-		int attackIndex = attacks.IndexOf (attackSelected);
+		int attackIndex = attacks_0.IndexOf (attackSelected);
 		if (attackSelected != null && attackIndex >= 0 && attackIndex < unAttackArmVals.transform.childCount) {
 			attackSelectedBg = attackTexts [attackIndex].transform.Find ("textBg").gameObject.GetComponent<Image> ();
 			attackSelectedBg.color = textSelectedColor;
@@ -1643,7 +1667,7 @@ public class UImanager : MonoBehaviour {
 				GameInit.MyMoney = GameInit.MyMoney + sellMoney;
 				sellingTra = null;
 
-				if(showArmInfo && selectedTra != null){
+				if(selectedTra != null && showArmInfo){
 					armInfoSell.sprite = armInfoSell1;
 				}
 
@@ -1753,6 +1777,7 @@ public class UImanager : MonoBehaviour {
 		showArmInfo = false;
 		if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
 			selectedTra.GetComponent<PojulObject> ().isSelected = false;
+			selectedTra = null;
 		}
 	}
 
@@ -1856,6 +1881,9 @@ public class UImanager : MonoBehaviour {
 		PojulObject mPojulObject = selectedTra.GetComponent<PojulObject> ();
 		if ("car3".Equals (mPojulObject.type) || "car5".Equals (mPojulObject.type) || "a10".Equals (mPojulObject.type)) {
 			mPojulObject.isAttackArmy = attackArmyValue.isOn;
+			if(mPojulObject.type.Equals("a10")){
+				((A10aPlan)mPojulObject).onBehavorChanged ();
+			}
 		}
 	}
 
@@ -1897,11 +1925,6 @@ public class UImanager : MonoBehaviour {
 			((CarType3)mPojulObject).setPlayType (1);
 			isOnLeave = true;
 		}else if("a10".Equals (mPojulObject.type)){
-			bool isOnNavArea = true;
-			if(!Util.isOnNavArea1(new Vector3(planMove.player.transform.position.x, 0, planMove.player.transform.position.z))){
-				isOnNavArea = false;
-			}
-			((A10aPlan)mPojulObject).isOnNavArea = isOnNavArea;
 			((A10aPlan)mPojulObject).setPlayType (1);
 			isOnLeave = true;
 		}
@@ -1952,6 +1975,10 @@ public class UImanager : MonoBehaviour {
 
 
 	public void OnAttackCloseClick(){
+		if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
+			selectedTra.GetComponent<PojulObject> ().isSelected = false;
+			selectedTra = null;
+		}
 		attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
 		showAttackWin = false;
 	}
@@ -1966,8 +1993,13 @@ public class UImanager : MonoBehaviour {
 
 	public void OnAttackAddClick(){
 		if(unAttackSelected != null && unAttackSelected.GetComponent<PojulObject>()){
-			unAttackSelected.GetComponent<PojulObject> ().isAttackArmy = true;
+			PojulObject mPojulObject = unAttackSelected.GetComponent<PojulObject> ();
+			mPojulObject.isAttackArmy = true;
+			mPojulObject.behavior = attackStatusVal.value + 1;
 			unAttackSelected = null;
+			if(mPojulObject.type.Equals("a10")){
+				((A10aPlan)mPojulObject).onBehavorChanged ();
+			}
 			updateAttackStatus ();
 			return;
 		}
@@ -1983,8 +2015,13 @@ public class UImanager : MonoBehaviour {
 
 	public void OnAttackDeaddClick(){
 		if(attackSelected != null && attackSelected.GetComponent<PojulObject>()){
-			attackSelected.GetComponent<PojulObject> ().isAttackArmy = false;
+			PojulObject mPojulObject = attackSelected.GetComponent<PojulObject> ();
+			mPojulObject.isAttackArmy = false;
+			mPojulObject.behavior = 1;
 			attackSelected = null;
+			if(mPojulObject.type.Equals("a10")){
+				((A10aPlan)mPojulObject).onBehavorChanged ();
+			}
 			updateAttackStatus ();
 			return;
 		}
@@ -2017,8 +2054,12 @@ public class UImanager : MonoBehaviour {
 
 	public void OnUnattackItemClick(GameObject obj){
 		//Debug.Log ("gqb------>OnUnattackItemClick");
+		if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
+			selectedTra.GetComponent<PojulObject> ().isSelected = false;
+			selectedTra = null;
+		}
 		int index = unAttackTexts.IndexOf (obj);
-		if(index < 0 || index >= unattacks.Count){
+		if(index < 0 || index >= unattacks_0.Count){
 			if(unAttackSelectedBg != null){
 				unAttackSelectedBg.color = textUnSelectedColor;
 			}
@@ -2030,13 +2071,21 @@ public class UImanager : MonoBehaviour {
 		}
 		unAttackSelectedBg = obj.transform.Find("textBg").gameObject.GetComponent<Image> ();
 		unAttackSelectedBg.color = textSelectedColor;
-		unAttackSelected = unattacks [index];
+		unAttackSelected = unattacks_0 [index];
+		if(unattacks_0 [index] != null && unattacks_0 [index].GetComponent<PojulObject>()){
+			selectedTra = unattacks_0 [index];
+			selectedTra.GetComponent<PojulObject> ().isSelected = true;
+		}
 	}
 
 	public void OnAttackItemClick(GameObject obj){
 		//Debug.Log ("gqb------>OnAttackItemClick");
+		if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
+			selectedTra.GetComponent<PojulObject> ().isSelected = false;
+			selectedTra = null;
+		}
 		int index = attackTexts.IndexOf (obj);
-		if(index < 0 || index >= attacks.Count){
+		if(index < 0 || index >= attacks_0.Count){
 			if(attackSelectedBg != null){
 				attackSelectedBg.color = textUnSelectedColor;
 			}
@@ -2048,7 +2097,55 @@ public class UImanager : MonoBehaviour {
 		}
 		attackSelectedBg = obj.transform.Find("textBg").gameObject.GetComponent<Image> ();
 		attackSelectedBg.color = textSelectedColor;
-		attackSelected = attacks [index];
+		attackSelected = attacks_0 [index];
+		if(attacks_0 [index] != null && attacks_0 [index].GetComponent<PojulObject>()){
+			selectedTra = attacks_0 [index];
+			selectedTra.GetComponent<PojulObject> ().isSelected = true;
+		}
+	}
+
+	public void OnAttackStatusChange(){
+		attackBehavorId_0 = attackStatusVal.value + 1;
+		for(int i = 0; i< attacks_0.Count; i++){
+			if(attacks_0[i] == null){
+				return;
+			}
+			PojulObject mPojulObject = attacks_0 [i].GetComponent<PojulObject> ();
+			if(mPojulObject == null || mPojulObject.isDestoryed){
+				return;
+			}
+			mPojulObject.behavior = attackStatusVal.value + 1;
+			if("a10".Equals(mPojulObject.type)){
+				((A10aPlan)mPojulObject).onBehavorChanged ();
+			}
+		}
+	}
+
+	public void OnAttackMassChanged(){
+		massId_0 = massAreaVal.value;
+		for (int i = 0; i < attacks_0.Count; i++) {
+			PojulObject mPojulObject = attacks_0 [i].GetComponent<PojulObject> ();
+			if(mPojulObject == null || mPojulObject.isDestoryed){
+				return;
+			}
+			if("a10".Equals(mPojulObject.type)){
+				((A10aPlan)mPojulObject).onBehavorChanged ();
+			}
+		}
+	}
+
+	public void OnAttackAreaChanged(){
+		attackAreaId_0 = attackAreaVal.value;
+		for (int i = 0; i < attacks_0.Count; i++) {
+			PojulObject mPojulObject = attacks_0 [i].GetComponent<PojulObject> ();
+			if(mPojulObject == null || mPojulObject.isDestoryed){
+				return;
+			}
+			if("a10".Equals(mPojulObject.type)){
+				((A10aPlan)mPojulObject).onBehavorChanged ();
+			}
+		}
+
 	}
 
 }

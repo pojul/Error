@@ -270,7 +270,7 @@ public class CarType2 : PojulObject {
 		if(!nav.enabled){
 			return;
 		}
-		nav.destination = navPoint;//target.transform.position;
+		nav.destination = new Vector3(navPoint.x, 5, navPoint.z);//target.transform.position;
 		float patrol = Random.Range(maxMoveSpeed*0.9f, maxMoveSpeed);
 		nav.speed = patrol;
 		nav.acceleration = patrol * 2f;
@@ -287,7 +287,7 @@ public class CarType2 : PojulObject {
 		if(!nav.enabled){
 			return;
 		}
-		nav.destination = navPoint;//target.transform.position;
+		nav.destination = new Vector3(navPoint.x, 5, navPoint.z);//target.transform.position;
 		nav.speed = speed;
 		nav.acceleration = speed * 2;
 		nav.autoRepath = true;
@@ -296,7 +296,7 @@ public class CarType2 : PojulObject {
 
 	public void createNavCube(){
 		navCube = GameObject.CreatePrimitive (PrimitiveType.Cube);
-		navCube.transform.position = new Vector3(transform.position.x, 6f, transform.position.z);
+		navCube.transform.position = new Vector3(transform.position.x, 5f, transform.position.z);
 		navCube.transform.localScale = new Vector3 (10, 10, 10);
 		navCube.AddComponent<UnityEngine.AI.NavMeshAgent>();
 		Destroy(navCube.GetComponent<BoxCollider> ());
@@ -312,13 +312,24 @@ public class CarType2 : PojulObject {
 			return;
 		}
 		if(type ==2){
+			Vector3 hitPoint;
+			if (collision != null) {
+				hitPoint = collision.contacts[0].point;
+			} else {
+				hitPoint = hit.point;
+			}
 			sliderHealth.value = sliderHealth.value - 68;
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
-				DestoryAll (collision.contacts[0].point, 120000.0f);
+				DestoryAll (hitPoint, 120000.0f);
 				destoryData ();
 				return;
 			}
+		}else if(type == 3){
+			isDestoryed = true;
+			DestoryAll (collision.contacts[0].point, 120000.0f);
+			destoryData ();
+			return;
 		}else if(type ==4){
 			sliderHealth.value = sliderHealth.value - 2.6f;
 			if(sliderHealth.value <= 0){

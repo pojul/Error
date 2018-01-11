@@ -91,7 +91,13 @@ public class TestScript : PojulObject {
 	public override void isFired(RaycastHit hit, Collision collision, int type){
 
 		if(type ==2){
-			if(collision.gameObject.name.Equals("pan") && !isPanDestoryed){
+			string hitName = "";
+			if (collision != null) {
+				hitName = collision.gameObject.name;
+			} else {
+				hitName = hit.transform.name;
+			}
+			if(hitName.Equals("pan") && !isPanDestoryed){
 				destoryPan (collision);
 			}
 		}

@@ -17,7 +17,7 @@ public class Bullet : PojulObject {
 	void Update () {
 		if(isHit){
 			return;
-		}
+		}//collision.contacts[0].point
 		RaycastHit hit;
 		if(!isHit && Physics.Raycast (transform.position, transform.forward, out hit, hitDistance)){
 			//Debug.Log (transform + "gqb------>distance: " + (hit.point - transform.position).magnitude + "; hit: " + hit.transform);
@@ -27,8 +27,12 @@ public class Bullet : PojulObject {
 					                         hit.point, Quaternion.LookRotation (hit.normal)) as GameObject;
 				bulletBomb2.tag = "bulletBomb2";
 
-				Transform root = hit.transform.root.GetChild(0);
-				PojulObject mPojulObject = root.GetComponent<PojulObject> ();
+				Transform root = null;
+				PojulObject mPojulObject = null;
+				if(hit.transform.root.childCount > 0){
+					root = hit.transform.root.GetChild(0);
+					mPojulObject = root.GetComponent<PojulObject> ();
+				}
 
 				if(mPojulObject == null && hit.transform != null){
 					root = hit.transform;

@@ -30,12 +30,18 @@ public class planMove : MonoBehaviour {
 
 	public static float dRotate3 = 0.0f;
 	public static float rotate2 = 0.0f;
+	public float minSpeed = 0;
 	
 	void Start(){
 		player = transform;
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
 		type = strs [1];
+		if("car3".Equals(type)){
+			minSpeed = 0;
+		}else if("a10".Equals(type)){
+			minSpeed = 888;
+		}
 
 		mPojulObject = transform.gameObject.GetComponent<PojulObject> ();
 
@@ -48,11 +54,11 @@ public class planMove : MonoBehaviour {
 		}
 
 		if(PlanControls.newPoint1Rolation != -1 || PlanControls.newPoint3Rolation != -1){
-			if(speed >= 0 && speed <= maxSpeed){
+			if(speed >= minSpeed && speed <= maxSpeed){
 				speed = speed + accelerate;
 			}
-			if (speed < 0) {
-				speed = 0;
+			if (speed < minSpeed) {
+				speed = minSpeed;
 			}
 			if (speed > maxSpeed) {
 				speed = maxSpeed;

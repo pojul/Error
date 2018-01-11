@@ -38,7 +38,7 @@ public class CreateEmeny : MonoBehaviour {
 			new Vector3(0, 200, 60000), Quaternion.Euler(0, 0, 0)) as GameObject;
 		prefab.tag = "1_a10";
 		A10aPlan p = prefab.GetComponent<A10aPlan> ();
-		p.setAttackPatrolArea (3);
+		//p.setAttackPatrolArea (3);
 		p.behavior = 3;
 
 		Debug.Log ("GQB------>createObj1");

@@ -38,7 +38,7 @@ public class CarType3 : PojulObject {
 	private Transform paoTransform_lod1;
 	private Transform paoTransform_lod2;
 
-	private float aimSpeed = 10.0f;
+	private float aimSpeed = 5.0f;
 	private float aimMaxVer = 12.0f;
 
 	private bool isMoving = false;
@@ -47,7 +47,7 @@ public class CarType3 : PojulObject {
 
 	//test
 	private Transform target;
-	private float fireInterval = 5.0f;
+	private float fireInterval = 6.0f;
 	private float lastFileTime = 0.0f;
 
 	private Rigidbody mPlayerRigidbody;
@@ -55,6 +55,12 @@ public class CarType3 : PojulObject {
 	public UnityEngine.AI.NavMeshAgent nav;
 
 	public RadiusArea mPatrolArea;
+	public List<Vector3> attackMasses;
+	public Vector3 massPark = new Vector3(0,0,0);
+	int massIndex = -1;
+	public float massSpeed;
+	private Transform transporter;
+	//private float transportRawHeight = 0;
 
 	//血量条
 	public Slider sliderHealth;
@@ -106,6 +112,8 @@ public class CarType3 : PojulObject {
 		}
 		//healthTranssform = transform.FindChild ("health");
 
+		massSpeed = Random.Range(GameInit.mach * 0.39f, GameInit.mach * 0.48f);
+
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
 		type = strs [1];
@@ -117,15 +125,18 @@ public class CarType3 : PojulObject {
 			enemyId = "1";
 			transform.position = new Vector3 (transform.position.x, height, transform.position.z);
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
+			attackMasses = GameInit.attackMasses_0;
 		}else if("1".Equals(playerId)){
 			mPatrolArea = new RadiusArea (Random.Range(5,8));
 			myCenter = new Vector3 (0,0,60000);
 			enemyCenter = new Vector3 (0,0,-60000);
 			enemyId = "0";
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.698f, 0.255f, 0.157f);
+			transform.position = new Vector3 (transform.position.x, height, transform.position.z);
 			/*transform.position = new Vector3 (-40000,
 				25, 
 				-51000);*/
+			attackMasses = GameInit.attackMasses_1;
 		}
 
 		if(playerType == 1){
@@ -143,7 +154,7 @@ public class CarType3 : PojulObject {
 		createNavCube ();
 		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
 		InvokeRepeating ("findInvade", 2.0f, 2.0f);
-		InvokeRepeating ("interceptInvade", 5.0f, 5.0f);
+		InvokeRepeating ("interceptInvade", 6.0f, 6.0f);
 		//startNav (new Vector3 (3340, 60, -34925));
 		//startNav (new Vector3 (0, 60, 0));
 	}
@@ -159,7 +170,7 @@ public class CarType3 : PojulObject {
 		}
 
 		if (playerType == 0) {
-			navCube.transform.position = new Vector3 (transform.position.x ,navCube.transform.position.y, transform.position.z);
+			navCube.transform.position = new Vector3 (transform.position.x, navCube.transform.position.y, transform.position.z);
 			navCube.transform.rotation = transform.rotation;
 			return;
 		}
@@ -173,7 +184,6 @@ public class CarType3 : PojulObject {
 			aimEnemy (target);
 		}
 	}
-
 
 	void getLunzis(){
 		if(transform_lod0 == null){
@@ -207,8 +217,8 @@ public class CarType3 : PojulObject {
 				mPlayerRigidbody = transform.gameObject.GetComponent<Rigidbody> ();
 				mPlayerRigidbody.mass = 1;
 				mPlayerRigidbody.useGravity = true;
-				mPlayerRigidbody.drag = 2f;
-				mPlayerRigidbody.angularDrag = 2f;
+				mPlayerRigidbody.drag = 1.5f;
+				mPlayerRigidbody.angularDrag = 1.5f;
 				planMove.mRigidbody = mPlayerRigidbody;
 			}
 			planMove.player = transform;
@@ -279,6 +289,25 @@ public class CarType3 : PojulObject {
 			return;
 		}
 
+		if(transporter != null){
+			behavior = 5;
+			return;
+		}
+
+		if(behavior == 5){
+			return;
+		}
+
+		if (Util.isOnEnemyNavArea1 (transform.position, playerId)) {
+			behavior = 3;
+		} else if (Util.isOnMyNavArea1 (transform.position, playerId)) {
+			if (behavior == 3) {
+				behavior = 2;
+			} else if (behavior == 4) {
+				behavior = 1;
+			}
+		}
+
 		if (MissileAimedTra == null) {
 			isMissileAimed = false;
 		} else {
@@ -287,17 +316,111 @@ public class CarType3 : PojulObject {
 
 		rayCastEnemy ();
 
-		if(nav != null && behavior == 1  && 
+		if(nav != null  && 
 			(nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid || nav.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial) ){
-			startNav(mPatrolArea.getRandomPoint());
+			navCube.transform.position = new Vector3 ((navCube.transform.position.x + 20), navCube.transform.position.y, (navCube.transform.position.z + 20));
+			//startNav(mPatrolArea.getRandomPoint());
 		}
 
+		if(target!= null && nav != null && nav.enabled && behavior == 1){
+			if(!Util.isOnMyNavArea1(target.position, playerId)){
+				target = null;
+			}	
+		}
 
-		if(nav != null && behavior == 1 && !nav.hasPath && !nav.pathPending && mPatrolArea != null && target == null){
+		if(nav != null && nav.enabled && behavior == 1 && !nav.hasPath && !nav.pathPending && mPatrolArea != null){
 			startNav(mPatrolArea.getRandomPoint());
+			massPark = new Vector3 (0,0,0);
 		}else if(behavior == 3 && nav.destination != enemyCenter){
 			startNav(enemyCenter, 270);
 		}
+
+		if(behavior == 2){
+			findMassPark ();
+		}
+
+	}
+
+	void findMassPark(){
+		if ((new Vector3(transform.position.x, 0, transform.position.z) - massPark).magnitude < 3) {
+			if(nav.remainingDistance < 3){
+				stop ();
+			}
+			int massId;
+			if ("0".Equals (playerId)) {
+				massId = UImanager.massId_0;
+			} else {
+				massId = UImanager.massId_1;
+			}
+			 
+			if (massIndex <= 0 && (new Vector3(transform.position.x, 0, transform.position.z) - new Vector3 ((attackMasses [massId].x -600), 
+				0, attackMasses [massId].z)).magnitude < 3) {
+				return;
+			}
+			Vector3 nextMassPark = new Vector3 ((attackMasses [massId].x -600), 
+				0, 
+				(attackMasses [massId].z - (massIndex -1) * 600));
+			if(isMassParkIdle(nextMassPark)){
+				massPark = nextMassPark;
+				startNav (nextMassPark, massSpeed);
+				massIndex = massIndex - 1;
+			}
+		} else {
+			int massId;
+			if ("0".Equals (playerId)) {
+				massId = UImanager.massId_0;
+			} else {
+				massId = UImanager.massId_1;
+			}
+			for(int i = 0; i < 9; i++){
+				Vector3 tempMassPark = new Vector3 ((attackMasses [massId].x -600), 
+					0, 
+					(attackMasses [massId].z - i * 600)
+				);
+				bool isIdle = isMassParkIdle (tempMassPark);
+				if(isIdle){
+					massPark = tempMassPark;
+					startNav (tempMassPark, massSpeed);
+					massIndex = i;
+					break;
+				}
+			}
+		}
+	}
+
+	bool isMassParkIdle(Vector3 massPark){
+		RaycastHit hit;
+		if(Physics.Raycast (new Vector3(massPark.x, 300, massPark.z), Vector3.down, out hit, 500.0f)){
+			if(hit.transform.root.childCount > 0 && !hit.transform.root.GetChild(0).tag.Equals("Untagged") && hit.transform.root.GetChild(0) != transform){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public override void setTransport(Transform transporter, bool isTransport){
+		if (isTransport) {
+			this.transporter = transporter;
+			behavior = 5;
+			nav.enabled = false;
+			transform.root.localScale = new Vector3 (0, 0, 0);
+			transform.root.position = new Vector3 (-200000, 0, 0);
+			//transform.root.parent = transporter;
+			stop ();
+		} else {
+			this.transporter = null;
+			int attackBehavorId;
+			if ("0".Equals (playerId)) {
+				attackBehavorId = UImanager.attackBehavorId_0;
+			} else {
+				attackBehavorId = UImanager.attackBehavorId_1;
+			}
+			behavior = attackBehavorId;
+			transform.root.position = new Vector3 ((transporter.position.x - 600), 0, (transporter.position.z - Random.Range(0, 800)));
+			transform.root.localScale = new Vector3 (10, 10, 10);
+			nav.enabled = true;
+		}
+
 	}
 
 	void rayCastEnemy(){
@@ -311,7 +434,14 @@ public class CarType3 : PojulObject {
 		if(paoTransform_lod0 != null && Physics.Raycast (paoTransform_lod0.position, paoTransform_lod0.forward, out hit, 12000.0f)){
 			if(hit.transform != null && (Time.time - lastFileTime) > fireInterval && hit.transform.root.childCount > 0){
 				//Debug.Log (hit.transform.root.GetChild(0).name + "; gqb------>hit:" + hit.transform.root.GetChild(0).tag);
-				string[] tags = hit.transform.root.GetChild(0).tag.Split ('_');
+				if (hit.transform.root.childCount <= 0) {
+					return;
+				}
+				string tag = hit.transform.root.GetChild (0).tag;
+				if(tag.Equals("Untagged")){
+					tag = hit.transform.root.tag;
+				}
+				string[] tags = tag.Split ('_');
 				if (tags.Length == 2 && enemyId.Equals(tags [0]) && ("car2".Equals (tags [1]) || "car3".Equals (tags [1])
 				   || "car4".Equals (tags [1]) || "car5".Equals (tags [1]) || "car6".Equals (tags [1]))) {
 					lastFileTime = Time.time;
@@ -404,20 +534,15 @@ public class CarType3 : PojulObject {
 		if(!nav.enabled){
 			return;
 		}
-		//nav.is
-		try{
-			nav.destination = navPoint;//target.transform.position;
-		}catch(System.Exception e){
-			return;
-		}
-
-		float patrol = Random.Range(maxMoveSpeed*0.5f, maxMoveSpeed);
+		nav.destination = new Vector3(navPoint.x, 5, navPoint.z);
+		float patrol = Random.Range(maxMoveSpeed*0.6f, maxMoveSpeed);
 		nav.speed = patrol;
 		speed = nav.speed;
 		nav.acceleration = patrol * 2f;
 		nav.autoRepath = true;
 		//nav.baseOffset = 50;
 		nav.angularSpeed = 100;
+		run ();
 	}
 
 	public void startNav(Vector3 navPoint, float speed){
@@ -427,16 +552,13 @@ public class CarType3 : PojulObject {
 		if(!nav.enabled){
 			return;
 		}
-		try{
-			nav.destination = navPoint;//target.transform.position;
-		}catch(System.Exception e){
-			return;
-		}
+		nav.destination = new Vector3(navPoint.x, 5, navPoint.z);//target.transform.position;
 		nav.speed = speed;
 		this.speed = nav.speed;
 		nav.acceleration = speed * 2;
 		nav.autoRepath = true;
 		nav.angularSpeed = 100;
+		run ();
 	}
 
 	public void createNavCube(){
@@ -467,17 +589,26 @@ public class CarType3 : PojulObject {
 			return;
 		}
 		if(type ==2){
+			Vector3 hitPoint;
+			string hitName = "";
+			if (collision != null) {
+				hitPoint = collision.contacts[0].point;
+				hitName = collision.gameObject.name;
+			} else {
+				hitPoint = hit.point;
+				hitName = hit.transform.name;
+			}
 			sliderHealth.value = sliderHealth.value - 36;
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
 				isPanDestoryed = true;
-				DestoryAll (collision.contacts[0].point, 30000.0f);
+				DestoryAll (hitPoint, 30000.0f);
 				destoryData ();
 				return;
 			}
-			if(collision.gameObject.name.Equals("pan") && !isPanDestoryed){
+			if(hitName.Equals("pan") && !isPanDestoryed){
 				isPanDestoryed = true;
-				destoryPan (collision);
+				destoryPan (hitPoint);
 			}
 		}else if(type ==3){
 			isDestoryed = true;
@@ -501,6 +632,11 @@ public class CarType3 : PojulObject {
 	}
 
 	void DestoryAll(Vector3 point, float force){
+
+		if(playerType == 0){
+			UImanager.isOnLeave = true;
+		}
+
 		if(panTransform_lod0 != null){
 			panTransform_lod0.parent = null;
 			panTransform_lod1.parent = panTransform_lod0;
@@ -546,7 +682,7 @@ public class CarType3 : PojulObject {
 			point.z);
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, 200.0f);
 		foreach (Collider hit in colliders){
-			if (hit.GetComponent<Rigidbody>()){
+			if (hit.GetComponent<Rigidbody>() && hit.transform != Camera.main.transform){
 				hit.GetComponent<Rigidbody>().AddExplosionForce(force, explosionPos, 200.0f);
 			}  
 		}
@@ -561,7 +697,7 @@ public class CarType3 : PojulObject {
 		}
 	}
 
-	void destoryPan(Collision collision){
+	void destoryPan(Vector3 hitPoint){
 		panTransform_lod0.parent = null;
 		panTransform_lod1.parent = panTransform_lod0;
 		panTransform_lod2.parent = panTransform_lod0;
@@ -577,9 +713,9 @@ public class CarType3 : PojulObject {
 			paoTransform_lod0.gameObject.AddComponent<Rigidbody> ();
 		}
 
-		Vector3 explosionPos = new Vector3 (collision.contacts[0].point.x, 
-			(collision.contacts[0].point.y - 10), 
-			collision.contacts[0].point.z);
+		Vector3 explosionPos = new Vector3 (hitPoint.x, 
+			(hitPoint.y - 10), 
+			hitPoint.z);
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, 50.0f);
 		foreach (Collider hit in colliders){
 			if (hit.GetComponent<Rigidbody>()){ 
@@ -651,13 +787,13 @@ public class CarType3 : PojulObject {
 			Transform tempTransform = colliders [i].transform.root.GetChild (0);
 			string tag = tempTransform.tag;
 			if (tag.Equals ("Untagged")) {
-				if (colliders [i].transform == null) {
+				if (colliders [i].transform.root == null) {
 					continue;
 				}
-				if (colliders [i].transform.tag.Equals ("Untagged")) {
+				if (colliders [i].transform.root.tag.Equals ("Untagged")) {
 					continue;
 				}
-				tempTransform = colliders [i].transform;
+				tempTransform = colliders [i].transform.root;
 			}
 			tag = tempTransform.tag;
 			//Debug.Log ("gqb------>findInvade tag: " + tag);
@@ -666,8 +802,7 @@ public class CarType3 : PojulObject {
 				string tempPlayerId = strs [0];
 				string tempType = strs [1];
 				if (enemyId.Equals (tempPlayerId)) {
-					if (target == null && ("a10".Equals (tempType) || "car2".Equals (tempType) || "car3".Equals (tempType)
-					    || "a10".Equals (tempType) || "car5".Equals (tempType))) {
+					if (target == null && ("car2".Equals (tempType) || "car3".Equals (tempType) || "car5".Equals (tempType))) {
 						target = tempTransform.FindChild ("aim");
 					}
 					Util.AddNearEnemys (tempTransform, playerId);
@@ -687,30 +822,33 @@ public class CarType3 : PojulObject {
 		if(playerType ==0){
 			return;
 		}
-
-		Dictionary<int, Dictionary<Transform, float>> nearEnemys = null;
+		List<Transform> allNearEnemys = null;
 		if("0".Equals(playerId)){
-			nearEnemys = GameInit.nearEnemys_0;
+			allNearEnemys = GameInit.attackArms_1;
 		}else if("1".Equals(playerId)){
-			nearEnemys = GameInit.nearEnemys_1;
+			allNearEnemys = GameInit.attackArms_0;
 		}
-		if(nearEnemys.ContainsKey(mPatrolArea.areaId) && nearEnemys [mPatrolArea.areaId].Count > 0){
-			Dictionary<Transform, float> tempTransforms = nearEnemys [mPatrolArea.areaId];//----
-			float dangeroustDis = 1000000.0f;
-			Transform dangeroustEnemy = null;
-			foreach(Transform key in tempTransforms.Keys){
-				if(key == null){
-					continue;
-				}
-				float tempDis = (myCenter - key.position).magnitude;
-				if( tempDis < dangeroustDis && (Time.time - tempTransforms[key]) < 3.2f){
-					dangeroustEnemy = key;
-					dangeroustDis = tempDis;
-				}
+		float dangeroustDis = 1000000.0f;
+		Transform dangeroustEnemy = null;
+		for(int i=0; i<allNearEnemys.Count;i++){
+			Transform tempDangeroustEnemy = allNearEnemys[i];
+			if(tempDangeroustEnemy == null || !Util.isOnMyNavArea1(tempDangeroustEnemy.position, playerId) || 
+				!tempDangeroustEnemy.GetComponent<PojulObject>() || tempDangeroustEnemy.GetComponent<PojulObject>().isDestoryed){
+				continue;
 			}
-			if(dangeroustEnemy != null && dangeroustEnemy.FindChild("aim") != null){
-				target = dangeroustEnemy.FindChild("aim");
+			string[] strs = tempDangeroustEnemy.tag.Split ('_');
+			if(strs.Length != 2){
+				return;
 			}
+			float tempDis = (myCenter - tempDangeroustEnemy.position).magnitude;
+			if(tempDis < dangeroustDis && ("car2".Equals (strs[1]) || "car3".Equals (strs[1]) || "car5".Equals (strs[1]))){
+				//Debug.Log (transform.tag +  "; gqb------>findDangeroust: " +  tempDangeroustEnemy.tag );
+				dangeroustEnemy = tempDangeroustEnemy;
+				dangeroustDis = tempDis;
+			}
+		}
+		if(dangeroustEnemy != null && dangeroustEnemy.FindChild("aim") != null){
+			target = dangeroustEnemy.FindChild("aim");
 		}
 	}
 
@@ -720,21 +858,34 @@ public class CarType3 : PojulObject {
 		}
 		if(behavior == 1 && target != null){
 			float distance = (transform.position - target.position).magnitude;
-			float speed = 280;
-			if (distance > 5000) {
-				speed = distance / 5000 * 40 + 280;
+			if(distance > 50000){
+				speed = 660;
+			}else if(distance > 30000){
+				speed = 600;
+			}else if(distance > 20000){
+				speed = 530;
+			}else if(distance > 9000){
+				speed = 480;
+			}else {
+				Random.Range(maxMoveSpeed*0.5f, maxMoveSpeed);
 			}
-			if(distance < 10000){
-				float toCenterDis = (target.position - myCenter).magnitude;
-				if ( toCenterDis > 20000 && toCenterDis < 45000) {
-					startNav (new Vector3((target.position.x + Random.Range(-3000,3000)),
-						height, 
-						(target.position.z + Random.Range(-3000,3000))), speed);
-				} else{
-					startNav (new Vector3(target.position.x, height, target.position.z), speed);
-				}
+			startNav (new Vector3(target.position.x, 0, target.position.z), speed);
+			//float distance = (transform.position - target.position).magnitude;
+			//float speed = 280;
+			//if (distance > 5000) {
+				//speed = distance * 40/ 5000  + 280;
+			//}
+			//if(distance < 10000){
+			/*float toCenterDis = (target.position - myCenter).magnitude;
+			if ( toCenterDis > 20000 && toCenterDis < 45000) {
+				startNav (new Vector3((target.position.x + Random.Range(-3000,3000)),
+					height, 
+					(target.position.z + Random.Range(-3000,3000))), speed);
+			} else{
+				startNav (new Vector3(target.position.x, 0, target.position.z), speed);
+			}*/
 
-			}
+			//}
 		}
 	}
 
@@ -773,6 +924,8 @@ public class CarType3 : PojulObject {
 		if(isDestoryed){
 			return;
 		}
+		//Camera.main.transform.position = new Vector3(transform.position.x, (transform.position.y + 200), transform.position.z);
+		//Camera.main.transform.rotation = Quaternion.LookRotation (transform.position - Camera.main.transform.position);
 		if(isPanDestoryed){
 			Camera.main.transform.position = transform.position +  (-transform.forward * planMove.dzMainCamera + transform.up * planMove.dyMainCamera);
 			Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, 
@@ -782,6 +935,7 @@ public class CarType3 : PojulObject {
 		Camera.main.transform.position = paoTransform_lod0.position +  (-paoTransform_lod0.forward * planMove.dzMainCamera + paoTransform_lod0.up * planMove.dyMainCamera);
 		Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, 
 			Quaternion.LookRotation(paoTransform_lod0.position - Camera.main.transform.position), 3.5f * Time.deltaTime);
+		
 	}
 
 }

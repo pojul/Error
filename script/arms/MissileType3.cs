@@ -63,7 +63,7 @@ public class MissileType3 : PojulObject {
 				float angle = Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg;
 				//Debug.Log (speed + "gqb------>angle: " + angle);
 				if(angle < 90 && speed > 400){
-					speed = speed - 2.2f - angle *3.0f;
+					speed = speed - 2.4f - angle *3.1f;
 				}
 
 				if(speed <= 400){

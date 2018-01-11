@@ -15,6 +15,13 @@ public class WorldUIManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		fireAim.rectTransform.sizeDelta = new Vector2 (Screen.height *0.1f, Screen.height *0.1f);
+		//Debug.Log ("gqb------>dpi: " + Screen.dpi);
+		if (Screen.dpi > 0) {
+			scaleTimes = 0.0027f *96/  Screen.dpi;
+		} else {
+			scaleTimes = 0.00065f;
+		}
+
 	}
 	
 	// Update is called once per frame

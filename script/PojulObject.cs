@@ -21,7 +21,7 @@ public class PojulObject : MonoBehaviour {
 	public string playerId = "";
 	public string enemyId = "";
 	public string type = "";
-	public int behavior = 1;//1: patrol;2: ready to attack;3: attack
+	public int behavior = 1;//1: patrol;2: mass;3: attack;4: retreat;5:transport
 
 	public Vector3 myCenter;
 	public Vector3 enemyCenter;
@@ -33,5 +33,7 @@ public class PojulObject : MonoBehaviour {
 	public virtual void fireOfPlayer (){}
 
 	public virtual void setPlayType (int playerType){}
+
+	public virtual void setTransport (Transform transporter, bool isTransport){}
 
 }

@@ -181,8 +181,24 @@ public class Util : MonoBehaviour {
 		return 0;
 	}
 
+	public static bool isOnEnemyNavArea1(Vector3 point, string playerId){
+		if ("0".Equals (playerId)) {
+			return isOnNavArea2(point);
+		} else {
+			return isOnNavArea1(point);
+		}
+	}
+
+	public static bool isOnMyNavArea1(Vector3 point, string playerId){
+		if ("0".Equals (playerId)) {
+			return isOnNavArea1(point);
+		} else {
+			return isOnNavArea2(point);
+		}
+	}
+
 	public static bool isOnNavArea1(Vector3 point){
-		if((point - GameInit.home1Pos).magnitude > 50286){
+		if((new Vector3(point.x, 0, point.z) - GameInit.home1Pos).magnitude > 52000){
 			return false;
 		}else{
 			return true;
@@ -190,7 +206,7 @@ public class Util : MonoBehaviour {
 	}
 
 	public static bool isOnNavArea2(Vector3 point){
-		if((point - GameInit.home2Pos).magnitude > 50286 ){
+		if((new Vector3(point.x, 0, point.z) - GameInit.home2Pos).magnitude > 52000 ){
 			return false;
 		}else{
 			return true;
