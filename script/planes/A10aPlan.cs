@@ -71,8 +71,6 @@ public class A10aPlan : PojulObject {
 	// Use this for initialization
 	void Start () {
 		transform.position = new Vector3 (transform.position.x, initHeight, transform.position.z);
-		maxMountMissle = 3;
-		currentMountMissle = 0;
 
 		addAirRay ();
 
@@ -108,6 +106,7 @@ public class A10aPlan : PojulObject {
 
 		int areaId = -1;
 		RectTransform mRectTransform = sliderHealth.GetComponent<RectTransform> ();
+		currentMountMissle = 0;
 		if ("0".Equals (playerId)) {
 			mPatrolArea = new RadiusArea (Random.Range(1,4));
 			myCenter = new Vector3 (0,0,-60000);
@@ -116,6 +115,7 @@ public class A10aPlan : PojulObject {
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
 			mRectTransform.sizeDelta = new Vector2 (0, 0);
 			attackMasses = GameInit.attackMasses_0;
+			maxMountMissle = 2;
 		} else if ("1".Equals (playerId)) {
 			mPatrolArea = new RadiusArea (Random.Range(5,8));
 			myCenter = new Vector3 (0,0,60000);
@@ -124,6 +124,7 @@ public class A10aPlan : PojulObject {
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.698f, 0.255f, 0.157f);
 			mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
 			attackMasses = GameInit.attackMasses_1;
+			maxMountMissle = 4;
 			//for test
 			//transform.position = new Vector3 (0, initHeight, -10000);
 
@@ -149,7 +150,7 @@ public class A10aPlan : PojulObject {
 
 		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
 		InvokeRepeating ("findInvade", 2.0f, 2.0f);
-		InvokeRepeating ("interceptInvade", 12.0f, 12.0f);
+		InvokeRepeating ("interceptInvade", 5.0f, 5.0f);
 		InvokeRepeating("avoidMissile", 0.9f, 0.9f);
 
 
@@ -258,8 +259,8 @@ public class A10aPlan : PojulObject {
 				planMove.mRigidbody = mPlayerRigidbody;
 			}
 			planMove.player = transform;
-			planMove.speed = moveSpeed;
-			planMove.maxSpeed = 1200;
+			planMove.speed = 2200;
+			planMove.maxSpeed = 2200;
 			planMove.maxAccelerate = 2.5f;
 			PlanControls.rorateSpeed = 72f;
 			planMove.rolSpeed = 7.0f;
@@ -363,6 +364,7 @@ public class A10aPlan : PojulObject {
 		}
 		if (target != null && nav != null && nav.enabled && behavior == 1 && Util.isOnEnemyNavArea1(target.position, playerId)) {
 			startNav(mPatrolArea.getRandomPoint());
+			target = null;
 		}
 
 		if(nav != null && behavior == 1 && !nav.hasPath && !nav.pathPending && mPatrolArea != null){
@@ -386,6 +388,9 @@ public class A10aPlan : PojulObject {
 	}
 
 	void toMass(){
+		if(target != null){
+			return;
+		}
 		int massId;
 		if ("0".Equals (playerId)) {
 			massId = UImanager.massId_0;
@@ -393,8 +398,8 @@ public class A10aPlan : PojulObject {
 			massId = UImanager.massId_1;
 		}
 		if ("1".Equals(playerId)) {
-			startNav(new Vector3(attackMasses [massId].x + Random.Range(-8800, 8800) ,0, 
-				attackMasses [massId].z + Random.Range(6000, 10000)));
+			startNav(new Vector3(attackMasses [massId].x + Random.Range(-5800, 5800) ,0, 
+				attackMasses [massId].z + Random.Range(6000, 9000)));
 		} else {
 			startNav(new Vector3(attackMasses [massId].x + Random.Range(-10000, 10000) ,0, 
 				attackMasses [massId].z + Random.Range(-10000, 10000)));
@@ -413,7 +418,7 @@ public class A10aPlan : PojulObject {
 				attackId = UImanager.attackAreaId_1;
 			}
 			//Debug.Log (playerId + "; gqb------>toAttck2222: " + attackId + ";dpoint: " + nav.destination);
-			startNav(new RadiusArea(attackId).getRandomPoint());
+			startNav(new RadiusArea(attackId).getRandomPoint(), 1100);
 		}
 	}
 
@@ -444,8 +449,13 @@ public class A10aPlan : PojulObject {
 		float distance = (transform.position - target.position).magnitude;
 
 		//Debug.DrawRay(transform.position, (target.position - transform.position).normalized *16000, Color.white);
+		float fireMissileDis = 20000;
+		if("0".Equals(playerId) && behavior == 1){
+			//Debug.Log (playerId + "gqb------>fireMissileDis: " + fireMissileDis );
+			fireMissileDis = 12000;
+		}
 		RaycastHit hit;
-		if(dx < 30 && dy < 45 && distance < 20000 
+		if(dx < 30 && dy < 45 && distance < fireMissileDis 
 			&& Physics.Raycast (transform.position, (target.position - transform.position).normalized, out hit, 21000.0f)){
 			if(!hit.transform.root.tag.Equals("Untagged") || (hit.transform.root.childCount > 0 && !hit.transform.root.GetChild(0).tag.Equals("Untagged"))){
 				fireMissile ();
@@ -598,6 +608,9 @@ public class A10aPlan : PojulObject {
 		List<Transform> tempNearEnemy = new List<Transform> ();
 
 		Collider[] colliders = Physics.OverlapSphere (transform.position, 22000);
+
+		float dangeroustDis = 100000.0f;
+		Transform dangeroustEnemy = null;
 		for (int i = 0; i < colliders.Length; i++) {
 			if (colliders [i].transform.root.childCount <= 0) {
 				continue;
@@ -619,20 +632,29 @@ public class A10aPlan : PojulObject {
 			if (strs.Length == 2) {
 				string tempPlayerId = strs [0];
 				string tempType = strs [1];
+				float tempDis = (transform.position - tempTransform.position).magnitude;
 				if (enemyId.Equals (tempPlayerId)) {
-					if (target == null && ("a10".Equals (tempType) || "car2".Equals (tempType) || "car3".Equals (tempType)
-					   || "a10".Equals (tempType) || "car5".Equals (tempType))) {
-						target = tempTransform.FindChild ("aim");
+					if (tempDis < dangeroustDis && ("littlecannon1".Equals (tempType) || "car2".Equals (tempType) || "car3".Equals (tempType)
+						|| "a10".Equals (tempType) || "car5".Equals (tempType)) 
+						&& tempTransform.GetComponent<PojulObject>() && !tempTransform.GetComponent<PojulObject>().isDestoryed) {
+						dangeroustEnemy = tempTransform;
+						dangeroustDis = tempDis;
+						//target = tempTransform.FindChild ("aim");
+
 					}
 					Util.AddNearEnemys (tempTransform, playerId);
 					if(playerType == 0){
-						if(tempTransform != null && (transform.position - tempTransform.position).magnitude < 20000 && !tempNearEnemy.Contains(tempTransform)){
+						if(tempTransform != null && (transform.position - tempTransform.position).magnitude < 16000 && !tempNearEnemy.Contains(tempTransform)){
 							tempNearEnemy.Add (tempTransform);
 						}
 					}
 				}
 			}
 		}
+		if(dangeroustEnemy != null && dangeroustEnemy.FindChild ("aim") != null){
+			target = dangeroustEnemy.FindChild ("aim");
+		}
+
 		if (target == null) {
 			findDangeroust ();
 		}
@@ -672,6 +694,17 @@ public class A10aPlan : PojulObject {
 		if(playerType ==0){
 			return;
 		}
+
+		if(playerId.Equals("1") && planMove.player != null){
+			PojulObject mPojulObject = planMove.player.GetComponent<PojulObject> ();
+			if(mPojulObject != null && !mPojulObject.isDestoryed && mPojulObject.type.Equals("a10") && Util.isOnNavArea2(planMove.player.position)){
+				if(planMove.player.FindChild("aim") != null){
+					target = planMove.player.FindChild("aim");
+					return;
+				}
+			}
+		}
+
 		List<Transform> allNearEnemys = null;
 		if("0".Equals(playerId)){
 			allNearEnemys = GameInit.attackArms_1;
@@ -735,22 +768,24 @@ public class A10aPlan : PojulObject {
 			return;
 		}
 
-		updateCurrentMountMissle ();
+		//updateCurrentMountMissle ();
 
 		if(target != null && currentMountMissle > 0){
-			if(behavior == 1){
-				startNav (new Vector3(target.position.x, planeHeight, target.position.z), maxMoveSpeed*0.8f);
+			if (behavior == 1) {
+				startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.8f);
 				height = target.position.y;
-			}else if(behavior == 3){
-				//Debug.Log (playerId + "; gqb------>interceptInvade: ");
-				int attackId;
-				if ("0".Equals (playerId)) {
-					attackId = 5 + UImanager.attackAreaId_0;
+			} else if (behavior == 3) {
+				startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.8f);
+				//startNav (new RadiusArea(attackId).getRandomPoint(), GameInit.mach*0.8f);
+				height = target.position.y;
+			} else if (behavior == 2) {
+				if (Util.isOnMyNavArea1 (target.position, playerId)) {
+					startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.8f);
 				} else {
-					attackId = UImanager.attackAreaId_1;
+					startNav (mPatrolArea.getRandomPoint (), GameInit.mach * 0.8f);
+					target = null;
 				}
-				startNav (new RadiusArea(attackId).getRandomPoint(), GameInit.mach*0.8f);
-				height = target.position.y;
+
 			}
 		}else if(missileCar != null){
 			startNav (new Vector3((missileCar.position.x + Random.Range(100,300)), planeHeight, (missileCar.position.z + Random.Range(100,300))), maxMoveSpeed*0.8f);
@@ -792,8 +827,7 @@ public class A10aPlan : PojulObject {
 			isPanDestoryed = true;
 			inflame(72000);
 			return;
-		}
-		if (type == 4) {
+		}else if (type == 4) {
 			sliderHealth.value = sliderHealth.value - 3.8f;
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
@@ -808,7 +842,6 @@ public class A10aPlan : PojulObject {
 	}
 
 	void inflame(float force){
-
 		GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMountMissle;
 		currentMountMissle = 0;
 
@@ -865,6 +898,7 @@ public class A10aPlan : PojulObject {
 	}
 
 	public void destoryAll(){
+
 		Destroy (navCube);
 		Destroy (transform_lod0.gameObject);
 		Destroy (this.gameObject);
@@ -885,38 +919,40 @@ public class A10aPlan : PojulObject {
 	}
 
 	void addMissile(){
-		if (missileCar == null) {
-			return;
-		}
-		CarType2 mCarType2 = missileCar.gameObject.GetComponent<CarType2> ();
-		if(mCarType2.currentMissiles[2] <= 0){
-			missileCar = null;
-			return;
-		}
-
-		int needNum = maxMountMissle - currentMountMissle;
-		int canSupplyNum = mCarType2.currentMissiles[2];
-		int exchangeNum = 0;
-		if (canSupplyNum <= needNum) {
-			exchangeNum = canSupplyNum;
-			mCarType2.currentMissiles [2] = 0;
-		} else {
-			exchangeNum = needNum;
-			mCarType2.currentMissiles [2] = mCarType2.currentMissiles [2] - needNum;
-		}
-		int addednum = 0;
-		for(int i = 0; i< missilePoses.Count; i++){
-			if(addednum >= exchangeNum){
+		lock(GameInit.locker){
+			if (missileCar == null) {
+				return;
+			}
+			CarType2 mCarType2 = missileCar.gameObject.GetComponent<CarType2> ();
+			if(mCarType2.currentMissiles[2] <= 0){
 				missileCar = null;
 				return;
 			}
-			if (missiles [missilePoses [i]] == null) {
-				GameObject prefab = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile3"]), 
-					missilePoses[i].position, missilePoses[i].rotation) as GameObject;
-				missiles [missilePoses[i]] = prefab.transform;
-				prefab.transform.parent = transform;
-				currentMountMissle = currentMountMissle + 1;
-				addednum = addednum + 1;
+
+			int needNum = maxMountMissle - currentMountMissle;
+			int canSupplyNum = mCarType2.currentMissiles[2];
+			int exchangeNum = 0;
+			if (canSupplyNum <= needNum) {
+				exchangeNum = canSupplyNum;
+				mCarType2.currentMissiles [2] = 0;
+			} else {
+				exchangeNum = needNum;
+				mCarType2.currentMissiles [2] = mCarType2.currentMissiles [2] - needNum;
+			}
+			int addednum = 0;
+			for(int i = 0; i< missilePoses.Count; i++){
+				if(addednum >= exchangeNum){
+					missileCar = null;
+					return;
+				}
+				if (missiles [missilePoses [i]] == null) {
+					GameObject prefab = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile3"]), 
+						missilePoses[i].position, missilePoses[i].rotation) as GameObject;
+					missiles [missilePoses[i]] = prefab.transform;
+					prefab.transform.parent = transform;
+					currentMountMissle = currentMountMissle + 1;
+					addednum = addednum + 1;
+				}
 			}
 		}
 	}
@@ -928,10 +964,10 @@ public class A10aPlan : PojulObject {
 		if(MissileAimedTra != null && isAvoidMissile){
 			return;
 		}
-		if(target != null && currentMountMissle > 0){
+		if(target != null && currentMountMissle > 0 && behavior != 2){
 			return;
 		}
-		if(behavior ==3 && currentMountMissle > 0){
+		if(behavior == 3 && currentMountMissle > 0){
 			return;
 		}
 
@@ -941,6 +977,7 @@ public class A10aPlan : PojulObject {
 		}else if("1".Equals(playerId)){
 			Car2s = GameInit.EnemyCar2;
 		}
+		//Debug.Log (missileCar + "::" + "; gqb------>findMissileCar Car2sCount22222: " +   Car2s.Count + "currentMountMissle: " + currentMountMissle);
 		float distance = 1000000;
 		Transform tempTra = null;
 		for(int i =0; i< Car2s.Count; i++ ){
@@ -949,6 +986,7 @@ public class A10aPlan : PojulObject {
 			}
 			CarType2 mCarType2 = Car2s[i].gameObject.GetComponent<CarType2> ();
 			float tempDistance = (transform.position - Car2s [i].position).magnitude;
+			//Debug.Log (missileCar + "::" + (Car2s[i].position - myCenter).magnitude + "; gqb------>findMissileCar Car2sCount22222: " +   Car2s.Count + "currentMountMissle: " + currentMountMissle);
 			if(mCarType2.currentMissiles[2] > 0 && (Car2s[i].position - myCenter).magnitude > 9000 
 				&& tempDistance < distance){
 				tempTra = Car2s [i];

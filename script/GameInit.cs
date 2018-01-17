@@ -64,7 +64,7 @@ public class GameInit  : MonoBehaviour {
 	public RadiusArea mRadiusArea1= new RadiusArea(5);
 
 	public GameObject test;
-	public float enemyGoldScale = 0.5f;
+	public float enemyGoldScale = 0.1f;
 	public int a10AttackNum = 0;
 	public int car3AttackNum = 0;
 	public int transport1AttackNum = 0;
@@ -72,12 +72,15 @@ public class GameInit  : MonoBehaviour {
 	public Transform attackTra;
 	public int enemyAttackBehavor;
 
+	public int copyCurrentM3 = 0;
+	public int copyRemainM3 = 0;
+
 	public static Vector3[] myNavPoint1as = new Vector3[]{new Vector3(3340, 100, -34925), 
 		new Vector3 (32331, 100, -61230), 
 		new Vector3 (-3853, 100, -92787),//15549), 
 		new Vector3 (-42224, 100, -61568)//3109)
 		//new Vector3 (11630, 125, 235)
-		} ;
+		};
 
 	private int airShipNum = 10;
 	private float airShipInterval = 20;
@@ -111,7 +114,9 @@ public class GameInit  : MonoBehaviour {
 
 		InvokeRepeating("enemyManager", 5f, 5f);
 
-		InvokeRepeating("instanceEnemy", 2f, 2f);
+		InvokeRepeating("instanceEnemy", 4f, 4f);
+
+		setEnemyAttackRandom ();
 	}
 
 	void gc(){
@@ -124,6 +129,9 @@ public class GameInit  : MonoBehaviour {
 	void addMoney(){
 		MyMoney = MyMoney + 1;
 		EnemyMoney = EnemyMoney + 1;
+
+		copyCurrentM3 = currentInstance ["1_missile3"];
+		copyRemainM3 = remainMissile["1_missile3"];
 	}
 
 	void initData(){
@@ -154,17 +162,17 @@ public class GameInit  : MonoBehaviour {
 		progress1 = (Texture2D)Resources.Load ("icon/progress1/progress1c");
 		progress2 = (Texture2D)Resources.Load ("icon/progress1/progress1d");
 
-		prices.Add ("a10", 8);
-		prices.Add ("car2", 4);//6
-		prices.Add ("car3", 6);//21
-		prices.Add ("car4", 1);//23
-		prices.Add ("car5", 6);//28
-		prices.Add ("car6", 20);
-		prices.Add ("missile1", 1);//33
+		prices.Add ("a10", 49);
+		prices.Add ("car2", 12);//6
+		prices.Add ("car3", 27);//21
+		prices.Add ("car4", 1);//23-----
+		prices.Add ("car5", 12);//28
+		prices.Add ("car6", 20);//------
+		prices.Add ("missile1", 31);//33
 		prices.Add ("missile2", 1);//29
-		prices.Add ("missile3", 1);
+		prices.Add ("missile3", 25);
 		prices.Add ("shell1", 1);
-		prices.Add ("transport1", 4);//62
+		prices.Add ("transport1", 18);//62
 
 		maxInstance.Add ("0_a10", 2);
 		maxInstance.Add ("1_a10", 2);
@@ -182,8 +190,8 @@ public class GameInit  : MonoBehaviour {
 		maxInstance.Add ("1_missile1",3);
 		maxInstance.Add ("0_missile2", 2);
 		maxInstance.Add ("1_missile2", 2);
-		maxInstance.Add ("0_missile3", 6);
-		maxInstance.Add ("1_missile3", 6);
+		maxInstance.Add ("0_missile3", 8);
+		maxInstance.Add ("1_missile3", 8);
 		maxInstance.Add ("0_shell1", 100000);
 		maxInstance.Add ("1_shell1", 100000);
 		maxInstance.Add ("0_transport1", 1);
@@ -281,6 +289,7 @@ public class GameInit  : MonoBehaviour {
 		attackAreas_1.Add (new Vector3(18000, 0, -106000));
 		attackAreas_1.Add (new Vector3(-42000, 0, -80000));
 
+		enemyGoldScale = 0.1f;
 	}
 
 	public static void instanceGameobject(string playerId, string type){
@@ -419,7 +428,7 @@ public class GameInit  : MonoBehaviour {
 			}
 			if ("a10".Equals (mPojulObject.type)) {
 				a10AttackNum = a10AttackNum + 1;
-				attackMountMissile = ((A10aPlan)mPojulObject).currentMountMissle;
+				attackMountMissile = attackMountMissile + ((A10aPlan)mPojulObject).currentMountMissle;
 			} else if("car3".Equals (mPojulObject.type)){
 				car3AttackNum = car3AttackNum + 1;
 			}else if("transport1".Equals (mPojulObject.type)){
@@ -434,7 +443,7 @@ public class GameInit  : MonoBehaviour {
 		bool needAddA10 = false;
 		bool needAddCar3 = false;
 		bool needAddTransport1 = false;
-		if( (currentInstance ["1_a10"] >= maxInstance ["1_a10"] && a10AttackNum < 1) ){
+		if( (currentInstance ["1_a10"] >= maxInstance ["1_a10"] && a10AttackNum < 2) ){
 			needAddA10 = true;
 		}
 		if( (currentInstance ["1_car3"] >= maxInstance ["1_car3"] && car3AttackNum < 3) ){
@@ -457,7 +466,9 @@ public class GameInit  : MonoBehaviour {
 				((A10aPlan)mPojulObject).onBehavorChanged ();
 				UImanager.attacks_1.Add (attackArms_1[i]);
 				a10AttackNum = a10AttackNum + 1;
-				needAddA10 = false;
+				if (car3AttackNum >= 2) {
+					needAddA10 = false;
+				}
 			}
 			if (mPojulObject.type.Equals ("car3") && needAddCar3 && !mPojulObject.isAttackArmy) {
 				mPojulObject.isAttackArmy = true;
@@ -491,14 +502,14 @@ public class GameInit  : MonoBehaviour {
 				}
 			}
 			//Debug.Log ("gqb------>enemyManager222");
-			if (a10AttackNum >= 1 && car3AttackNum >= 3 && transport1AttackNum >= 1) {
+			if (a10AttackNum >= 2 && car3AttackNum >= 3 && transport1AttackNum >= 1) {
 				UImanager.attackBehavorId_1 = 2;
 				onEnemyBehavorChanged ();
 			} else {
 				addEnemyAttacks ();
 			}
 		} else if (UImanager.attackBehavorId_1 == 2) {
-			if (a10AttackNum < 1 || car3AttackNum < 3 || transport1AttackNum < 1) {
+			if (a10AttackNum < 2 || car3AttackNum < 3 || transport1AttackNum < 1) {
 				//addEnemyAttacks ();
 				UImanager.attackBehavorId_1 = 1;
 				onEnemyBehavorChanged ();
@@ -511,25 +522,30 @@ public class GameInit  : MonoBehaviour {
 		} else if (UImanager.attackBehavorId_1 == 3) {
 			if ( car3AttackNum < 1 ) {
 				UImanager.attackBehavorId_1 = 1;
-				UImanager.massId_1 = Random.Range (0, 1);
-				int attackListId = Random.Range (0, 1);
-				if(UImanager.massId_1 == 0){
-					UImanager.attackAreaId_1 = new int[]{1,4}[attackListId];
-				}else if(UImanager.massId_1 == 1){
-					UImanager.attackAreaId_1 = new int[]{2,3}[attackListId];
-				}
-				onEnemyBehavorChanged ();
+				setEnemyAttackRandom ();
 			}
 		}
 	}
 
+	void setEnemyAttackRandom(){
+		UImanager.massId_1 = (Random.Range (0, 21)%2);
+		int attackListId = (Random.Range (0, 21)%2);
+		if(UImanager.massId_1 == 0){
+			UImanager.attackAreaId_1 = 1;
+		}else if(UImanager.massId_1 == 1){
+			UImanager.attackAreaId_1 = 2;
+		}
+		Debug.Log ("gqb------>UImanager.massId_1: " + UImanager.massId_1 + "; UImanager.attackAreaId_1: " + UImanager.attackAreaId_1);
+		onEnemyBehavorChanged ();
+	}
+
 	bool isEnemyAttackReady(){
 		//Debug.Log ("gqb------>isEnemyAttackReady00000");
-		if(attackMountMissile < 2){
+		if(attackMountMissile < 8){
 			return false;
 		}
 		//Debug.Log ("gqb------>isEnemyAttackReady11111");
-		if(attackTra == null || (new Vector3(attackTra.position.x, 0, attackTra.position.z) - attackMasses_1[UImanager.massId_1]).magnitude > 10 ){
+		if(attackTra == null || (new Vector3(attackTra.position.x, 0, attackTra.position.z) - attackMasses_1[UImanager.massId_1]).magnitude > 300 ){
 			return false;
 		}
 		//Debug.Log ("gqb------>isEnemyAttackReady22222");
@@ -563,7 +579,7 @@ public class GameInit  : MonoBehaviour {
 				return false;
 			}
 		}
-		Debug.Log ("gqb------>isEnemyAttackReady33333");
+		//Debug.Log ("gqb------>isEnemyAttackReady33333");
 		return true;
 	}
 

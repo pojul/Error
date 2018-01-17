@@ -91,7 +91,7 @@ public class MissileType1 : PojulObject {
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
 		type = strs [1];
-		this.target = target;
+		this.target = getMissileTarget(transform, target);
 		this.speed = startSpeed + 200;
 		isForward = true;
 
@@ -139,11 +139,16 @@ public class MissileType1 : PojulObject {
 			contact.point, Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
 		bomb2.tag = "bomb2";
 		bomb2.transform.parent = collision.gameObject.transform;
-		Transform root = collision.gameObject.transform.root.GetChild(0);
-		PojulObject mPojulObject = root.GetComponent<PojulObject> ();
+
+		Transform root = null;
+		PojulObject mPojulObject = null;
+		if(collision.gameObject.transform.root.childCount > 0){
+			root = collision.gameObject.transform.root.GetChild(0);
+			mPojulObject = root.GetComponent<PojulObject> ();
+		}
 
 		if(mPojulObject == null && collision.gameObject.transform != null){
-			root = collision.gameObject.transform;
+			root = collision.gameObject.transform.root;
 			mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 		}
 		if(mPojulObject != null){
@@ -184,5 +189,29 @@ public class MissileType1 : PojulObject {
 		Destroy (this.gameObject);
 
 	}
+
+	public static Transform getMissileTarget(Transform self, Transform rawTarget){
+		if(rawTarget.parent != null && (rawTarget.parent.CompareTag("0_transport1") || rawTarget.parent.CompareTag("1_transport1"))){
+			Transform pos1 = rawTarget.parent.FindChild ("aimpos1");
+			Transform pos2 = rawTarget.parent.FindChild ("aimpos1");
+			if (pos1 != null || pos2 != null) {
+				float ds1 = 100000;
+				float ds2 = 100000;
+				if(pos1 != null){
+					ds1 = (self.position - pos1.position).magnitude;
+				}
+				if(pos2 != null){
+					ds2 = (self.position - pos2.position).magnitude;
+				}
+				if(ds1 < ds2 && pos1 != null){
+					rawTarget = pos1;
+				}else if(pos2 != null){
+					rawTarget = pos2;
+				}
+			}
+		}
+		return rawTarget;
+	}
+
 
 }

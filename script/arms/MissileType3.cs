@@ -32,7 +32,7 @@ public class MissileType3 : PojulObject {
 	
 	// Update is called once per frame
 	void Update () {
-		if(target != null){
+		if(target != null && !isDestoryed){
 			Quaternion rawRotation = transform.rotation;
 			Quaternion newRotation = new Quaternion();
 			if (!isForward && !missTarget) {
@@ -63,7 +63,7 @@ public class MissileType3 : PojulObject {
 				float angle = Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg;
 				//Debug.Log (speed + "gqb------>angle: " + angle);
 				if(angle < 90 && speed > 400){
-					speed = speed - 2.4f - angle *3.1f;
+					speed = speed - 2.8f - angle *3.2f;
 				}
 
 				if(speed <= 400){
@@ -88,7 +88,7 @@ public class MissileType3 : PojulObject {
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
 		type = strs [1];
-		this.target = target;
+		this.target = MissileType1.getMissileTarget(transform, target);
 		this.speed = startSpeed;
 		initBlaze ();
 
@@ -103,6 +103,10 @@ public class MissileType3 : PojulObject {
 	}
 
 	void destoryMissile(){
+		if(isDestoryed){
+			return;
+		}
+		isDestoryed = true;
 		destory ();
 	}
 
@@ -116,7 +120,7 @@ public class MissileType3 : PojulObject {
 		}
 
 	}
-
+		
 	void addRigidbody(){
 		mBoxCollider.enabled = true;
 
@@ -126,25 +130,73 @@ public class MissileType3 : PojulObject {
 	}
 
 	void OnCollisionEnter(Collision collision){
-		//Debug.Log ("gqb------>OnCollisionEnter: ");
+		if(isDestoryed){
+			return;
+		}
+		//Debug.Log ("gqb------>OnCollisionEnter MissileType3: ");
 		ContactPoint contact = collision.contacts[0];
 		GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
 			contact.point, Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
 		bomb2.tag = "bomb2";
 		bomb2.transform.parent = collision.gameObject.transform;
-		Transform root = collision.gameObject.transform.root.GetChild(0);
-		PojulObject mPojulObject = root.GetComponent<PojulObject> ();
+
+		Transform root = null;
+		PojulObject mPojulObject = null;
+		if(collision.gameObject.transform.root.childCount > 0){
+			root = collision.gameObject.transform.root.GetChild(0);
+			mPojulObject = root.GetComponent<PojulObject> ();
+		}
 
 		if(mPojulObject == null && collision.gameObject.transform != null){
-			root = collision.gameObject.transform;
+			root = collision.gameObject.transform.root;
 			mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 		}
 		if(mPojulObject != null){
+			if(mPojulObject.type.Equals("transport1")){
+				((TransportType1)mPojulObject).setBombParent (bomb2);
+			}
 			mPojulObject.isFired(new RaycastHit(), collision, 3);
 		}
+		isDestoryed = true;
 		destory ();
 	}
 
+	public override void isFired(RaycastHit hit, Collision collision, int type){
+		if(isDestoryed){
+			return;
+		}
+
+		if (type == 2) {
+			Vector3 hitPoint;
+			if (collision != null) {
+				hitPoint = collision.contacts[0].point;
+			} else {
+				hitPoint = hit.point;
+			}
+			isDestoryed = true;
+			DestoryAll (hitPoint, 30000.0f);
+			return;
+		}
+	}
+
+	void DestoryAll(Vector3 point, float force){
+		if(!transform.gameObject.GetComponent<Rigidbody>()){
+			transform.gameObject.AddComponent<Rigidbody>();
+		}
+		Rigidbody mRigidbody = transform.gameObject.GetComponent<Rigidbody>();
+		mRigidbody.useGravity = true;
+		Vector3 explosionPos = new Vector3 (point.x, 
+			(point.y - 10), 
+			point.z);
+		Collider[] colliders = Physics.OverlapSphere(explosionPos, 200.0f);
+		foreach (Collider hit in colliders){
+			if (hit.GetComponent<Rigidbody>() && hit.transform != Camera.main.transform){
+				hit.GetComponent<Rigidbody>().AddExplosionForce(force, explosionPos, 200.0f);
+			}  
+		}
+		Invoke ("destory", 10);
+	}
+		
 	void destory(){
 		lock(GameInit.locker){
 			if(!GameInit.currentInstance.ContainsKey((string)tag)){
@@ -152,6 +204,7 @@ public class MissileType3 : PojulObject {
 			}
 			if(GameInit.currentInstance.ContainsKey((string)tag)){
 				GameInit.currentInstance[tag] = GameInit.currentInstance[tag] - 1;
+				//Debug.Log ("gqb----->destory: " + tag);
 			}
 			if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
 				GameInit.gameObjectInstance.Remove (transform.gameObject);

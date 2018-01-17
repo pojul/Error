@@ -80,6 +80,7 @@ public class UImanager : MonoBehaviour {
 	private float scrollPos = 0.0f;
 	public static bool isOnLeave = false;
 	private float onLeaveHeight = 12000;
+	public static float fireInterval = 2;
 
 	private bool showShopWin = false;
 	public string[] armNames = new string[10];
@@ -756,6 +757,7 @@ public class UImanager : MonoBehaviour {
 				updatyXZ (Camera.main.transform, cameraThubmnailPoint);
 			}
 			if(isOnLeave){
+				cameraY = 12000;
 				Camera.main.transform.position = Vector3.Slerp (Camera.main.transform.position, 
 					new Vector3(Camera.main.transform.position.x, onLeaveHeight, Camera.main.transform.position.z), Time.deltaTime*0.45f);
 			}
@@ -859,10 +861,14 @@ public class UImanager : MonoBehaviour {
 
 		if (!hit.transform.root.CompareTag ("Untagged") ||
 		   (hit.transform.root.childCount > 0 && !hit.transform.root.GetChild (0).CompareTag ("Untagged"))) {
-			Transform root = hit.transform.root.GetChild(0);
-			PojulObject mPojulObject = root.GetComponent<PojulObject> ();
+			Transform root = null;
+			PojulObject mPojulObject = null;
+			if(hit.transform.root.childCount > 0){
+				root = hit.transform.root.GetChild(0);
+				mPojulObject = root.GetComponent<PojulObject> ();
+			}
 			if(mPojulObject == null && hit.transform != null){
-				root = hit.transform;
+				root = hit.transform.root;
 				mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 			}
 			if(mPojulObject != null){
@@ -880,13 +886,13 @@ public class UImanager : MonoBehaviour {
 				Transform tempTransform = colliders [i].transform.root.GetChild (0);
 				string tag = tempTransform.tag;
 				if (tag.Equals ("Untagged")) {
-					if (colliders [i].transform == null) {
+					if (colliders [i].transform.root == null) {
 						continue;
 					}
-					if (colliders [i].transform.tag.Equals ("Untagged")) {
+					if (colliders [i].transform.root.tag.Equals ("Untagged")) {
 						continue;
 					}
-					tempTransform = colliders [i].transform;
+					tempTransform = colliders [i].transform.root;
 				}
 				tag = tempTransform.tag;
 				string[] strs = tempTransform.tag.Split ('_');
@@ -924,7 +930,7 @@ public class UImanager : MonoBehaviour {
 
 		mPojulObject = tra.GetComponent<PojulObject> ();
 		if("car2".Equals(mPojulObject.type) || "car3".Equals(mPojulObject.type) || "car5".Equals(mPojulObject.type)
-			|| "a10".Equals(mPojulObject.type)){
+			|| "a10".Equals(mPojulObject.type) || "littlecannon1".Equals(mPojulObject.type) || "homepao".Equals(mPojulObject.type)){
 			if(showAttackWin){
 				if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
 					selectedTra.GetComponent<PojulObject> ().isSelected = false;
@@ -950,112 +956,161 @@ public class UImanager : MonoBehaviour {
 			}else if(sellingTra != null){
 				armInfoSell.sprite = armInfoSell4;
 			}else{
-				armInfoSell.sprite = armInfoSell1;
+				if("littlecannon1".Equals (mPojulObject.type) || "homepao".Equals (mPojulObject.type)){
+					armInfoSell.sprite = armInfoSell4;
+				}else{
+					armInfoSell.sprite = armInfoSell1;
+				}
 			}
 
-			if("car2".Equals(mPojulObject.type)){
+			if ("car2".Equals (mPojulObject.type)) {
 				armInfoType.text = "type: supply car";
 				health.text = "health: " + ((CarType2)mPojulObject).sliderHealth.value;
 				patrolArea.color = textDisableColor;
 				patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				patrolAreaValue.enabled = false;
 				attackArmy.color = textDisableColor;
-				attackArmyValue.transform.FindChild("Background").GetComponent<Image>().color = textDisableColor;
+				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = textDisableColor;
 				attackArmyValue.enabled = false;
 				maxMountMissile.color = textDisableColor;
-				maxMountMissileValue.gameObject.GetComponent<Image>().color = textDisableColor;
+				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				maxMountMissileValue.enabled = false;
 				supplyPriority.color = textDisableColor;
-				supplyPriorityValue.gameObject.GetComponent<Image>().color = textDisableColor;
+				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				supplyPriorityValue.enabled = false;
-				armInfoArms.text = ((CarType2)mPojulObject).currentMissiles[0] + " S-A missiles, "
-					+ ((CarType2)mPojulObject).currentMissiles[2] + " F missiles";
-				armInfoSellNote.text = (int)(GameInit.prices["car2"]*0.5f*((CarType2)mPojulObject).sliderHealth.value/((CarType2)mPojulObject).sliderHealth.maxValue)
-					+ " golds";
+				armInfoArms.text = ((CarType2)mPojulObject).currentMissiles [0] + " S-A missiles, "
+				+ ((CarType2)mPojulObject).currentMissiles [2] + " F missiles";
+				armInfoSellNote.text = (int)(GameInit.prices ["car2"] * 0.5f * ((CarType2)mPojulObject).sliderHealth.value / ((CarType2)mPojulObject).sliderHealth.maxValue)
+				+ " golds";
 				armInfoControl.sprite = armInfoControl3;
-			}else if("car3".Equals(mPojulObject.type)){
+			} else if ("car3".Equals (mPojulObject.type)) {
 				armInfoType.text = "type: tank";
 				health.text = "health: " + ((CarType3)mPojulObject).sliderHealth.value;
 				patrolArea.color = textEnableColor;
 				patrolAreaValue.gameObject.GetComponent<Image> ().color = Color.white;
 				patrolAreaValue.enabled = true;
-				if(((CarType3)mPojulObject).mPatrolArea.areaId <= 4){
-					patrolAreaValue.value = ((CarType3)mPojulObject).mPatrolArea.areaId -1;
+				if (((CarType3)mPojulObject).mPatrolArea.areaId <= 4) {
+					patrolAreaValue.value = ((CarType3)mPojulObject).mPatrolArea.areaId - 1;
 				}
 				attackArmy.color = textEnableColor;
-				attackArmyValue.transform.FindChild("Background").GetComponent<Image>().color = Color.white;
+				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
 				attackArmyValue.enabled = true;
 				attackArmyValue.isOn = mPojulObject.isAttackArmy;
 				maxMountMissile.color = textDisableColor;
-				maxMountMissileValue.gameObject.GetComponent<Image>().color = textDisableColor;
+				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				maxMountMissileValue.enabled = false;
 				supplyPriority.color = textDisableColor;
-				supplyPriorityValue.gameObject.GetComponent<Image>().color = textDisableColor;
+				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				supplyPriorityValue.enabled = false;
 				armInfoArms.text = "";
-				armInfoSellNote.text = (int)(GameInit.prices["car3"]*0.5f*((CarType3)mPojulObject).sliderHealth.value/((CarType3)mPojulObject).sliderHealth.maxValue)
-					+ " golds";
+				armInfoSellNote.text = (int)(GameInit.prices ["car3"] * 0.5f * ((CarType3)mPojulObject).sliderHealth.value / ((CarType3)mPojulObject).sliderHealth.maxValue)
+				+ " golds";
 				if (planMove.player != null || mPojulObject.behavior == 5) {
 					armInfoControl.sprite = armInfoControl3;
 				} else {
 					armInfoControl.sprite = armInfoControl1;
 				}
-			}else if("car5".Equals(mPojulObject.type)){
+			} else if ("car5".Equals (mPojulObject.type)) {
 				armInfoType.text = "type: missile car";
 				health.text = "health: " + ((CarType5)mPojulObject).sliderHealth.value;
 				patrolArea.color = textEnableColor;
 				patrolAreaValue.gameObject.GetComponent<Image> ().color = Color.white;
 				patrolAreaValue.enabled = true;
-				if(((CarType5)mPojulObject).mPatrolArea.areaId <= 4){
-					patrolAreaValue.value = ((CarType5)mPojulObject).mPatrolArea.areaId -1;
+				if (((CarType5)mPojulObject).mPatrolArea.areaId <= 4) {
+					patrolAreaValue.value = ((CarType5)mPojulObject).mPatrolArea.areaId - 1;
 				}
 				attackArmy.color = textEnableColor;
-				attackArmyValue.transform.FindChild("Background").GetComponent<Image>().color = Color.white;
+				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
 				attackArmyValue.enabled = true;
 				attackArmyValue.isOn = mPojulObject.isAttackArmy;
 				maxMountMissile.color = textEnableColor;
-				maxMountMissileValue.gameObject.GetComponent<Image>().color = Color.white;
+				maxMountMissileValue.gameObject.GetComponent<Image> ().color = Color.white;
 				maxMountMissileValue.enabled = true;
 				maxMountMissileValue.value = ((CarType5)mPojulObject).maxMountMissle;
 				supplyPriority.color = textEnableColor;
-				supplyPriorityValue.gameObject.GetComponent<Image>().color = Color.white;
+				supplyPriorityValue.gameObject.GetComponent<Image> ().color = Color.white;
 				supplyPriorityValue.enabled = true;
 				supplyPriorityValue.value = ((CarType5)mPojulObject).priority;
 				armInfoArms.text = ((CarType5)mPojulObject).currentMountMissle + " S-A missiles, ";
 
-				armInfoSellNote.text = (int)(GameInit.prices["car5"]*0.5f*((CarType5)mPojulObject).sliderHealth.value/((CarType5)mPojulObject).sliderHealth.maxValue)
-					+ " golds";
+				armInfoSellNote.text = (int)(GameInit.prices ["car5"] * 0.5f * ((CarType5)mPojulObject).sliderHealth.value / ((CarType5)mPojulObject).sliderHealth.maxValue)
+				+ " golds";
 				armInfoControl.sprite = armInfoControl3;
-			}else if("a10".Equals(mPojulObject.type)){
+			} else if ("a10".Equals (mPojulObject.type)) {
 				armInfoType.text = "type: fighter";
 				health.text = "health: " + ((A10aPlan)mPojulObject).sliderHealth.value;
 				patrolArea.color = textEnableColor;
 				patrolAreaValue.gameObject.GetComponent<Image> ().color = Color.white;
 				patrolAreaValue.enabled = true;
-				if(((A10aPlan)mPojulObject).mPatrolArea.areaId <= 4){
-					patrolAreaValue.value = ((A10aPlan)mPojulObject).mPatrolArea.areaId -1;
+				if (((A10aPlan)mPojulObject).mPatrolArea.areaId <= 4) {
+					patrolAreaValue.value = ((A10aPlan)mPojulObject).mPatrolArea.areaId - 1;
 				}
 				attackArmy.color = textEnableColor;
-				attackArmyValue.transform.FindChild("Background").GetComponent<Image>().color = Color.white;
+				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
 				attackArmyValue.enabled = true;
 				attackArmyValue.isOn = mPojulObject.isAttackArmy;
 				maxMountMissile.color = textEnableColor;
-				maxMountMissileValue.gameObject.GetComponent<Image>().color = Color.white;
+				maxMountMissileValue.gameObject.GetComponent<Image> ().color = Color.white;
 				maxMountMissileValue.enabled = true;
 				maxMountMissileValue.value = ((A10aPlan)mPojulObject).maxMountMissle;
 				supplyPriority.color = textDisableColor;
-				supplyPriorityValue.gameObject.GetComponent<Image>().color = textDisableColor;
+				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				supplyPriorityValue.enabled = false;
 				armInfoArms.text = ((A10aPlan)mPojulObject).currentMountMissle + " F missiles";
 
-				armInfoSellNote.text = (int)(GameInit.prices["a10"]*0.5f*((A10aPlan)mPojulObject).sliderHealth.value/((A10aPlan)mPojulObject).sliderHealth.maxValue)
-					+ " golds";
+				armInfoSellNote.text = (int)(GameInit.prices ["a10"] * 0.5f * ((A10aPlan)mPojulObject).sliderHealth.value / ((A10aPlan)mPojulObject).sliderHealth.maxValue)
+				+ " golds";
+				if (planMove.player != null) {
+					armInfoControl.sprite = armInfoControl3;
+				} else {
+					armInfoControl.sprite = armInfoControl1;
+				}
+			} else if ("littlecannon1".Equals (mPojulObject.type)) {
+				armInfoType.text = "type: railgun";
+				health.text = "health: " + ((LittleCannon1)mPojulObject).sliderHealth.value;
+				patrolArea.color = textDisableColor;
+				patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				patrolAreaValue.enabled = false;
+				attackArmy.color = textDisableColor;
+				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = textDisableColor;
+				attackArmyValue.enabled = false;
+				maxMountMissile.color = textDisableColor;
+				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				maxMountMissileValue.enabled = false;
+				supplyPriority.color = textDisableColor;
+				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				supplyPriorityValue.enabled = false;
+				armInfoArms.text = "muzzle velocity of shells: 15 mach";
+				armInfoSellNote.text = "";
+				if (planMove.player != null) {
+					armInfoControl.sprite = armInfoControl3;
+				} else {
+					armInfoControl.sprite = armInfoControl1;
+				}
+			}else if ("homepao".Equals (mPojulObject.type)) {
+				armInfoType.text = "type: big railgun";
+				health.text = "health: " + ((HomePao)mPojulObject).sliderHealth.value;
+				patrolArea.color = textDisableColor;
+				patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				patrolAreaValue.enabled = false;
+				attackArmy.color = textDisableColor;
+				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = textDisableColor;
+				attackArmyValue.enabled = false;
+				maxMountMissile.color = textDisableColor;
+				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				maxMountMissileValue.enabled = false;
+				supplyPriority.color = textDisableColor;
+				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				supplyPriorityValue.enabled = false;
+				armInfoArms.text = "muzzle velocity of shells: 20 mach";
+				armInfoSellNote.text = "";
 				if (planMove.player != null) {
 					armInfoControl.sprite = armInfoControl3;
 				} else {
 					armInfoControl.sprite = armInfoControl1;
 				}
 			}
+
 		}
 	}
 		
@@ -1349,7 +1404,7 @@ public class UImanager : MonoBehaviour {
 			PojulObject mPojulObject = planMove.player.gameObject.GetComponent<PojulObject> ();
 			if(mPojulObject != null){
 				canFire = false;
-				Invoke ("car3CanFire", 2);
+				Invoke ("car3CanFire", fireInterval);
 				fire.sprite = fireBg3;
 				mPojulObject.fireOfPlayer ();
 			}
@@ -1797,11 +1852,16 @@ public class UImanager : MonoBehaviour {
 			selectedTra.GetComponent<PojulObject>().isDestoryed){
 			return;
 		}
+		//Debug.Log ("gqb ------>OnArmInfoControlClick");
 		PojulObject mPojulObject = selectedTra.GetComponent<PojulObject> ();
 		if ("car3".Equals (mPojulObject.type)) {
 			((CarType3)mPojulObject).setPlayType (0);
 		}else if("a10".Equals (mPojulObject.type)){
 			((A10aPlan)mPojulObject).setPlayType (0);
+		}else if("littlecannon1".Equals (mPojulObject.type)){
+			((LittleCannon1)mPojulObject).setPlayType (0);
+		}else if("homepao".Equals (mPojulObject.type)){
+			((HomePao)mPojulObject).setPlayType (0);
 		}
 
 	}
@@ -1821,6 +1881,10 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void OnArmInfoSellClick(){
+		if (armInfoSell.sprite == armInfoSell4 || armInfoSell.sprite == armInfoSell3) {
+			return;
+		}
+
 		if(sellingTra != null || selectedTra == null || !selectedTra.GetComponent<PojulObject>() ||
 			selectedTra.GetComponent<PojulObject>().isDestoryed || selectedTra.GetComponent<PojulObject>().isSelling){
 			return;
@@ -1833,6 +1897,9 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void OnArmInfoSellDown(){
+		if (armInfoSell.sprite == armInfoSell4 || armInfoSell.sprite == armInfoSell3) {
+			return;
+		}
 		if(sellingTra != null || selectedTra == null || !selectedTra.GetComponent<PojulObject>() ||
 			selectedTra.GetComponent<PojulObject>().isDestoryed || selectedTra.GetComponent<PojulObject>().isSelling){
 			return;
@@ -1841,6 +1908,9 @@ public class UImanager : MonoBehaviour {
 	}
 
 	public void OnArmInfoSellUp(){
+		if (armInfoSell.sprite == armInfoSell4 || armInfoSell.sprite == armInfoSell3) {
+			return;
+		}
 		if(sellingTra != null || selectedTra == null || !selectedTra.GetComponent<PojulObject>() ||
 			selectedTra.GetComponent<PojulObject>().isDestoryed || selectedTra.GetComponent<PojulObject>().isSelling){
 			return;
@@ -1913,10 +1983,11 @@ public class UImanager : MonoBehaviour {
 		if(isSelectMode || planMove.player == null || !planMove.player.GetComponent<PojulObject>() || planMove.player.GetComponent<PojulObject>().isDestoryed){
 			return;
 		}
+		cameraY = 12000;
 		PojulObject mPojulObject = planMove.player.GetComponent<PojulObject> ();
 		//A10aPlan mA10aPlan = planMove.player.GetComponent<A10aPlan> ();
 		if ("car3".Equals (mPojulObject.type)) {
-			if(planMove.player.transform.position.y < 5){
+			if (planMove.player.transform.position.y < 5) {
 				((CarType3)mPojulObject).destoryData ();
 				((CarType3)mPojulObject).destoryAll ();
 				isOnLeave = true;
@@ -1924,8 +1995,14 @@ public class UImanager : MonoBehaviour {
 			}
 			((CarType3)mPojulObject).setPlayType (1);
 			isOnLeave = true;
-		}else if("a10".Equals (mPojulObject.type)){
+		} else if ("a10".Equals (mPojulObject.type)) {
 			((A10aPlan)mPojulObject).setPlayType (1);
+			isOnLeave = true;
+		} else if ("littlecannon1".Equals (mPojulObject.type)) {
+			((LittleCannon1)mPojulObject).setPlayType (1);
+			isOnLeave = true;
+		} else if ("homepao".Equals (mPojulObject.type)) {
+			((HomePao)mPojulObject).setPlayType (1);
 			isOnLeave = true;
 		}
 

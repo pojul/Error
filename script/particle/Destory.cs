@@ -21,6 +21,8 @@ public class Destory : PojulObject {
 			destoryTime = 1.2f;
 		}else if (CompareTag ("bulletBomb2")) {
 			destoryTime = 1.0f;
+		}if (CompareTag ("paoFire")) {
+			destoryTime = 2.2f;
 		}
 
 		Invoke ("destory", destoryTime);

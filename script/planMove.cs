@@ -39,8 +39,20 @@ public class planMove : MonoBehaviour {
 		type = strs [1];
 		if("car3".Equals(type)){
 			minSpeed = 0;
+			dzMainCamera = 110;
+			dyMainCamera = 18;
 		}else if("a10".Equals(type)){
 			minSpeed = 888;
+			dzMainCamera = 220;
+			dyMainCamera = 50;
+		}else if("littlecannon1".Equals(type)){
+			minSpeed = 0;
+			dzMainCamera = 200;
+			dyMainCamera = 150;
+		}else if("homepao".Equals(type)){
+			minSpeed = 0;
+			dzMainCamera = 220;
+			dyMainCamera = 150;
 		}
 
 		mPojulObject = transform.gameObject.GetComponent<PojulObject> ();
@@ -64,32 +76,32 @@ public class planMove : MonoBehaviour {
 				speed = maxSpeed;
 			}
 
-			if("a10".Equals(type)){
-				Quaternion targetRotation = Quaternion.Euler(-(PlanControls.newPoint3Rolation + 360) , 
-					PlanControls.newPoint1Rolation,
-					-(PlanControls.newPoint2Rolation + 360));
-				transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rolSpeed);
+			if ("a10".Equals (type)) {
+				Quaternion targetRotation = Quaternion.Euler (-(PlanControls.newPoint3Rolation + 360), 
+					                            PlanControls.newPoint1Rolation,
+					                            -(PlanControls.newPoint2Rolation + 360));
+				transform.rotation = Quaternion.Slerp (transform.rotation, targetRotation, Time.deltaTime * rolSpeed);
 
-				if(!UImanager.isCamreaMoveTo){
-					Camera.main.transform.position = transform.position +  (-transform.forward * dzMainCamera + transform.up * dyMainCamera);
-					Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, 
-						Quaternion.LookRotation(transform.position - Camera.main.transform.position), 3.5f * Time.deltaTime);
+				if (!UImanager.isCamreaMoveTo) {
+					Camera.main.transform.position = transform.position + (-transform.forward * dzMainCamera + transform.up * dyMainCamera);
+					Camera.main.transform.rotation = Quaternion.Slerp (Camera.main.transform.rotation, 
+						Quaternion.LookRotation (transform.position - Camera.main.transform.position), 3.5f * Time.deltaTime);
 				}
-			}else if("car3".Equals(type)){
+			} else if ("car3".Equals (type)) {
 				float rolX = transform.rotation.eulerAngles.x;
 				float rolY = transform.rotation.eulerAngles.y;
-				if(transform.position.y >= 0){
+				if (transform.position.y >= 0) {
 					rolX = 0;
 					rolY = PlanControls.newPoint1Rolation;
-				}else if(transform.position.y < 0){
+				} else if (transform.position.y < 0) {
 					rolX = 90;
 					rolSpeed = 0.022f;
 				}
 
-				Quaternion targetRotation = Quaternion.Euler(rolX, 
-					rolY,
-					0);
-				transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rolSpeed);
+				Quaternion targetRotation = Quaternion.Euler (rolX, 
+					                            rolY,
+					                            0);
+				transform.rotation = Quaternion.Slerp (transform.rotation, targetRotation, Time.deltaTime * rolSpeed);
 
 				((CarType3)mPojulObject).rotatePan (dRotate3);
 				dRotate3 = 0;
@@ -99,7 +111,7 @@ public class planMove : MonoBehaviour {
 					((CarType3)mPojulObject).rotateCamera ();
 				}
 
-				if(transform.position.y < -1800){
+				if (transform.position.y < -1800) {
 					//Destroy (this.gameObject);
 					mPojulObject.isDestoryed = true;
 
@@ -107,13 +119,25 @@ public class planMove : MonoBehaviour {
 					((CarType3)mPojulObject).destoryAll ();
 				}
 
+			} else if ("littlecannon1".Equals (type)) {
+				((LittleCannon1)mPojulObject).rotatePan (PlanControls.newPoint1Rolation ,dRotate3);
+				dRotate3 = 0;
+				if (!UImanager.isCamreaMoveTo) {
+					((LittleCannon1)mPojulObject).rotateCamera ();
+				}
+			} else if ("homepao".Equals (type)) {
+				((HomePao)mPojulObject).rotatePan (PlanControls.newPoint1Rolation ,dRotate3);
+				dRotate3 = 0;
+				if (!UImanager.isCamreaMoveTo) {
+					((HomePao)mPojulObject).rotateCamera ();
+				}
 			}
 
 			if(mRigidbody != null && "car3".Equals(type) && transform.position.y >= 0){
-				mRigidbody.AddForce (transform.forward * speed * 2f);
+				mRigidbody.AddForce (transform.forward * speed * 2f, ForceMode.Force);
 				//Debug.Log ("gqb------>" + mRigidbody.velocity.magnitude);
 			}else if(mRigidbody != null){
-				mRigidbody.AddForce (transform.forward * speed * 2f);
+				mRigidbody.AddForce (transform.forward * speed * 2f, ForceMode.Force);
 			}
 				
 

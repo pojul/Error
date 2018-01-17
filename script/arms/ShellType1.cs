@@ -13,7 +13,7 @@ public class ShellType1 : PojulObject {
 
 	// Use this for initialization
 	void Start () {
-		startTime = Time.time;
+		
 	}
 	
 	// Update is called once per frame
@@ -27,7 +27,7 @@ public class ShellType1 : PojulObject {
 				if (!hit.transform.root.CompareTag ("Untagged") ||
 				    (hit.transform.root.childCount > 0 && !hit.transform.root.GetChild (0).CompareTag ("Untagged"))) {
 					GameObject bomb2 = (GameObject)Instantiate (Resources.Load ("Prefabs/Particle/bomb2"), 
-						(transform.position - transform.forward * 10), Quaternion.FromToRotation (Vector3.up, hit.normal)) as GameObject;
+						(hit.point  + transform.forward * 2), Quaternion.FromToRotation (Vector3.up, hit.normal)) as GameObject;
 					bomb2.tag = "bomb2";
 					//Debug.Log ("gqb------>ShellType11111: " + hit.transform.root.tag);
 					Transform root = null;
@@ -38,55 +38,64 @@ public class ShellType1 : PojulObject {
 					}
 
 					if(mPojulObject == null && hit.transform != null){
-						root = hit.transform;
+						root = hit.transform.root;
 						mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 					}
-
 					if(mPojulObject != null){
 						mPojulObject.isFired(hit, null, 2);
 						bomb2.transform.parent = root;
 					}
 				} else {
-					//Debug.Log ("gqb------>ShellType22222: " + hit.transform.root.tag);
+					//Debug.Log (hit.transform.root.name +  "gqb------>ShellType22222: " + hit.transform.root.tag);
 					GameObject bomb2 = (GameObject)Instantiate (Resources.Load ("Prefabs/Particle/bomb2"), 
-						(transform.position - transform.forward * 10), Quaternion.FromToRotation (Vector3.up, hit.normal)) as GameObject;
-					bomb2.tag = "bomb2";	
+						(hit.point  + transform.forward * 2), Quaternion.FromToRotation (Vector3.up, hit.normal)) as GameObject;
+					bomb2.tag = "bomb2";
 					bomb2.transform.parent = hit.transform.root;
 				}
 				isHit = true;
 				destory ();
 			}
-			transform.GetComponent<Rigidbody> ().AddForce (transform.up*136.0f);
+			transform.GetComponent<Rigidbody> ().AddForce (transform.up*90.0f);
 			transform.position = transform.position + transform.forward * startSpeed * Time.deltaTime;
 			startSpeed = startSpeed - decaySpeed * Time.deltaTime;
+		
+			if((Time.time - startTime) > 6){
+				isHit = true;
+				destory ();
+			}
 		}
-		if((Time.time - startTime) > 6){
-			isHit = true;
-			destory ();
-		}
+
 	}
 
 	public void shoot(float startSpeed, float decaySpeed){
+		if(!transform.gameObject.GetComponent<Rigidbody>()){
+			transform.gameObject.AddComponent<Rigidbody> ();
+		}
+		transform.gameObject.GetComponent<Renderer> ().enabled = true;
+		transform.gameObject.GetComponent<BoxCollider> ().enabled = true;
+		transform.parent = null;
 		this.startSpeed = startSpeed;
 		this.decaySpeed = decaySpeed;
 		this.isShoot = true;
-		hitDistance = startSpeed * 1.0f / 20;
+		startTime = Time.time;
+		hitDistance = startSpeed * 1.0f / ShowFPS.currFPS;
 		isHit = false;
 	}
 
 	void OnCollisionEnter(Collision collision){
 		ContactPoint contact = collision.contacts[0];
+		//Debug.Log ("gqb------>OnCollisionEnter11111: ");
 		//GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
 			//(contact.point - transform.forward * 10), Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
 		GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
-			contact.point, Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
+			(contact.point + transform.forward * 2), Quaternion.FromToRotation(Vector3.up, contact.normal)) as GameObject;
 		bomb2.tag = "bomb2";
 		bomb2.transform.parent = collision.gameObject.transform;
 		Transform root = collision.gameObject.transform.root.GetChild(0);
 		PojulObject mPojulObject = root.GetComponent<PojulObject> ();
 
 		if(mPojulObject == null && collision.gameObject.transform != null){
-			root = collision.gameObject.transform;
+			root = collision.gameObject.transform.root;
 			mPojulObject = root.gameObject.GetComponent<PojulObject> ();
 		}
 

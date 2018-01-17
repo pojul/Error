@@ -27,7 +27,7 @@ public class CarType2 : PojulObject {
 
 	private bool isMoving = false;
 
-	private float height = 46; //68.0f;
+	private float height = 24; //68.0f;
 	private float maxMoveSpeed = GameInit.mach * 0.6f;
 	private Vector3 park;
 	public GameObject navCube;
@@ -399,7 +399,7 @@ public class CarType2 : PojulObject {
 			}
 		}
 		Vector3 explosionPos = new Vector3 (point.x, 
-			(point.y - 300), 
+			(point.y - 150), 
 			point.z);
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, 200.0f);
 		foreach (Collider hit in colliders){
@@ -419,11 +419,11 @@ public class CarType2 : PojulObject {
 	}
 
 	public void destoryAll(){
-		if ("0".Equals (playerId)) {
+		/*if ("0".Equals (playerId)) {
 			GameInit.MyCar2.Remove (transform);
 		} else if("1".Equals (playerId)){
 			GameInit.EnemyCar2.Remove (transform);
-		}
+		}*/
 		if(mainTransform_lod0 != null){
 			Destroy (mainTransform_lod0.gameObject);
 		}

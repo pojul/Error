@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TransportType1 : PojulObject {
 
@@ -25,6 +26,13 @@ public class TransportType1 : PojulObject {
 	private Transform propeller1Transform_lod2;
 	private Transform propeller2Transform_lod2;
 
+	private Transform mainTransform_lod0;
+	private Transform mainTransform_lod1;
+	private Transform mainTransform_lod2;
+
+	private Transform force1_lod0;
+	private Transform force2_lod0;
+
 	/*private Renderer mRenderer_lod0_propeller1;
 	/*private Renderer mRenderer_lod0_propeller2;
 	private Renderer mRenderer_lod1_propeller1;
@@ -36,12 +44,11 @@ public class TransportType1 : PojulObject {
 	private bool isMoving = false;
 	private float openDoorSpeed = 0.4f;
 	private int initHeight = 2500;
-	private float height = 88;//104;//84; //190;
-	private float maxMoveSpeed = GameInit.mach * 0.8f;
+	private float height = 70;//104;//84; //190;
+	private float maxMoveSpeed = GameInit.mach * 1.1f;
 	private float aniSpeed = 0.0f;
 	private float navPathDistance = -1f;
 	private float maxFlyHeight = 10000.0f;
-	private float minFlyHeight = 9000.0f;
 	//private float flyHeight = 190.0f;
 
 	private Vector3 park;
@@ -54,12 +61,15 @@ public class TransportType1 : PojulObject {
 	public List<Vector3> attackAreas;
 	public float transportOutTime = 0;
 
+	private bool ispropeller1Destory = false;
+	private bool ispropeller2Destory = false;
+
+	//血量条
+	public Slider sliderHealth;
 
 	void Start () {
 		transform.name = "Transport1";
 		transform.position = new Vector3 (transform.position.x, initHeight, transform.position.z);
-
-		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
 		transform_lod0 = transform.FindChild ("transport_type_lod0");
 		transform_lod1 = transform.FindChild ("transport_type_lod1");
@@ -69,10 +79,14 @@ public class TransportType1 : PojulObject {
 		//mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
 		//mAnimator_lod2 = (Animator)transform_lod2.GetComponent<Animator> ();
 
+		mainTransform_lod0 = transform_lod0.FindChild ("main");
+		force1_lod0 = mainTransform_lod0.FindChild ("force1");
+		force2_lod0 = mainTransform_lod0.FindChild ("force2");
+		mAudioSource = (AudioSource)mainTransform_lod0.GetComponent<AudioSource> ();
+
 		doorTransform_lod0 = transform_lod0.FindChild ("door");
 		doorTransform_lod1 = transform_lod1.FindChild ("door");
 		doorTransform_lod2 = transform_lod2.FindChild ("door");
-
 
 		propeller1Transform_lod0 = transform_lod0.FindChild ("propeller1");
 		propeller2Transform_lod0 = transform_lod0.FindChild ("propeller2");
@@ -80,6 +94,8 @@ public class TransportType1 : PojulObject {
 		propeller2Transform_lod1 = transform_lod1.FindChild ("propeller2");
 		propeller1Transform_lod2 = transform_lod2.FindChild ("propeller1");
 		propeller2Transform_lod2 = transform_lod2.FindChild ("propeller2");
+
+
 
 		/*mRenderer_lod0_propeller1 = propeller1Transform_lod0.GetComponent<Renderer>();
 		mRenderer_lod0_propeller2 = propeller2Transform_lod0.GetComponent<Renderer>();
@@ -94,6 +110,7 @@ public class TransportType1 : PojulObject {
 		playerId = strs [0];
 		type = strs [1];
 
+		RectTransform mRectTransform = sliderHealth.GetComponent<RectTransform> ();
 		if ("0".Equals (playerId)) {
 			park = Util.getIdlePart ("0");
 			GameInit.park0 [park] = 1;
@@ -102,6 +119,7 @@ public class TransportType1 : PojulObject {
 			enemyCenter = new Vector3 (0,0,60000);
 			attackMasses = GameInit.attackMasses_0;
 			attackAreas = GameInit.attackAreas_0;
+			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
 		}else if ("1".Equals (playerId)){
 			park = Util.getIdlePart ("1");
 			GameInit.park1 [park] = 1;
@@ -110,7 +128,13 @@ public class TransportType1 : PojulObject {
 			enemyCenter = new Vector3 (0,0,-60000);
 			attackMasses = GameInit.attackMasses_1;
 			attackAreas = GameInit.attackAreas_1;
+			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.698f, 0.255f, 0.157f);
 		}
+		if(playerType == 1){
+			mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
+		}
+		sliderHealth.value = sliderHealth.maxValue;
+
 		transportTo = park;
 		//startNav (park);
 
@@ -122,6 +146,15 @@ public class TransportType1 : PojulObject {
 		if(isMoving){
 			listenerRollAni ();
 		}
+
+		sliderHealth.transform.rotation = Quaternion.Euler(transform_lod0.rotation.eulerAngles.x , 
+			Camera.main.transform.rotation.eulerAngles.y,
+			transform_lod0.rotation.eulerAngles.z);
+
+		if(isDestoryed){
+			onDestoried ();
+		}
+
 	}
 
 	void behaviorListener(){
@@ -249,7 +282,7 @@ public class TransportType1 : PojulObject {
 					continue;
 				}
 				PojulObject mPojulObject = temp.GetComponent<PojulObject> ();
-				if(mPojulObject.isDestoryed || mPojulObject.behavior ==5){
+				if(mPojulObject.isDestoryed || mPojulObject.behavior == 5){
 					continue;
 				}
 				return true;
@@ -349,7 +382,8 @@ public class TransportType1 : PojulObject {
 		//Debug.Log("gqb------>startMove");
 		if (aniSpeed < 1000) {
 			aniSpeed = aniSpeed + 2f;
-			mAudioSource.volume = aniSpeed * 0.0007f;
+			mAudioSource.volume = 1;
+			mAudioSource.pitch = aniSpeed * 0.001f;
 		} else {
 			if(transportTo != null){
 				startNav (transportTo);
@@ -361,7 +395,8 @@ public class TransportType1 : PojulObject {
 		//Debug.Log("gqb------>endMove");
 		if (aniSpeed > 2) {
 			aniSpeed = aniSpeed - 2f;
-			mAudioSource.volume = aniSpeed * 0.0007f;
+			mAudioSource.volume = 1;
+			mAudioSource.pitch = aniSpeed * 0.001f;
 		} else {
 			navPathDistance = -1;
 			isMoving = false;
@@ -396,7 +431,7 @@ public class TransportType1 : PojulObject {
 		nav.acceleration = maxMoveSpeed ;
 		nav.autoRepath = true;
 		//nav.baseOffset = 50;
-		nav.angularSpeed = 30;
+		nav.angularSpeed = 60;
 		navPathDistance = Mathf.Abs((new Vector3(transform.position.x, 0, transform.position.z) - navPoint).magnitude);
 		//flyHeight = Random.Range (minFlyHeight, maxFlyHeight);
 		//flyHeightSpeed = Mathf.Abs (flyHeightSpeed);
@@ -406,14 +441,174 @@ public class TransportType1 : PojulObject {
 	public void createNavCube(){
 		navCube = GameObject.CreatePrimitive (PrimitiveType.Cube);
 		navCube.transform.position = new Vector3(transform.position.x, 5, transform.position.z);
-		navCube.transform.localScale = new Vector3 (500, 500, 500);
+		navCube.transform.localScale = new Vector3 (10, 10, 10);
 		navCube.AddComponent<UnityEngine.AI.NavMeshAgent>();
+		Destroy(navCube.GetComponent<BoxCollider> ());
 		//transform.parent = navCube.transform;
 
 		MeshRenderer m = navCube.GetComponent<MeshRenderer>();
 		m.enabled = false;
 		nav= navCube.GetComponent<UnityEngine.AI.NavMeshAgent> ();
 		//nav.baseOffset
+	}
+
+	public override void isFired(RaycastHit hit, Collision collision, int type){
+		if (isDestoryed) {
+			return;
+		}
+
+		if (type == 2) {
+			Vector3 hitPoint;
+			if (collision != null) {
+				hitPoint = collision.contacts[0].point;
+			} else {
+				hitPoint = hit.point;
+			}
+			sliderHealth.value = sliderHealth.value - 42;
+			if(sliderHealth.value <= 0){
+				isDestoryed = true;
+				isPanDestoryed = true;
+				destoryData ();
+				inflame(hitPoint, 122000);
+				return;
+			}
+		} else if (type == 3) {
+			sliderHealth.value = sliderHealth.value - 107;
+			if (sliderHealth.value <= 0) {
+				isDestoryed = true;
+				isPanDestoryed = true;
+
+				float ds1 = (collision.contacts[0].point - force1_lod0.position).magnitude;
+				float ds2 = (collision.contacts[0].point - force2_lod0.position).magnitude;
+				if (ds1 > ds2) {
+					ispropeller1Destory = true;
+				} else {
+					ispropeller2Destory = true;
+				}
+				destoryData ();
+				inflame (collision.contacts[0].point, 122000.0f);
+				return;
+			}
+		}
+
+
+	}
+
+	public void destoryData(){
+		for(int i =0; i < attackTransports.Count; i++){
+			if(attackTransports[i] != null && attackTransports[i].GetComponent<CarType3>()){
+				attackTransports [i].GetComponent<CarType3> ().destoryData ();
+				attackTransports [i].GetComponent<CarType3> ().destoryAll ();
+			}
+		}
+
+		if(GameInit.currentInstance.ContainsKey((string)tag)){
+			GameInit.currentInstance[tag] = (int)GameInit.currentInstance[tag] - 1;
+		}
+		if(GameInit.gameObjectInstance.Contains(transform.gameObject)){
+			GameInit.gameObjectInstance.Remove (transform.gameObject);
+		}
+	}
+
+	void inflame(Vector3 point, float force){
+
+		Destroy (transform_lod1.gameObject);
+		Destroy (transform_lod2.gameObject);
+
+		GameObject inflameObj = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["inflame"]), 
+			point, Quaternion.Euler(0, 0, 0)) as GameObject;
+		inflameObj.transform.parent = mainTransform_lod0;
+
+		//test
+		transform.position = new Vector3 (transform.position.x, 3000, transform.position.z);
+		aniSpeed = 1000;
+		ispropeller1Destory = true;
+
+		mainTransform_lod0.parent = null;
+		propeller1Transform_lod0.parent = mainTransform_lod0;
+		propeller2Transform_lod0.parent = mainTransform_lod0;
+		doorTransform_lod0.parent = mainTransform_lod0;
+		transform.GetComponent<LODGroup>().enabled = false;
+
+		mainTransform_lod0.gameObject.AddComponent<Rigidbody> ();
+		//mainTransform_lod0.gameObject.GetComponent<Rigidbody> ().drag = 0.1f;
+		//mainTransform_lod0.gameObject.GetComponent<Rigidbody> ().angularDrag = 0.1f;
+		propeller1Transform_lod0.gameObject.GetComponent<MeshCollider> ().enabled = true;
+		propeller2Transform_lod0.gameObject.GetComponent<MeshCollider> ().enabled = true;
+		//mainTransform_lod0.gameObject.GetComponent<MeshRenderer> ().enabled = true;
+		//propeller1Transform_lod0.gameObject.GetComponent<MeshRenderer> ().enabled = true;
+		//propeller2Transform_lod0.gameObject.GetComponent<MeshRenderer> ().enabled = true;
+
+		Vector3 explosionPos = new Vector3 (point.x, 
+			(point.y - 20), 
+			point.z);
+		if(ispropeller1Destory){
+			propeller1Transform_lod0.parent = null;
+			propeller1Transform_lod0.gameObject.AddComponent<Rigidbody> ();
+			//propeller1Transform_lod0.gameObject.GetComponent<Rigidbody> ().drag = 0.1f;
+			//propeller1Transform_lod0.gameObject.GetComponent<Rigidbody> ().angularDrag = 0.1f;
+			propeller1Transform_lod0.GetComponent<Rigidbody>().AddExplosionForce(force, explosionPos, 300.0f);
+		}
+
+		if(ispropeller2Destory){
+			propeller2Transform_lod0.parent = null;
+			propeller2Transform_lod0.gameObject.AddComponent<Rigidbody> ();
+			//propeller2Transform_lod0.gameObject.GetComponent<Rigidbody> ().drag = 0.1f;
+			//propeller2Transform_lod0.gameObject.GetComponent<Rigidbody> ().angularDrag = 0.1f;
+			propeller2Transform_lod0.GetComponent<Rigidbody>().AddExplosionForce(force, explosionPos, 300.0f);
+		}
+
+		Invoke ("destoryAll", 80);
+	}
+
+	public void destoryAll(){
+		if(propeller1Transform_lod0 != null){
+			Destroy (propeller1Transform_lod0.gameObject);
+		}
+		if(propeller2Transform_lod0 != null){
+			Destroy (propeller2Transform_lod0.gameObject);
+		}
+		if(mainTransform_lod0 != null){
+			Destroy (mainTransform_lod0.gameObject);
+		}
+		if(transform_lod0 != null){
+			Destroy (transform_lod0.gameObject);
+		}
+		Destroy(transform.root.gameObject);
+	}
+
+	void onDestoried(){
+		propeller1Transform_lod0.localEulerAngles = new Vector3(propeller1Transform_lod0.localEulerAngles.x, 
+			(propeller1Transform_lod0.localEulerAngles.y + aniSpeed * Time.deltaTime), propeller1Transform_lod0.localEulerAngles.z);
+		propeller2Transform_lod0.localEulerAngles = new Vector3(propeller2Transform_lod0.localEulerAngles.x, 
+			(propeller2Transform_lod0.localEulerAngles.y + aniSpeed * Time.deltaTime), propeller2Transform_lod0.localEulerAngles.z);
+
+		if (ispropeller1Destory) {
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force1_lod0.right * 0.05f * aniSpeed, 
+				force1_lod0.position);
+		}else{
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force1_lod0.up * 0.1f * aniSpeed, 
+				force1_lod0.position);
+		}
+
+		if(ispropeller2Destory){
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (-force2_lod0.right * 0.05f * aniSpeed, 
+				force2_lod0.position);
+		}else{
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force2_lod0.up * 0.1f * aniSpeed, 
+				force2_lod0.position);
+		}
+
+		if(aniSpeed >= 1000){
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForce (mainTransform_lod0.forward * 0.07f * aniSpeed);
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForce (new Vector3 (0, 1, 0) * 0.08f * aniSpeed);
+		}
+	}
+
+	public void setBombParent(GameObject bmob){
+		if(mainTransform_lod0 != null){
+			bmob.transform.parent = mainTransform_lod0;
+		}
 	}
 
 }

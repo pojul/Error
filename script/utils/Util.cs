@@ -213,4 +213,38 @@ public class Util : MonoBehaviour {
 		}
 	}
 
+
+	public static float getDirectDRol(float fromRol, float toRol, float limit){
+		float dRol = 0;
+		float dRol1 = 0;
+		float dRol2 = 0;
+		int direct = 1;
+		if(fromRol > toRol){
+			dRol1 = fromRol - toRol;
+			dRol2 = 360 - fromRol + toRol;
+			if(dRol1 < dRol2){
+				direct = -1;
+				dRol = dRol1;
+			}else{
+				direct = 1;
+				dRol = dRol2;
+			}
+		}else if(fromRol < toRol){
+			dRol1 = toRol - fromRol;
+			dRol2 = 360 - toRol + fromRol;
+			if (dRol1 < dRol2) {
+				direct = 1;
+				dRol = dRol1;
+			} else {
+				direct = -1;
+				dRol = dRol2;
+			}
+		}
+		float minDRol = limit * Time.deltaTime;
+		if(dRol > minDRol){
+			dRol = minDRol;
+		}
+		return dRol*direct;
+	}
+
 }

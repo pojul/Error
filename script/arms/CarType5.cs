@@ -32,7 +32,7 @@ public class CarType5 : PojulObject {
 	public bool readyLaunch = false;
 
 	private float aimSpeed = 4.8f;
-	private float height = 46.5f; //69.0f;
+	private float height = 38f; //69.0f;
 	private float maxMoveSpeed = GameInit.mach * 0.36f;
 
 	public GameObject navCube;
@@ -129,7 +129,7 @@ public class CarType5 : PojulObject {
 		//addMissile ();
 		currentMountMissle = 0;
 		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
-		InvokeRepeating ("findInvade", 2.0f, 2.0f);
+		InvokeRepeating ("findInvade", 1.5f, 1.5f);
 
 	}
 
@@ -440,7 +440,7 @@ public class CarType5 : PojulObject {
 		}
 
 		Vector3 explosionPos = new Vector3 (point.x, 
-			(point.y - 300), 
+			(point.y - 150), 
 			point.z);
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, 200.0f);
 		foreach (Collider hit in colliders){
