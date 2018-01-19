@@ -517,7 +517,13 @@ public class PlanControls : MonoBehaviour {
 	}
 
 	float limitMaxRlo(float dRol){
-		float maxdRol = rorateSpeed * Time.deltaTime;
+		float maxdRol;
+		if (planMove.player != null && planMove.player.GetComponent<PojulObject> ()
+		   && !planMove.player.GetComponent<PojulObject> ().type.Equals ("a10")) {
+			maxdRol = rorateSpeed * Time.deltaTime * Mathf.Pow ((WorldUIManager.magnifierCamera.fieldOfView / 12.0f), 1.2f);//(WorldUIManager.magnifierCamera.fieldOfView / 12.0f);
+		} else {
+			maxdRol = rorateSpeed * Time.deltaTime;
+		}
 		if(dRol > maxdRol){
 			dRol = maxdRol;
 		}else if(dRol < -maxdRol){

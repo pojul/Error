@@ -1,10 +1,11 @@
 fileFormatVersion: 2
 guid: 2a1da4850d4b574439f57ea710d5cc11
-timeCreated: 1504910741
+timeCreated: 1516231025
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - planDestoryClip: {fileID: 8300000, guid: 1792989a5a33779428d2dbe9a9430605, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

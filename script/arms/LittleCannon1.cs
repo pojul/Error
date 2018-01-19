@@ -12,10 +12,10 @@ public class LittleCannon1 : PojulObject {
 	private Transform paoTransform;
 	private Transform playerView;
 
-	private float fireInterval = 12f;
+	private float fireInterval = 13f;
 	private float lastFileTime = 0.0f;
-	private float aimSpeed = 20f;
-	private float rayCastEnemyDis = 6000;
+	private float aimSpeed = 26f;
+	private float rayCastEnemyDis = 10000;
 	private float height = -190;
 
 	public float dzMainCamera = 200;
@@ -33,7 +33,7 @@ public class LittleCannon1 : PojulObject {
 			tag = "0_littlecannon1";
 			enemyId = "1";
 			aimSpeed = 20f;
-			rayCastEnemyDis = 6000;
+			rayCastEnemyDis = 8000;
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
 		} else {
 			tag = "1_littlecannon1";
@@ -68,8 +68,12 @@ public class LittleCannon1 : PojulObject {
 	
 	// Update is called once per frame
 	void Update () {
-
+		health = sliderHealth.value;
 		if(isDestoryed){
+			return;
+		}
+
+		if(playerType == 0){
 			return;
 		}
 
@@ -97,6 +101,15 @@ public class LittleCannon1 : PojulObject {
 	}
 
 	void behaviorListener(){
+
+		if(isDestoryed){
+			return;
+		}
+
+		if(playerType == 0){
+			return;
+		}
+
 		if (MissileAimedTra == null) {
 			isMissileAimed = false;
 		} else {
@@ -172,6 +185,10 @@ public class LittleCannon1 : PojulObject {
 			return;
 		}
 
+		if(playerType == 0){
+			return;
+		}
+
 		Quaternion lookFireRotation = Quaternion.LookRotation(enemyTransform.position - fireTransform.position);
 		 
 		float dRolY = Util.getDirectDRol(fireTransform.rotation.eulerAngles.y, lookFireRotation.eulerAngles.y, aimSpeed);
@@ -187,6 +204,10 @@ public class LittleCannon1 : PojulObject {
 			return;
 		}
 
+		if(playerType == 0){
+			return;
+		}
+			
 		//Debug.DrawRay(fireTransform.position, fireTransform.forward*16100, Color.white);
 
 		RaycastHit hit;
@@ -228,7 +249,7 @@ public class LittleCannon1 : PojulObject {
 		if(preShell == null){
 			createShell ();
 		}
-		((ShellType1)preShell.GetComponent<ShellType1> ()).shoot(51000, 0);
+		((ShellType1)preShell.GetComponent<ShellType1> ()).shoot(51000, 0, 0);
 		createShell ();
 	}
 
@@ -329,7 +350,7 @@ public class LittleCannon1 : PojulObject {
 			WorldUIManager.fireAimTra = fireTransform;
 			WorldUIManager.fireAimDistance = 12000.0f;
 			UImanager.fireInterval = fireInterval;
-			GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().setPlayerUI ("car3");
+			GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().setPlayerUI ("littlecannon1", "railgun");
 			if(Camera.main.gameObject.GetComponent<Rigidbody>()){
 				Destroy(Camera.main.gameObject.GetComponent<Rigidbody>());
 			}
@@ -360,9 +381,9 @@ public class LittleCannon1 : PojulObject {
 		}
 		panTransform.rotation = Quaternion.Slerp(panTransform.rotation,
 			Quaternion.Euler (new Vector3(0, PlanControls.newPoint1Rolation, 0)),
-			3.5f * Time.deltaTime
+			15.4f * Time.deltaTime
 		);
-		float paoRol = paoTransform.rotation.eulerAngles.x - rotationPao * 5.0f;
+		float paoRol = paoTransform.rotation.eulerAngles.x - rotationPao;
 		//Debug.Log ("gqb------>paoRol: " + paoRol);
 		if(paoRol > 89 && paoRol < 271){
 			if ((paoRol - 89) < (271 - paoRol)) {
@@ -373,7 +394,7 @@ public class LittleCannon1 : PojulObject {
 		}
 		paoTransform.rotation =  Quaternion.Slerp(paoTransform.rotation,
 			Quaternion.Euler (new Vector3(paoRol, panTransform.rotation.eulerAngles.y, 0)),
-			3.5f * Time.deltaTime
+			15.4f * Time.deltaTime
 		);
 	}
 

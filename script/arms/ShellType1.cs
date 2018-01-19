@@ -10,6 +10,7 @@ public class ShellType1 : PojulObject {
 	private float startTime;
 	private bool isHit = false;
 	private float hitDistance = 0;
+	private float forceUp;
 
 	// Use this for initialization
 	void Start () {
@@ -55,7 +56,7 @@ public class ShellType1 : PojulObject {
 				isHit = true;
 				destory ();
 			}
-			transform.GetComponent<Rigidbody> ().AddForce (transform.up*90.0f);
+			transform.GetComponent<Rigidbody> ().AddForce (transform.up*forceUp);
 			transform.position = transform.position + transform.forward * startSpeed * Time.deltaTime;
 			startSpeed = startSpeed - decaySpeed * Time.deltaTime;
 		
@@ -67,7 +68,7 @@ public class ShellType1 : PojulObject {
 
 	}
 
-	public void shoot(float startSpeed, float decaySpeed){
+	public void shoot(float startSpeed, float decaySpeed, float forceUp){
 		if(!transform.gameObject.GetComponent<Rigidbody>()){
 			transform.gameObject.AddComponent<Rigidbody> ();
 		}
@@ -77,6 +78,7 @@ public class ShellType1 : PojulObject {
 		this.startSpeed = startSpeed;
 		this.decaySpeed = decaySpeed;
 		this.isShoot = true;
+		this.forceUp = forceUp;
 		startTime = Time.time;
 		hitDistance = startSpeed * 1.0f / ShowFPS.currFPS;
 		isHit = false;

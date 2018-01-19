@@ -121,7 +121,7 @@ public class TankFire : PojulObject {
 			(paoTransform_lod0.position + paoTransform_lod0.forward*10), paoTransform_lod0.rotation) as GameObject;
 		//shell1.transform.rotation = fireTransform.rotation;
 		shell1.tag = "shell1";
-		((ShellType1)shell1.GetComponent<ShellType1> ()).shoot(10000, 0);
+		((ShellType1)shell1.GetComponent<ShellType1> ()).shoot(10000, 0, 0);
 
 		/*GameObject bomb2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bomb2"), 
 			new Vector3(0, 0, 0), Quaternion.Euler(0, 0, 0)) as GameObject;

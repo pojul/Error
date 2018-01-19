@@ -5,17 +5,11 @@ using UnityEngine.UI;
 
 public class A10aPlan : PojulObject {
 
-	public static float planeHeight = 5f;//60f;
+	public static float planeHeight = 6f;//60f;
 	public static float cameraX = 0.33f;
 	public static float cameraY = 3.07f;
 	public static float cameraZ = 44.08f;
-	
-	public static float air_ray1X = 13.8f;
-	public static float air_ray1Y = -1.06348f;
-    public static float air_ray1Z = -44.96f;
-	
-	public static float air_ray2X = -13.33f;
-	public static float air_ray2Y = -1.06348f;
+
     public static float air_ray2Z = -44.96f;
 
 	public GameObject airRay1;
@@ -28,12 +22,14 @@ public class A10aPlan : PojulObject {
 	private Transform transform_lod2;
 
 	private Transform[] fires = new Transform[8];
+	private Transform airRay1Pos;
+	private Transform airRay2Pos;
 
 	private Transform aimTransform;
 
 	private float maxMoveSpeed = GameInit.mach;
 	private float moveSpeed = 0.0f;
-	private float rolateSpeed = 70f;
+	private float rolateSpeed = 75f;
 	private Vector3 backEnemyPos = new Vector3(0, 6f, 8818);
 	private GameObject navCube;
 	private UnityEngine.AI.NavMeshAgent nav;
@@ -67,18 +63,22 @@ public class A10aPlan : PojulObject {
 	public Canvas mCanvas;
 
 	public List<Vector3> attackMasses;
+	public string airType = "";
 
 	// Use this for initialization
 	void Start () {
 		transform.position = new Vector3 (transform.position.x, initHeight, transform.position.z);
 
-		addAirRay ();
-
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
-		transform_lod0 = transform.FindChild ("A10a_lod0");
+		/*transform_lod0 = transform.FindChild ("A10a_lod0");
 		transform_lod1 = transform.FindChild ("A10a_lod1");
-		transform_lod2 = transform.FindChild ("A10a_lod2");
+		transform_lod2 = transform.FindChild ("A10a_lod2");*/
+
+		transform_lod0 = transform.GetChild (0);
+		transform_lod1 = transform.GetChild (1);
+		transform_lod2 = transform.GetChild (2);
+		airType = transform_lod0.name.Split ('_') [0];
 
 		missilePoses.Add (transform.FindChild ("missilePos1"));
 		missilePoses.Add (transform.FindChild ("missilePos2"));
@@ -90,19 +90,34 @@ public class A10aPlan : PojulObject {
 		missiles.Add (missilePoses[2], null);
 		missiles.Add (missilePoses[3], null);
 
-		fires[0] = transform.FindChild ("fire1");
-		fires[1] = transform.FindChild ("fire2");
-		fires[2] = transform.FindChild ("fire3");
-		fires[3] = transform.FindChild ("fire4");
-		fires[4] = transform.FindChild ("fire5");
-		fires[5] = transform.FindChild ("fire6");
-		fires[6] = transform.FindChild ("fire7");
-		fires[7] = transform.FindChild ("fire8");
+		if("A10a".Equals(airType)){
+			fires[0] = transform.FindChild ("fire1");
+			fires[1] = transform.FindChild ("fire2");
+			fires[2] = transform.FindChild ("fire3");
+			fires[3] = transform.FindChild ("fire4");
+			fires[4] = transform.FindChild ("fire5");
+			fires[5] = transform.FindChild ("fire6");
+			fires[6] = transform.FindChild ("fire7");
+			fires[7] = transform.FindChild ("fire8");
+		}
 
+		airRay1Pos = transform.FindChild ("airRay1Pos");
+		airRay2Pos = transform.FindChild ("airRay2Pos");
+
+		addAirRay ();
 
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
 		type = strs [1];
+
+
+		if("A10a".Equals(airType)){
+			maxMoveSpeed = 0.5f * 3400;
+		}else if("su34".Equals(airType)){
+			maxMoveSpeed = 0.7f * 3400;
+		}else if("F15E".Equals(airType)){
+			maxMoveSpeed = 0.72f * 3400;
+		}
 
 		int areaId = -1;
 		RectTransform mRectTransform = sliderHealth.GetComponent<RectTransform> ();
@@ -162,6 +177,7 @@ public class A10aPlan : PojulObject {
 	}
 		
 	void Update () {
+		health = sliderHealth.value;
 		if(isDestoryed){
 			return;
 		}
@@ -245,7 +261,7 @@ public class A10aPlan : PojulObject {
 				PlanControls.newPoint2Rolation = -(int)(transform.rotation.eulerAngles.z + 360);
 			}
 			if(mAudioSource != null){
-				mAudioSource.volume = 0.1f;
+				mAudioSource.volume = 0.0f;
 			}
 			if(!transform.gameObject.GetComponent<planMove> ()){
 				transform.gameObject.AddComponent<planMove> ();
@@ -254,22 +270,28 @@ public class A10aPlan : PojulObject {
 				transform.gameObject.AddComponent<Rigidbody> ();
 				mPlayerRigidbody = transform.gameObject.GetComponent<Rigidbody> ();
 				mPlayerRigidbody.useGravity = false;
-				mPlayerRigidbody.drag = 1.4f;
-				mPlayerRigidbody.angularDrag = 1.4f;
+				mPlayerRigidbody.drag = 1.0f;
+				mPlayerRigidbody.angularDrag = 1.0f;
 				planMove.mRigidbody = mPlayerRigidbody;
 			}
 			planMove.player = transform;
-			planMove.speed = 2200;
-			planMove.maxSpeed = 2200;
-			planMove.maxAccelerate = 2.5f;
-			PlanControls.rorateSpeed = 72f;
-			planMove.rolSpeed = 7.0f;
-			if(fires [0] == null){
-				fires [0] = transform.FindChild ("fire1");
+			planMove.speed = maxMoveSpeed * 0.6f;
+			planMove.maxSpeed = maxMoveSpeed;
+			planMove.maxAccelerate = 5f;
+			PlanControls.rorateSpeed = 92f;
+			planMove.rolSpeed = 12.0f;
+			if ("A10a".Equals (airType)) {
+				if (fires [0] == null) {
+					fires [0] = transform.FindChild ("fire1");
+				}
+				WorldUIManager.fireAimTra = fires [0];
+			} else {
+				WorldUIManager.fireAimTra = null;
 			}
-			WorldUIManager.fireAimTra = fires [0];
+
 			WorldUIManager.fireAimDistance = 21000.0f;
-			GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().setPlayerUI("a10");
+			GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().setPlayerUI("a10", airType);
+			Camera.main.GetComponent<AudioSource> ().enabled = true;
 		}else if(playerType == 1){
 			/*
 			*need judge is in nav area
@@ -291,23 +313,19 @@ public class A10aPlan : PojulObject {
 			planMove.player = null;
 			WorldUIManager.fireAimTra = null;
 			WorldUIManager.fireAimDistance = 0.0f;
+			Camera.main.GetComponent<AudioSource> ().enabled = false;
 		}
 	}
 
 	void addAirRay (){
 		airRay1 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/air_ray_A101"), 
-		
-			new Vector3(transform.position.x + air_ray1X, 
-						transform.position.y + air_ray1Y, 
-						transform.position.z+ air_ray1Z), 
-					Quaternion.Euler(0, 180, 0)) as GameObject;
+			airRay1Pos.position, 
+			Quaternion.Euler(0, 180, 0)) as GameObject;
 		airRay1.transform.parent = transform;
 
 		//airRay2 = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["air_ray_A10"]), 
 		airRay2 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/air_ray_A101"), 
-			new Vector3(transform.position.x + air_ray2X, 
-				transform.position.y + air_ray2Y, 
-				transform.position.z+ air_ray2Z), 
+			airRay2Pos.position,
 			Quaternion.Euler(0, 180, 0)) as GameObject;
 		airRay2.transform.parent = transform;
 	}
@@ -418,7 +436,7 @@ public class A10aPlan : PojulObject {
 				attackId = UImanager.attackAreaId_1;
 			}
 			//Debug.Log (playerId + "; gqb------>toAttck2222: " + attackId + ";dpoint: " + nav.destination);
-			startNav(new RadiusArea(attackId).getRandomPoint(), 1100);
+			startNav(new RadiusArea(attackId).getRandomPoint(), maxMoveSpeed * 0.6f);
 		}
 	}
 
@@ -476,6 +494,9 @@ public class A10aPlan : PojulObject {
 		if(isDestoryed){
 			return;	
 		}
+		if(!"A10a".Equals (airType)) {
+			return;
+		}
 		if(fireIndex > 7){
 			fireIndex = 0;
 		}
@@ -490,6 +511,7 @@ public class A10aPlan : PojulObject {
 
 		GameObject bullet = (GameObject)Instantiate(Resources.Load("Prefabs/arms/bullet"),
 			fires[fireIndex].position  + fires[fireIndex].forward * 0.5f, fires[fireIndex].rotation ) as GameObject;
+		bullet.tag = "bullet";
 		Bullet mBullet = bullet.GetComponent<Bullet> ();
 		mBullet.shoot (planMove.speed);
 
@@ -509,10 +531,10 @@ public class A10aPlan : PojulObject {
 				MissileType3 mMissileType3 = missiles [missilePoses [i]].gameObject.GetComponent<MissileType3> ();
 				float startSpeed = moveSpeed;
 				if(playerType == 0){
-					startSpeed = planMove.speed;
+					startSpeed = planMove.player.gameObject.GetComponent<Rigidbody>().velocity.magnitude;
 				}
 				PojulObject mPojulObject = target.parent.gameObject.GetComponent<PojulObject> ();
-				mMissileType3.fireInit ((playerId + "_missile3" ), target, startSpeed);
+				mMissileType3.fireInit ((playerId + "_missile3" ), target, startSpeed * 1.1f);
 				if(mPojulObject != null){
 					mPojulObject.isMissileAimed = true;
 					mPojulObject.MissileAimedTra = missiles [missilePoses [i]];
@@ -532,6 +554,9 @@ public class A10aPlan : PojulObject {
 			if(missiles [missilePoses[i]] != null){
 				MissileType3 mMissileType3 = missiles [missilePoses [i]].gameObject.GetComponent<MissileType3> ();
 				float startSpeed = planMove.speed;
+				if(transform.gameObject.GetComponent<Rigidbody>()){
+					startSpeed = transform.gameObject.GetComponent<Rigidbody> ().velocity.magnitude;
+				}
 				PojulObject mPojulObject = target.gameObject.GetComponent<PojulObject> ();
 				mMissileType3.fireInit ((playerId + "_missile3" ), target, startSpeed);
 				if(mPojulObject != null){
@@ -553,7 +578,7 @@ public class A10aPlan : PojulObject {
 			return;
 		}
 		nav.destination = new Vector3(navPoint.x, planeHeight, navPoint.z);//target.transform.position;
-		float patrol = Random.Range(maxMoveSpeed*0.7f, maxMoveSpeed);
+		float patrol = Random.Range(maxMoveSpeed*0.6f, maxMoveSpeed*0.8f);
 		height = Random.Range(minHeight, maxHeight);
 		//Debug.Log ("gqb------>startNav height: " + height);
 		moveSpeed = patrol;
@@ -644,7 +669,7 @@ public class A10aPlan : PojulObject {
 					}
 					Util.AddNearEnemys (tempTransform, playerId);
 					if(playerType == 0){
-						if(tempTransform != null && (transform.position - tempTransform.position).magnitude < 16000 && !tempNearEnemy.Contains(tempTransform)){
+						if(tempTransform != null && (transform.position - tempTransform.position).magnitude < 22000 && !tempNearEnemy.Contains(tempTransform)){
 							tempNearEnemy.Add (tempTransform);
 						}
 					}
@@ -711,7 +736,7 @@ public class A10aPlan : PojulObject {
 		}else if("1".Equals(playerId)){
 			allNearEnemys = GameInit.attackArms_0;
 		}
-		float dangeroustDis = 100000.0f;
+		float dangeroustDis = 1000000.0f;
 		Transform dangeroustEnemy = null;
 		for(int i=0; i<allNearEnemys.Count;i++){
 			Transform tempDangeroustEnemy = allNearEnemys[i];
@@ -742,10 +767,10 @@ public class A10aPlan : PojulObject {
 		}
 		if(MissileAimedTra != null && isAvoidMissile){
 			if (behavior == 1) {
-				startNav (mPatrolArea.getRandomPoint (), GameInit.mach * 1.2f);
+				startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.8f);
 			} else if (behavior == 3) {
 				if(currentMountMissle <= 0){
-					startNav (mPatrolArea.getRandomPoint (), GameInit.mach * 1.2f);
+					startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.8f);
 				}else{
 					int attackId;
 					if ("0".Equals (playerId)) {
@@ -753,7 +778,7 @@ public class A10aPlan : PojulObject {
 					} else {
 						attackId = UImanager.attackAreaId_1;
 					}
-					startNav (new RadiusArea (attackId).getRandomPoint (), GameInit.mach * 1.2f);
+					startNav (new RadiusArea (attackId).getRandomPoint (), maxMoveSpeed * 0.8f);
 				}
 			} else if (behavior == 2) {
 				int massId;
@@ -770,25 +795,25 @@ public class A10aPlan : PojulObject {
 
 		//updateCurrentMountMissle ();
 
-		if(target != null && currentMountMissle > 0){
+		if(target != null && target.GetComponent<PojulObject>() && !target.GetComponent<PojulObject>().isDestoryed && currentMountMissle > 0){
 			if (behavior == 1) {
-				startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.8f);
+				startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.6f);
 				height = target.position.y;
 			} else if (behavior == 3) {
-				startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.8f);
+				startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.6f);
 				//startNav (new RadiusArea(attackId).getRandomPoint(), GameInit.mach*0.8f);
 				height = target.position.y;
 			} else if (behavior == 2) {
 				if (Util.isOnMyNavArea1 (target.position, playerId)) {
-					startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.8f);
+					startNav (new Vector3 (target.position.x, planeHeight, target.position.z), maxMoveSpeed * 0.6f);
 				} else {
-					startNav (mPatrolArea.getRandomPoint (), GameInit.mach * 0.8f);
+					startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.6f);
 					target = null;
 				}
 
 			}
 		}else if(missileCar != null){
-			startNav (new Vector3((missileCar.position.x + Random.Range(100,300)), planeHeight, (missileCar.position.z + Random.Range(100,300))), maxMoveSpeed*0.8f);
+			startNav (new Vector3((missileCar.position.x + Random.Range(100,300)), planeHeight, (missileCar.position.z + Random.Range(100,300))), maxMoveSpeed*0.6f);
 			height = missileCar.position.y;
 		}
 		if (height < 1000){
@@ -841,7 +866,7 @@ public class A10aPlan : PojulObject {
 		}
 	}
 
-	void inflame(float force){
+	public void inflame(float force){
 		GameInit.currentInstance [(playerId + "_missile3")] = GameInit.currentInstance [(playerId + "_missile3")] - currentMountMissle;
 		currentMountMissle = 0;
 
@@ -894,6 +919,8 @@ public class A10aPlan : PojulObject {
 
 		if(playerType == 0){
 			planMove.player = null;
+			UImanager.isOnLeave = true;
+			Camera.main.GetComponent<AudioSource> ().enabled = false;
 		}
 	}
 

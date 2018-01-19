@@ -71,6 +71,7 @@ public class GameInit  : MonoBehaviour {
 	public int attackMountMissile = 0;
 	public Transform attackTra;
 	public int enemyAttackBehavor;
+	public string enemyRandomFighter = "a10";
 
 	public int copyCurrentM3 = 0;
 	public int copyRemainM3 = 0;
@@ -117,6 +118,8 @@ public class GameInit  : MonoBehaviour {
 		InvokeRepeating("instanceEnemy", 4f, 4f);
 
 		setEnemyAttackRandom ();
+
+		getRandomFighterType ();
 	}
 
 	void gc(){
@@ -136,6 +139,8 @@ public class GameInit  : MonoBehaviour {
 
 	void initData(){
 		modelpaths.Add ("a10", "Prefabs/A10a_lod");
+		modelpaths.Add ("f15e", "Prefabs/F15E_lod");
+		modelpaths.Add ("su34", "Prefabs/Su34_lod");
 		modelpaths.Add ("A10", "Prefabs/A-10a");
 		modelpaths.Add ("air_ray_A10", "Prefabs/Particle/air_ray_A101");
 		modelpaths.Add ("tankFire", "Prefabs/Particle/tankFire");
@@ -162,7 +167,9 @@ public class GameInit  : MonoBehaviour {
 		progress1 = (Texture2D)Resources.Load ("icon/progress1/progress1c");
 		progress2 = (Texture2D)Resources.Load ("icon/progress1/progress1d");
 
-		prices.Add ("a10", 49);
+		prices.Add ("a10", 42);
+		prices.Add ("f15e", 52);
+		prices.Add ("su34", 50);
 		prices.Add ("car2", 12);//6
 		prices.Add ("car3", 27);//21
 		prices.Add ("car4", 1);//23-----
@@ -293,7 +300,12 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	public static void instanceGameobject(string playerId, string type){
-		string tag = (playerId + "_" + type);
+		string tag = "";
+		if ("su34".Equals (type) || "f15e".Equals (type)) {
+			tag = (playerId + "_" + "a10");
+		} else {
+			tag = (playerId + "_" + type);
+		}
 		if ("missile1".Equals (type) || "missile2".Equals (type) || "missile3".Equals (type)) {
 			currentInstance [tag] = (int)currentInstance [tag] + 1;
 			remainMissile[tag] = remainMissile[tag] + 1;
@@ -355,9 +367,10 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	void instanceEnemy(){
-		if(EnemyMoney > prices["a10"]*enemyGoldScale && currentInstance["1_a10"] < maxInstance["1_a10"]){
-			instanceGameobject ("1", "a10");
-			EnemyMoney = EnemyMoney - prices ["a10"]*enemyGoldScale;
+		if(EnemyMoney > prices[enemyRandomFighter]*enemyGoldScale && currentInstance["1_a10"] < maxInstance["1_a10"]){
+			instanceGameobject ("1", enemyRandomFighter);
+			EnemyMoney = EnemyMoney - prices [enemyRandomFighter]*enemyGoldScale;
+			getRandomFighterType ();
 		}
 
 		if(EnemyMoney > prices["missile3"]*enemyGoldScale){
@@ -596,6 +609,17 @@ public class GameInit  : MonoBehaviour {
 			if ("a10".Equals (mPojulObject.type)) {
 				((A10aPlan)mPojulObject).onBehavorChanged ();
 			}
+		}
+	}
+
+	void getRandomFighterType(){
+		int random = Random.Range (1,1000);
+		if(random < 200){
+			enemyRandomFighter = "a10";
+		}else if(random < 600){
+			enemyRandomFighter = "f15e";
+		}else{
+			enemyRandomFighter = "su34";
 		}
 	}
 

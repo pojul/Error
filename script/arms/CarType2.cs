@@ -104,6 +104,7 @@ public class CarType2 : PojulObject {
 		
 	// Update is called once per frame
 	void Update () {
+		health = sliderHealth.value;
 		sliderHealth.transform.rotation = Quaternion.Euler(mainTransform_lod0.rotation.eulerAngles.x , 
 			Camera.main.transform.rotation.eulerAngles.y,
 			mainTransform_lod0.rotation.eulerAngles.z);

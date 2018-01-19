@@ -13,8 +13,8 @@ public class MissileType3 : PojulObject {
 	private bool isForward = false;
 	private bool isDecay = false;
 
-	private float maxSpeed = GameInit.mach * 3.0f;
-	private float acceleration = 25;
+	private float maxSpeed = 3400 * 1.5f;
+	private float acceleration = 42;
 	private float speed = 0;
 	private float aimSpeed = 4.3f;
 
@@ -48,6 +48,7 @@ public class MissileType3 : PojulObject {
 			}
 
 			transform.position = transform.position + transform.forward * speed * Time.deltaTime;
+			//Debug.Log (speed + "gqb------>speed: " + speed);
 			if(!missTarget){
 				if(speed < maxSpeed && !isDecay){
 					speed = speed + acceleration;
@@ -63,7 +64,7 @@ public class MissileType3 : PojulObject {
 				float angle = Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg;
 				//Debug.Log (speed + "gqb------>angle: " + angle);
 				if(angle < 90 && speed > 400){
-					speed = speed - 2.8f - angle *3.2f;
+					speed = speed - 8f - angle *12f;
 				}
 
 				if(speed <= 400){
@@ -92,8 +93,14 @@ public class MissileType3 : PojulObject {
 		this.speed = startSpeed;
 		initBlaze ();
 
-		Invoke ("startDecay", 5);
-		Invoke ("destoryMissile", 35);
+		if (target.parent != null && target.parent.GetComponent<PojulObject> () && target.parent.GetComponent<PojulObject> ().type.Equals ("a10")) {
+			aimSpeed = 4.2f;
+		} else {
+			aimSpeed = 6.4f;
+		}
+		//Debug.Log (target.parent.GetComponent<PojulObject> () +  "gqb------>aimSpeed: " + aimSpeed);
+		Invoke ("startDecay", 5f);
+		Invoke ("destoryMissile", 15);
 
 	}
 

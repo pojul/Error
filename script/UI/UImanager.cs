@@ -211,10 +211,41 @@ public class UImanager : MonoBehaviour {
 	public Sprite attackArminfo1;
 	public Sprite attackArminfo2;
 
-	// Use this for initialization
+	public RawImage magnifier;
+	public RawImage magnifierBorder;
+	public Image  healthProgress;
+	public Image  healthProgressVal;
+	public Image uidataType;
+	public Image uidataHeight;
+	public Image uidataMissile;
+	public Text uidataTypeVal;
+	public Text uidataHeightVal;
+	public Text uidataMissileVal;
+	public Image magnifier1x;
+	public Image magnifier5x;
+	public Image magnifier10x;
+
+	public Sprite uidataHeight1;
+	public Sprite uidataHeight2;
+	public Sprite uidataMissile1;
+	public Sprite uidataMissile2;
+	public Sprite magnifier1x1;
+	public Sprite magnifier1x2;
+	public Sprite magnifier5x1;
+	public Sprite magnifier5x2;
+	public Sprite magnifier10x1;
+	public Sprite magnifier10x2;
+
+	private int magnifierTimes = 1; //1: 1x; 5: 5x; 10: 10x
+
+
+	private Color waringColor = new Color(Color.red.r, Color.red.g, Color.red.b, 0.9f);
+	private Color normalColor = new Color(Color.white.r, Color.white.g, Color.white.b, 0.9f);
+
+	//public RawImage  100;
 	void Start () {
 		fireAim = fireAimPre;
-
+                     
 		thubmnail.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.32f, Screen.height * 0.32f);
 		thubmnail.rectTransform.position = new Vector3 (thubmnail.rectTransform.sizeDelta .x * 0.5f, 
 			(Screen.height - thubmnail.rectTransform.sizeDelta .y * 0.5f),thubmnail.rectTransform.position.z);
@@ -227,7 +258,7 @@ public class UImanager : MonoBehaviour {
 		fire.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.12f, Screen.height * 0.12f);
 		fire.rectTransform.position = new Vector3 ((Screen.width - fire.rectTransform.sizeDelta .x * 0.56f), 
 			fire.rectTransform.sizeDelta .y * 2.15f,fire.rectTransform.position.z);
-
+                     
 		leave.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.12f, Screen.height * 0.12f);
 		leave.rectTransform.position = new Vector3 ((Screen.width - leave.rectTransform.sizeDelta .x * 0.56f), 
 			leave.rectTransform.sizeDelta .y * 3.25f,leave.rectTransform.position.z);
@@ -235,48 +266,107 @@ public class UImanager : MonoBehaviour {
 		aimNext.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.12f, Screen.height * 0.12f);
 		aimNext.rectTransform.position = new Vector3 ((Screen.width - aimNext.rectTransform.sizeDelta .x * 2.15f), 
 			aimNext.rectTransform.sizeDelta .y * 0.56f,aimNext.rectTransform.position.z);
-
+		
 		fireMissile.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.18f, Screen.height * 0.18f);
 		fireMissile.rectTransform.position = new Vector3 ((Screen.width - fireMissile.rectTransform.sizeDelta .x * 0.52f), 
-			fireMissile.rectTransform.sizeDelta .y * 0.52f,thubmnail.rectTransform.position.z);
-
-		missileAim.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.05f, Screen.height * 0.05f);
-
+		fireMissile.rectTransform.sizeDelta .y * 0.52f,thubmnail.rectTransform.position.z);
+		fireMissile.rectTransform.localScale = new Vector3 (0, 0, 0);
+		aimNext.rectTransform.localScale = new Vector3 (0, 0, 0);
+                     
+	    missileAim.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.03f, Screen.height * 0.03f);
+                     
 		PlanControls.control3CircleCenterX = Screen.width*9.4f/10 - Screen.height*3.0f/10;
 		PlanControls.control3CircleX = Screen.width*9.4f/10 - Screen.height*5f/10;
-
 		RectTransform mRectTransform = accelerate.GetComponent<RectTransform>();
-		mRectTransform.sizeDelta = new Vector2 (Screen.height * 0.4f, Screen.height * 0.1f);
-		mRectTransform.position = new Vector3 ((Screen.width - mRectTransform.sizeDelta .y * 0.6f), 
-			Screen.height * 0.655f, mRectTransform.position.z);
+		mRectTransform.sizeDelta = new Vector2 (Screen.height * 0.32f, Screen.height * 0.08f);
+		mRectTransform.position = new Vector3 ((leave.rectTransform.position.x), 
+			Screen.height * 0.622f, mRectTransform.position.z);
 		accelerate.value = accelerate.maxValue * 0.5f;
-		accelerate.handleRect.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.height * 0.06f, Screen.height * 0.05f);;
+		accelerate.handleRect.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.height * 0.05f, Screen.height * 0.04f);
 
 		buy.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.1f, Screen.height * 0.1f);
 		buy.rectTransform.position = new Vector3 (buy.rectTransform.sizeDelta .x * 0.5f, 
 			buy.rectTransform.sizeDelta .y * 6,buy.rectTransform.position.z);
-
+                     
 		mselect.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.1f, Screen.height * 0.1f);
 		mselect.rectTransform.position = new Vector3 (mselect.rectTransform.sizeDelta .x * 0.5f, 
-			mselect.rectTransform.sizeDelta .y * 5f,mselect.rectTransform.position.z);
+		mselect.rectTransform.sizeDelta .y * 5f,mselect.rectTransform.position.z);
 
 		attack.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.1f, Screen.height * 0.1f);
 		attack.rectTransform.position = new Vector3 (attack.rectTransform.sizeDelta .x * 0.5f, 
-			attack.rectTransform.sizeDelta .y * 4f,attack.rectTransform.position.z);
-
+		attack.rectTransform.sizeDelta .y * 4f,attack.rectTransform.position.z);
+                     
 		touchMove.rectTransform.sizeDelta = new Vector2 ( (Screen.width - Screen.height * 0.64f), Screen.height);
 		touchMove.rectTransform.position = new Vector3 ((Screen.height * 0.32f + touchMove.rectTransform.sizeDelta .x * 0.5f), 
 			touchMove.rectTransform.sizeDelta .y * 0.5f ,touchMove.rectTransform.position.z);
 
-		initArmShop ();
-		initArmInfo ();
-		initAttack();
+		magnifierBorder.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.2f, Screen.height * 0.2f);
+		magnifierBorder.rectTransform.position = new Vector3 (Screen.width - magnifierBorder.rectTransform.sizeDelta .x * 0.55f, 
+			(Screen.height - magnifierBorder.rectTransform.sizeDelta .y * 0.55f),magnifierBorder.rectTransform.position.z);
 
+		magnifier.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.x * 0.94f, magnifierBorder.rectTransform.sizeDelta.y * 0.94f);
+		magnifier.rectTransform.position = new Vector3 (magnifierBorder.rectTransform.position.x, 
+			(magnifierBorder.rectTransform.position.y), magnifier.rectTransform.position.z);
+
+		healthProgress.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.x, magnifierBorder.rectTransform.sizeDelta.y);
+		healthProgress.rectTransform.position = new Vector3 (magnifierBorder.rectTransform.position.x, 
+			(magnifierBorder.rectTransform.position.y), healthProgress.rectTransform.position.z);
+
+		healthProgressVal.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.x, magnifierBorder.rectTransform.sizeDelta.y);
+		healthProgressVal.rectTransform.position = new Vector3 (magnifierBorder.rectTransform.position.x, 
+			(magnifierBorder.rectTransform.position.y), healthProgress.rectTransform.position.z);
+
+		uidataType.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.y * 2.01f , magnifierBorder.rectTransform.sizeDelta.y * 0.32f);
+		uidataType.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.44f),
+			(magnifierBorder.rectTransform.position.y + magnifierBorder.rectTransform.sizeDelta.y*0.518f - uidataType.rectTransform.sizeDelta.y *0.5f),
+			uidataType.rectTransform.position.z
+		);
+
+		uidataHeight.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.y * 2.01f , magnifierBorder.rectTransform.sizeDelta.y * 0.32f);
+		uidataHeight.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.44f),
+			(magnifierBorder.rectTransform.position.y),
+			uidataType.rectTransform.position.z
+		);
+
+		uidataMissile.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.y * 2.01f , magnifierBorder.rectTransform.sizeDelta.y * 0.32f);
+		uidataMissile.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.44f),
+			(magnifierBorder.rectTransform.position.y - magnifierBorder.rectTransform.sizeDelta.y*0.518f + uidataType.rectTransform.sizeDelta.y *0.5f),
+			uidataType.rectTransform.position.z
+		);
+
+		uidataTypeVal.rectTransform.sizeDelta = new Vector2 (uidataType.rectTransform.sizeDelta.x , uidataType.rectTransform.sizeDelta.y);
+		uidataTypeVal.rectTransform.localPosition = new Vector3 (0, 0, 0);
+		uidataTypeVal.fontSize = ((int)(textSize * 0.75f));
+
+		uidataHeightVal.rectTransform.sizeDelta = new Vector2 (uidataType.rectTransform.sizeDelta.x , uidataType.rectTransform.sizeDelta.y);
+		uidataHeightVal.rectTransform.localPosition = new Vector3 (0, 0, 0);
+		uidataHeightVal.fontSize = ((int)(textSize * 0.75f));
+
+		uidataMissileVal.rectTransform.sizeDelta = new Vector2 (uidataType.rectTransform.sizeDelta.x , uidataType.rectTransform.sizeDelta.y);
+		uidataMissileVal.rectTransform.localPosition = new Vector3 (0, 0, 0);
+		uidataMissileVal.fontSize = ((int)(textSize * 0.75f));
+
+		magnifier1x.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.16f, Screen.height * 0.16f);
+		magnifier1x.rectTransform.position = new Vector3 ((Screen.width - magnifier1x.rectTransform.sizeDelta .x * 0.56f), 
+			magnifier1x.rectTransform.sizeDelta .y * 0.56f, magnifier1x.rectTransform.position.z);
+
+		magnifier5x.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.12f, Screen.height * 0.12f);
+		magnifier5x.rectTransform.position = new Vector3 ((Screen.width - magnifier5x.rectTransform.sizeDelta .x * 2.15f), 
+			magnifier5x.rectTransform.sizeDelta .y * 0.56f,magnifier5x.rectTransform.position.z);
+
+
+		magnifier10x.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.12f, Screen.height * 0.12f);
+		magnifier10x.rectTransform.position = new Vector3 ((Screen.width - magnifier10x.rectTransform.sizeDelta .x * 1.6f), 
+			magnifier10x.rectTransform.sizeDelta .y * 1.6f, magnifier10x.rectTransform.position.z);
+
+		initArmShop();
+		initArmInfo();
+		initAttack();
 		InvokeRepeating("updateThubmnail", 0.5f, 0.5f);
 
 		InvokeRepeating("updateMissileAim", 0.2f, 0.2f);
 		InvokeRepeating("clearNullThubmnail", 2f, 2f);
-	}
+	}                
 
 	void initArmShop(){
 		armShopPanel.rectTransform.sizeDelta = new Vector2 (Screen.height * 1.12f, Screen.height * 0.7f);
@@ -284,7 +374,7 @@ public class UImanager : MonoBehaviour {
 			(armShopPanel.rectTransform.sizeDelta .x * 0.5f + (Screen.width - Screen.height * 1.12f)*0.5f), 
 			(Screen.height - armShopPanel.rectTransform.sizeDelta .y * 0.5f - Screen.height * 0.15f), 
 			armShopPanel.rectTransform.position.z);
-
+                     
 		armShopTitle.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.28435f, Screen.height * 0.11f);
 		armShopTitle.rectTransform.position = new Vector3 (
 			(armShopPanel.rectTransform.position.x), 
@@ -296,14 +386,13 @@ public class UImanager : MonoBehaviour {
 			(armShopPanel.rectTransform.position.x + (armShopPanel.rectTransform.sizeDelta.x - armShopClose.rectTransform.sizeDelta.x)*0.5f - Screen.height * 0.01f), 
 			(armShopPanel.rectTransform.position.y + (armShopPanel.rectTransform.sizeDelta.y - armShopClose.rectTransform.sizeDelta.y)*0.5f - Screen.height * 0.01f), 
 			armShopClose.rectTransform.position.z);
-
 		RectTransform armShopScrollViewRect = armShopScrollView.GetComponent<RectTransform> ();
 		armShopScrollViewRect.sizeDelta = new Vector2 (Screen.height * 1.11f, Screen.height * 0.56f);
 		armShopScrollViewRect.position = new Vector3 (
 			(armShopPanel.rectTransform.position.x), 
 			(armShopPanel.rectTransform.position.y - (armShopPanel.rectTransform.sizeDelta.y - armShopScrollViewRect.sizeDelta.y)*0.5f + Screen.height * 0.01f), 
 			armShopScrollViewRect.position.z);
-
+ 
 		RectTransform armShopContentRect = armShopContent.GetComponent<RectTransform> ();
 		armShopContentRect.sizeDelta = new Vector2 (armShopContentRect.sizeDelta.x, (armShopItemImgHeight*10 + armShopItemSpace*9));
 		scrollPos = armShopContentRect.position.y;
@@ -776,12 +865,17 @@ public class UImanager : MonoBehaviour {
 
 		}
 
-		if(planMove.player != null && "a10".Equals(playerType) && isFireDown){
+		updateUiData ();
+
+		if(planMove.player != null){
 			PojulObject mPojulObject = planMove.player.gameObject.GetComponent<PojulObject> ();
-			if (mPojulObject != null && (Time.time - lastFireTime) > 0.12f) {
-				lastFireTime = Time.time;
-				mPojulObject.fireOfPlayer ();
+			if("a10".Equals(playerType) && isFireDown){
+				if (mPojulObject != null && (Time.time - lastFireTime) > 0.12f) {
+					lastFireTime = Time.time;
+					mPojulObject.fireOfPlayer ();
+				}
 			}
+
 		}
 
 		if(missileAimedTra != null){
@@ -1127,6 +1221,15 @@ public class UImanager : MonoBehaviour {
 				if(mPojulObject == null){
 					continue;
 				}
+				if(mPojulObject.isDestoryed && thubmnailPoints.ContainsKey(GameInit.myThumbnailObjs[i].GetHashCode())){
+					object[] objs = thubmnailPoints [GameInit.myThumbnailObjs [i].GetHashCode ()];
+					if(objs.Length == 2 && objs[1] != null){
+						Destroy (((Image)objs[1]).gameObject);
+						thubmnailPoints.Remove (GameInit.myThumbnailObjs[i].GetHashCode());
+						continue;
+					}
+				}
+
 				string[] strs = GameInit.myThumbnailObjs [i].tag.Split ('_');
 				if(strs.Length != 2){
 					continue;
@@ -1175,6 +1278,17 @@ public class UImanager : MonoBehaviour {
 				GameObject allNearEnemyObj = allNearEnemyTra.gameObject;
 				float allNearEnemyTimes = (float)allNearEnemysObjs [1];
 				if(allNearEnemyObj == null){
+					continue;
+				}
+				PojulObject mPojulObject = allNearEnemyObj.GetComponent<PojulObject> ();
+				if(mPojulObject != null && mPojulObject.isDestoryed && enemythubmnailPoints.ContainsKey (allNearEnemyObj.GetHashCode())){
+					object[] objs = enemythubmnailPoints [allNearEnemyObj.GetHashCode()];
+					Image tempImage = (Image)objs [1];
+					if(tempImage == null){
+						return;
+					}
+					Destroy (tempImage.gameObject);
+					enemythubmnailPoints.Remove (allNearEnemyObj.GetHashCode());
 					continue;
 				}
 				if ((Time.time - allNearEnemyTimes) < 3.6f) {
@@ -1400,7 +1514,7 @@ public class UImanager : MonoBehaviour {
 		if(isSelectMode){
 			return;
 		}
-		if(planMove.player != null && "car3".Equals(playerType) && canFire){
+		if(planMove.player != null && !"a10".Equals(playerType) && canFire){
 			PojulObject mPojulObject = planMove.player.gameObject.GetComponent<PojulObject> ();
 			if(mPojulObject != null){
 				canFire = false;
@@ -1676,7 +1790,11 @@ public class UImanager : MonoBehaviour {
 		if(showShopWin){
 			for(int i = 0; i < armShopImgs.Length; i++){
 				string str = GameInit.prices[armNames[i]] + "/" + GameInit.MyMoney.ToString ();
-				if ((int)GameInit.currentInstance [("0_" + armNames [i])] >= (int)GameInit.maxInstance [("0_" + armNames [i])]) {
+				string armName = armNames [i];
+				if("su34".Equals(armName) || "f15e".Equals(armName)){
+					armName = "a10";
+				}
+				if ((int)GameInit.currentInstance [("0_" + armName)] >= (int)GameInit.maxInstance [("0_" + armName)]) {
 					couldArmBuy [i] = false;
 					str = str + " max number";
 					armShopBuys [i].sprite = armShopBuy3;
@@ -1774,15 +1892,76 @@ public class UImanager : MonoBehaviour {
 		return rotations;
 	}
 
-	public void setPlayerUI(string type){
+	public void setPlayerUI(string type, string secondType){
 		playerType = type;
-		if("a10".Equals(type)){
-			fireMissile.rectTransform.localScale = new Vector3 (1,1,1);
+		if ("a10".Equals (type)) {
+			fireMissile.rectTransform.localScale = new Vector3 (1, 1, 1);
 			aimNext.rectTransform.localScale = new Vector3 (1, 1, 1);
-		}else if("car3".Equals(type)){
-			fireMissile.rectTransform.localScale = new Vector3 (0,0,0);
+			magnifier1x.rectTransform.localScale = new Vector3 (0, 0, 0);
+			magnifier5x.rectTransform.localScale = new Vector3 (0, 0, 0);
+			magnifier10x.rectTransform.localScale = new Vector3 (0, 0, 0);
+		} else if ("car3".Equals (type)) {
+			fireMissile.rectTransform.localScale = new Vector3 (0, 0, 0);
 			aimNext.rectTransform.localScale = new Vector3 (0, 0, 0);
+			magnifier1x.rectTransform.localScale = new Vector3 (1, 1, 1);
+			magnifier5x.rectTransform.localScale = new Vector3 (1, 1, 1);
+			magnifier10x.rectTransform.localScale = new Vector3 (1, 1, 1);
+		} else if ("littlecannon1".Equals (type)) {
+			fireMissile.rectTransform.localScale = new Vector3 (0, 0, 0);
+			aimNext.rectTransform.localScale = new Vector3 (0, 0, 0);
+			magnifier1x.rectTransform.localScale = new Vector3 (1, 1, 1);
+			magnifier5x.rectTransform.localScale = new Vector3 (1, 1, 1);
+			magnifier10x.rectTransform.localScale = new Vector3 (1, 1, 1);
+		} else if ("homepao".Equals (type)) {
+			fireMissile.rectTransform.localScale = new Vector3 (0, 0, 0);
+			aimNext.rectTransform.localScale = new Vector3 (0, 0, 0);
+			magnifier1x.rectTransform.localScale = new Vector3 (1, 1, 1);
+			magnifier5x.rectTransform.localScale = new Vector3 (1, 1, 1);
+			magnifier10x.rectTransform.localScale = new Vector3 (1, 1, 1);
 		}
+	}
+
+	void updateUiData(){
+		if(planMove.player == null){
+			uidataHeight.sprite = uidataHeight1;
+			uidataMissile.sprite = uidataMissile1;
+			return;
+		}
+		PojulObject mPojulObject = planMove.player.GetComponent<PojulObject> ();
+		if(mPojulObject == null || mPojulObject.isDestoryed){
+			uidataHeight.sprite = uidataHeight1;
+			uidataMissile.sprite = uidataMissile1;
+			return;
+		}
+
+		float height = planMove.player.position.y * 0.1f;
+		if(mPojulObject.type.Equals("homepao") || mPojulObject.type.Equals("littlecannon1")){
+			height = 0;
+		}
+		uidataHeightVal.text = "      height: " + height.ToString ("f2");
+		if(height < 100 && mPojulObject.type.Equals("a10") && (Util.isOnNavArea1(planMove.player.position) || Util.isOnNavArea2(planMove.player.position))){
+			uidataHeight.sprite = uidataHeight2;
+		}else {
+			uidataHeight.sprite = uidataHeight1;
+		}
+
+		if (mPojulObject.MissileAimedTra != null) {
+			uidataMissile.sprite = uidataMissile2;
+			float missiledDis = (planMove.player.position - mPojulObject.MissileAimedTra.position).magnitude * 0.1f;
+			uidataMissileVal.text = "    missiled: " + missiledDis.ToString("f2");
+		} else {
+			uidataMissile.sprite = uidataMissile1;
+			uidataMissileVal.text = "    missiled: 0.0";
+		}
+		healthProgressVal.fillAmount = mPojulObject.health * 0.01f;
+
+		if (planMove.player.GetComponent<Rigidbody> ()) {
+			int velocity = (int)(planMove.player.GetComponent<Rigidbody> ().velocity.magnitude * 0.1f);
+			uidataTypeVal.text = "    velocity: " + velocity;
+		} else {
+			uidataTypeVal.text = "    velocity: 0";
+		}
+
 	}
 
 	public void OnArmShopCloseClick(){
@@ -2223,6 +2402,54 @@ public class UImanager : MonoBehaviour {
 			}
 		}
 
+	}
+
+	public void OnMagnifier1xClick(){
+		magnifierTimes = 1;
+		magnifier1x.sprite = magnifier1x2;
+		magnifier5x.sprite = magnifier5x1;
+		magnifier10x.sprite = magnifier10x1;
+		WorldUIManager.magnifierCamera.fieldOfView = 12;
+	}
+
+	public void OnMagnifier1xDown(){
+		magnifier1x.sprite = magnifier1x2;
+	}
+
+	public void OnMagnifier1xUp(){
+		magnifier1x.sprite = magnifier1x1;
+	}
+
+	public void OnMagnifier5xClick(){
+		magnifierTimes = 5;
+		magnifier1x.sprite = magnifier1x1;
+		magnifier5x.sprite = magnifier5x2;
+		magnifier10x.sprite = magnifier10x1;
+		WorldUIManager.magnifierCamera.fieldOfView = 5;
+	}
+
+	public void OnMagnifier5xDown(){
+		magnifier5x.sprite = magnifier5x2;
+	}
+
+	public void OnMagnifier5xUp(){
+		magnifier5x.sprite = magnifier5x1;
+	}
+
+	public void OnMagnifier10xClick(){
+		magnifierTimes = 10;
+		magnifier1x.sprite = magnifier1x1;
+		magnifier5x.sprite = magnifier5x1;
+		magnifier10x.sprite = magnifier10x2;
+		WorldUIManager.magnifierCamera.fieldOfView = 3f;
+	}
+
+	public void OnMagnifier10xDown(){
+		magnifier10x.sprite = magnifier10x2;
+	}
+
+	public void OnMagnifier10xUp(){
+		magnifier10x.sprite = magnifier10x1;
 	}
 
 }

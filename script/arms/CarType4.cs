@@ -178,7 +178,7 @@ public class CarType4 : PojulObject {
 		GameObject shell1 = (GameObject)Instantiate(Resources.Load("Prefabs/arms/shell_type1"), 
 			(paoTransform_lod0.position + paoTransform_lod0.forward*10), paoTransform_lod0.rotation) as GameObject;
 		shell1.tag = "shell1";
-		((ShellType1)shell1.GetComponent<ShellType1> ()).shoot(10000, 0);
+		((ShellType1)shell1.GetComponent<ShellType1> ()).shoot(10000, 0, 90);
 	}
 
 	void aimEnemy(Transform enemyTransform){

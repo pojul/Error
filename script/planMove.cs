@@ -31,7 +31,7 @@ public class planMove : MonoBehaviour {
 	public static float dRotate3 = 0.0f;
 	public static float rotate2 = 0.0f;
 	public float minSpeed = 0;
-	
+
 	void Start(){
 		player = transform;
 		string[] strs = transform.tag.Split ('_');
@@ -134,10 +134,10 @@ public class planMove : MonoBehaviour {
 			}
 
 			if(mRigidbody != null && "car3".Equals(type) && transform.position.y >= 0){
-				mRigidbody.AddForce (transform.forward * speed * 2f, ForceMode.Force);
+				mRigidbody.AddForce (transform.forward * speed * 2.5f, ForceMode.Force);
 				//Debug.Log ("gqb------>" + mRigidbody.velocity.magnitude);
 			}else if(mRigidbody != null){
-				mRigidbody.AddForce (transform.forward * speed * 2f, ForceMode.Force);
+				mRigidbody.AddForce (transform.forward * speed * 2.0f, ForceMode.Force);
 			}
 				
 
@@ -157,10 +157,26 @@ public class planMove : MonoBehaviour {
 	}
 
 	void OnCollisionEnter(Collision collision){
-		if (mRigidbody != null) {
-			//mRigidbody.drag = 1;
-			//mRigidbody.angularDrag = 1;
+		if(!"a10".Equals(type) || mPojulObject.isDestoryed){
+			return;
 		}
+		//Debug.Log ("gqb------>gqb OnCollisionEnter11111: " + collision.transform.root.tag);
+		string rootTag = collision.transform.root.tag;
+		if("bullet".Equals(rootTag) || "shell1".Equals(rootTag) || 
+			"shell2".Equals(rootTag) || "1_missile3".Equals(rootTag) || "1_missile1".Equals(rootTag) || "border".Equals(rootTag)){
+			return;
+		}
+		GameObject prefab = (GameObject)Instantiate(Resources.Load("Prefabs/audio/airDestory"), 
+			collision.contacts[0].point, Quaternion.Euler(0, 0, 0)) as GameObject;
+		if(transform.gameObject.GetComponent<Rigidbody>()){
+			transform.gameObject.GetComponent<Rigidbody> ().useGravity = true;
+			transform.gameObject.GetComponent<Rigidbody> ().drag = 0.01f;
+			transform.gameObject.GetComponent<Rigidbody> ().angularDrag = 0.01f;
+		}
+		((A10aPlan)mPojulObject).isDestoryed = true;
+		((A10aPlan)mPojulObject).isPanDestoryed = true;
+		((A10aPlan)mPojulObject).inflame (72000);
+		//Debug.Log ("gqb------>gqb OnCollisionEnter22222: " + collision.transform.root.tag);
 	}
 
 	void OnCollisionExit(Collision collision){

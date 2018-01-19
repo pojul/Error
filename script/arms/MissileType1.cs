@@ -13,10 +13,10 @@ public class MissileType1 : PojulObject {
 	private bool isForward = false;
 	private bool isDecay = false;
 
-	private float maxSpeed = GameInit.mach * 4.5f;
-	private float acceleration = 40;
+	private float maxSpeed = 3400 * 8f;
+	private float acceleration = 200;
 	private float speed = 0;
-	private float aimSpeed = 13f;
+	private float aimSpeed = 80f;
 
 	private Rigidbody mRigidbody;
 
@@ -72,7 +72,7 @@ public class MissileType1 : PojulObject {
 				float angle = Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg;
 				//Debug.Log (speed + "gqb------>angle: " + angle);
 				if(angle < 90 && speed > 400){
-					speed = speed - 2 - angle *2.5f;
+					speed = speed - 20 - angle *30f;
 				}
 				if(speed <= 400){
 					missTarget = true;
@@ -98,8 +98,8 @@ public class MissileType1 : PojulObject {
 
 		initBlaze ();
 
-		Invoke ("startDecay", 15);
-		Invoke ("destoryMissile", 45);
+		Invoke ("startDecay", 8);
+		Invoke ("destoryMissile", 22);
 
 	}
 
@@ -117,7 +117,7 @@ public class MissileType1 : PojulObject {
 		blaze = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["missile_blaze2"]), 
 			blazePos.position, blazePos.rotation) as GameObject;
 		blaze.transform.parent = transform;
-		Invoke ("addRigidbody", 1.8f);
+		Invoke ("addRigidbody", 0.8f);
 		if(mAudioSource != null && !mAudioSource.isPlaying){
 			mAudioSource.Play ();
 		}

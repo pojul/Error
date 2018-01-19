@@ -164,6 +164,7 @@ public class CarType3 : PojulObject {
 
 	// Update is called once per frame
 	void Update () {
+		health = sliderHealth.value;
 		if(isDestoryed){
 			return;
 		}
@@ -220,14 +221,14 @@ public class CarType3 : PojulObject {
 				mPlayerRigidbody = transform.gameObject.GetComponent<Rigidbody> ();
 				mPlayerRigidbody.mass = 1;
 				mPlayerRigidbody.useGravity = true;
-				mPlayerRigidbody.drag = 1.6f;
-				mPlayerRigidbody.angularDrag = 1.6f;
+				mPlayerRigidbody.drag = 1.0f;
+				mPlayerRigidbody.angularDrag = 1.0f;
 				planMove.mRigidbody = mPlayerRigidbody;
 			}
 			planMove.player = transform;
 			planMove.speed = speed;
-			planMove.maxSpeed = 600;
-			planMove.maxAccelerate = 1.2f;
+			planMove.maxSpeed = 300;
+			planMove.maxAccelerate = 0.6f;
 			PlanControls.rorateSpeed = 35f;
 			planMove.rolSpeed = 7.0f;
 			if(fireTransform == null){
@@ -236,7 +237,7 @@ public class CarType3 : PojulObject {
 			WorldUIManager.fireAimTra = fireTransform;
 			WorldUIManager.fireAimDistance = 12000.0f;
 			UImanager.fireInterval = 2.0f;
-			GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().setPlayerUI ("car3");
+			GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().setPlayerUI ("car3", "tank");
 			if(lunzis[0] == null){
 				getLunzis ();
 			}
@@ -452,7 +453,7 @@ public class CarType3 : PojulObject {
 				}
 				string[] tags = tag.Split ('_');
 				if (tags.Length == 2 && enemyId.Equals(tags [0]) && ("car2".Equals (tags [1]) || "car3".Equals (tags [1])
-					|| "littlecannon1".Equals (tags [1]) || "car5".Equals (tags [1]) || "car6".Equals (tags [1]))) {
+					|| "littlecannon1".Equals (tags [1]) || "car5".Equals (tags [1]) || "homepao".Equals (tags [1]))) {
 					lastFileTime = Time.time;
 					fire ();
 				}
@@ -472,7 +473,7 @@ public class CarType3 : PojulObject {
 		GameObject shell1 = (GameObject)Instantiate(Resources.Load("Prefabs/arms/shell_type1"), 
 			(paoTransform_lod0.position + paoTransform_lod0.forward*28), paoTransform_lod0.rotation) as GameObject;
 		shell1.tag = "shell1";
-		((ShellType1)shell1.GetComponent<ShellType1> ()).shoot(10200, 0);
+		((ShellType1)shell1.GetComponent<ShellType1> ()).shoot(10200, 0, 90);
 	}
 
     void aimEnemy(Transform enemyTransform){
@@ -950,7 +951,7 @@ public class CarType3 : PojulObject {
 		if(isPanDestoryed){
 			Camera.main.transform.position = transform.position +  (-transform.forward * planMove.dzMainCamera + transform.up * planMove.dyMainCamera);
 			Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, 
-				Quaternion.LookRotation(transform.position - Camera.main.transform.position), 3.5f * Time.deltaTime);
+				Quaternion.LookRotation(transform.position - Camera.main.transform.position), 4.4f * Time.deltaTime);
 			return;
 		}
 		Camera.main.transform.position = paoTransform_lod0.position +  (-paoTransform_lod0.forward * planMove.dzMainCamera + paoTransform_lod0.up * planMove.dyMainCamera);

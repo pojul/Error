@@ -45,7 +45,7 @@ public class TransportType1 : PojulObject {
 	private float openDoorSpeed = 0.4f;
 	private int initHeight = 2500;
 	private float height = 70;//104;//84; //190;
-	private float maxMoveSpeed = GameInit.mach * 1.1f;
+	private float maxMoveSpeed = 3400 * 0.46f;
 	private float aniSpeed = 0.0f;
 	private float navPathDistance = -1f;
 	private float maxFlyHeight = 10000.0f;
@@ -54,7 +54,7 @@ public class TransportType1 : PojulObject {
 	private Vector3 park;
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
-	private Vector3 transportTo;
+	public Vector3 transportTo;
 
 	public List<Vector3> attackMasses;
 	public List<Transform> attackTransports;
@@ -69,7 +69,6 @@ public class TransportType1 : PojulObject {
 
 	void Start () {
 		transform.name = "Transport1";
-		transform.position = new Vector3 (transform.position.x, initHeight, transform.position.z);
 
 		transform_lod0 = transform.FindChild ("transport_type_lod0");
 		transform_lod1 = transform.FindChild ("transport_type_lod1");
@@ -120,6 +119,7 @@ public class TransportType1 : PojulObject {
 			attackMasses = GameInit.attackMasses_0;
 			attackAreas = GameInit.attackAreas_0;
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
+			transform.position = new Vector3 (0, initHeight, -60000);
 		}else if ("1".Equals (playerId)){
 			park = Util.getIdlePart ("1");
 			GameInit.park1 [park] = 1;
@@ -129,13 +129,14 @@ public class TransportType1 : PojulObject {
 			attackMasses = GameInit.attackMasses_1;
 			attackAreas = GameInit.attackAreas_1;
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.698f, 0.255f, 0.157f);
+			transform.position = new Vector3 (0, initHeight, 60000);
 		}
 		if(playerType == 1){
 			mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
 		}
 		sliderHealth.value = sliderHealth.maxValue;
 
-		transportTo = park;
+		//transportTo = park;
 		//startNav (park);
 
 		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
@@ -143,6 +144,7 @@ public class TransportType1 : PojulObject {
 	
 	// Update is called once per frame
 	void Update () {
+		health = sliderHealth.value;
 		if(isMoving){
 			listenerRollAni ();
 		}
@@ -182,6 +184,7 @@ public class TransportType1 : PojulObject {
 			massId = UImanager.massId_1;
 		}
 		transportTo = attackMasses [massId];
+		//Debug.Log (massId + "; gqb------>massId: " + attackMasses [massId]);
 		if ((nav.destination - attackMasses [massId]).magnitude > 500) {
 			navPathDistance = -1;
 			run ();
@@ -431,7 +434,7 @@ public class TransportType1 : PojulObject {
 		nav.acceleration = maxMoveSpeed ;
 		nav.autoRepath = true;
 		//nav.baseOffset = 50;
-		nav.angularSpeed = 60;
+		nav.angularSpeed = 70;
 		navPathDistance = Mathf.Abs((new Vector3(transform.position.x, 0, transform.position.z) - navPoint).magnitude);
 		//flyHeight = Random.Range (minFlyHeight, maxFlyHeight);
 		//flyHeightSpeed = Mathf.Abs (flyHeightSpeed);
@@ -520,9 +523,9 @@ public class TransportType1 : PojulObject {
 		inflameObj.transform.parent = mainTransform_lod0;
 
 		//test
-		transform.position = new Vector3 (transform.position.x, 3000, transform.position.z);
-		aniSpeed = 1000;
-		ispropeller1Destory = true;
+		//transform.position = new Vector3 (transform.position.x, 3000, transform.position.z);
+		//aniSpeed = 1000;
+		//ispropeller1Destory = true;
 
 		mainTransform_lod0.parent = null;
 		propeller1Transform_lod0.parent = mainTransform_lod0;
@@ -558,7 +561,7 @@ public class TransportType1 : PojulObject {
 			propeller2Transform_lod0.GetComponent<Rigidbody>().AddExplosionForce(force, explosionPos, 300.0f);
 		}
 
-		Invoke ("destoryAll", 80);
+		Invoke ("destoryAll", 30);
 	}
 
 	public void destoryAll(){
@@ -570,6 +573,9 @@ public class TransportType1 : PojulObject {
 		}
 		if(mainTransform_lod0 != null){
 			Destroy (mainTransform_lod0.gameObject);
+		}
+		if(navCube != null){
+			Destroy (navCube);
 		}
 		if(transform_lod0 != null){
 			Destroy (transform_lod0.gameObject);
@@ -584,24 +590,24 @@ public class TransportType1 : PojulObject {
 			(propeller2Transform_lod0.localEulerAngles.y + aniSpeed * Time.deltaTime), propeller2Transform_lod0.localEulerAngles.z);
 
 		if (ispropeller1Destory) {
-			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force1_lod0.right * 0.05f * aniSpeed, 
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force1_lod0.right * 0.04f * aniSpeed, 
 				force1_lod0.position);
 		}else{
-			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force1_lod0.up * 0.1f * aniSpeed, 
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force2_lod0.up * 0.11f * aniSpeed, 
 				force1_lod0.position);
 		}
 
 		if(ispropeller2Destory){
-			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (-force2_lod0.right * 0.05f * aniSpeed, 
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (-force2_lod0.right * 0.04f * aniSpeed, 
 				force2_lod0.position);
 		}else{
-			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force2_lod0.up * 0.1f * aniSpeed, 
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForceAtPosition (force2_lod0.up * 0.11f * aniSpeed, 
 				force2_lod0.position);
 		}
 
 		if(aniSpeed >= 1000){
 			mainTransform_lod0.GetComponent<Rigidbody> ().AddForce (mainTransform_lod0.forward * 0.07f * aniSpeed);
-			mainTransform_lod0.GetComponent<Rigidbody> ().AddForce (new Vector3 (0, 1, 0) * 0.08f * aniSpeed);
+			mainTransform_lod0.GetComponent<Rigidbody> ().AddForce (new Vector3 (0, 1, 0) * 0.085f * aniSpeed);
 		}
 	}
 

@@ -8,6 +8,8 @@ public class PojulObject : MonoBehaviour {
 	public bool isSelected = false;
 	public bool isAttackArmy = false;
 
+	public string navPathStatus;
+
 	public bool isDestoryed = false;
 	public bool isPanDestoryed = false;
 
@@ -22,6 +24,8 @@ public class PojulObject : MonoBehaviour {
 	public string enemyId = "";
 	public string type = "";
 	public int behavior = 1;//1: patrol;2: mass;3: attack;4: retreat;5:transport
+
+	public float health;
 
 	public Vector3 myCenter;
 	public Vector3 enemyCenter;

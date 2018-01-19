@@ -153,6 +153,7 @@ public class CarType5 : PojulObject {
 
 	// Update is called once per frame
 	void Update () {
+		health = sliderHealth.value;
 		if(isDestoryed){
 			return;
 		}

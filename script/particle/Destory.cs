@@ -17,13 +17,16 @@ public class Destory : PojulObject {
 			destoryTime = 20;
 		} else if (CompareTag ("bulletFire")) {
 			destoryTime = 1;
-		}else if (CompareTag ("bulletBomb1")) {
+		} else if (CompareTag ("bulletBomb1")) {
 			destoryTime = 1.2f;
-		}else if (CompareTag ("bulletBomb2")) {
+		} else if (CompareTag ("bulletBomb2")) {
 			destoryTime = 1.0f;
-		}if (CompareTag ("paoFire")) {
+		} else if (CompareTag ("paoFire")) {
 			destoryTime = 2.2f;
+		} else if (CompareTag ("airDestory")) {
+			destoryTime = 2.5f;
 		}
+
 
 		Invoke ("destory", destoryTime);
 	}
