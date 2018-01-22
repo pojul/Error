@@ -43,8 +43,16 @@ public class WorldUIManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		//Debug.Log (planMove.player + " :player gqb------>fireAimTra: " +fireAimTra);
-		if (planMove.player != null && fireAimTra != null) {
 
+		if(planMove.player != null ){
+			PojulObject mPojulObject = planMove.player.GetComponent<PojulObject> ();
+			if(mPojulObject != null && !mPojulObject.isDestoryed && mPojulObject.type.Equals("a10") && mPojulObject.MissileAimedTra != null){
+				lookAtBack (planMove.player);
+				return;
+			}
+		}
+
+		if (planMove.player != null && fireAimTra != null) {
 			rayCast (fireAimTra, fireAim, fireAimDistance, 1);
 
 			//magnifierAim.rectTransform.localScale = new Vector3 (0, 0, 0);
@@ -109,6 +117,13 @@ public class WorldUIManager : MonoBehaviour {
 			magnifierTra = MyPaos [i];
 			break;
 		}
+	}
+
+	void lookAtBack(Transform lookAt){
+		magnifierCamera.transform.position = lookAt.position + lookAt.forward *1500;
+		magnifierCamera.transform.rotation = Quaternion.Slerp (magnifierCamera.transform.rotation, 
+			Quaternion.LookRotation(lookAt.position - magnifierCamera.transform.position),
+			Time.deltaTime * 48f);
 	}
 
 }

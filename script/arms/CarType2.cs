@@ -437,5 +437,15 @@ public class CarType2 : PojulObject {
 		Destroy(transform.root.gameObject);
 	}
 
+	public override int getSellGold(){
+		if(isDestoryed){
+			return 0;
+		}
+		float gold1 = (GameInit.prices ["car2"] * 0.5f *sliderHealth.value / sliderHealth.maxValue);
+		float gold2 = 0.5f * (currentMissiles[0] * GameInit.prices ["missile1"] + currentMissiles[1] * GameInit.prices ["missile2"] + 
+			currentMissiles[2] * GameInit.prices ["missile3"]);
+		int gold = (int)(gold1 + gold2);
+		return gold;
+	}
 
 }

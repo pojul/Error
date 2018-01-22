@@ -53,9 +53,13 @@ public class HomePao : PojulObject {
 		homeTra = transform.FindChild ("home_pao").FindChild ("homeTra");
 		playerView = paoTransform.FindChild("playerView");
 
+
+
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
 		type = strs [1];
+
+		//panTransform.rotation = Quaternion.Euler (new Vector3(0,10,0));
 
 		createShell ();
 		InvokeRepeating ("findEnemy", 1.5f, 1.5f);
@@ -188,10 +192,10 @@ public class HomePao : PojulObject {
 
 		Quaternion lookFireRotation = Quaternion.LookRotation(enemyTransform.position - fireTransform.position);
 
-		float dRolY = Util.getDirectDRol(fireTransform.rotation.eulerAngles.y, lookFireRotation.eulerAngles.y, aimSpeed);
+		float dRolY = Util.getDirectDRol(fireTransform.rotation.eulerAngles.y, lookFireRotation.eulerAngles.y, aimSpeed, 0);
 		panTransform.rotation = Quaternion.Euler (new Vector3(0, (panTransform.eulerAngles.y + dRolY), 0));
 
-		float dRolX = Util.getDirectDRol(fireTransform.rotation.eulerAngles.x, lookFireRotation.eulerAngles.x, aimSpeed);
+		float dRolX = Util.getDirectDRol(fireTransform.rotation.eulerAngles.x, lookFireRotation.eulerAngles.x, aimSpeed, 0);
 		paoTransform.rotation = Quaternion.Euler (new Vector3((paoTransform.eulerAngles.x + dRolX), panTransform.eulerAngles.y, 0));
 	}
 
@@ -246,7 +250,7 @@ public class HomePao : PojulObject {
 		if(preShell == null){
 			createShell ();
 		}
-		((ShellType1)preShell.GetComponent<ShellType1> ()).shoot(68000, 0, 0);
+		((ShellType1)preShell.GetComponent<ShellType1> ()).shoot(27200, 0, 0);
 		createShell ();
 	}
 
@@ -262,7 +266,7 @@ public class HomePao : PojulObject {
 			} else {
 				hitPoint = hit.point;
 			}
-			sliderHealth.value = sliderHealth.value - 17;
+			sliderHealth.value = sliderHealth.value - 10;
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
 				isPanDestoryed = true;
@@ -270,7 +274,7 @@ public class HomePao : PojulObject {
 				return;
 			}
 		}else if(type == 3){
-			sliderHealth.value = sliderHealth.value - 21;
+			sliderHealth.value = sliderHealth.value - 17;
 			if (sliderHealth.value <= 0) {
 				isDestoryed = true;
 				isPanDestoryed = true;
@@ -335,7 +339,7 @@ public class HomePao : PojulObject {
 		if (playerType == 0) {
 			//mCanvas.enabled = false;
 			sliderHealth.GetComponent<RectTransform> ().sizeDelta = new Vector2 (0, 0);
-			PlanControls.newPoint1Rolation = transform.rotation.eulerAngles.y;
+			PlanControls.newPoint1Rolation = panTransform .rotation.eulerAngles.y;
 
 			if(!transform.gameObject.GetComponent<planMove> ()){
 				transform.gameObject.AddComponent<planMove> ();

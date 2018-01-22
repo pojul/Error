@@ -13,10 +13,11 @@ public class MissileType3 : PojulObject {
 	private bool isForward = false;
 	private bool isDecay = false;
 
-	private float maxSpeed = 3400 * 1.5f;
-	private float acceleration = 42;
+	private float maxSpeed = 3400 * 1.12f;
+	private float acceleration = 32;
 	private float speed = 0;
-	private float aimSpeed = 4.3f;
+	private float aimSpeed = 5f;
+	private float moreScale = 0.1f;
 
 	private Rigidbody mRigidbody;
 	private BoxCollider mBoxCollider;
@@ -28,6 +29,8 @@ public class MissileType3 : PojulObject {
 		mBoxCollider.enabled = false;
 
 		blazePos = transform.FindChild ("blazePos");
+		maxSpeed = 3400 * GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().missile3MaxSpeed;
+		moreScale = GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().moreScale;
 	}
 	
 	// Update is called once per frame
@@ -36,12 +39,42 @@ public class MissileType3 : PojulObject {
 			Quaternion rawRotation = transform.rotation;
 			Quaternion newRotation = new Quaternion();
 			if (!isForward && !missTarget) {
-				transform.rotation = Quaternion.Slerp(transform.rotation, 
-					Quaternion.LookRotation(target.position - transform.position), aimSpeed * Time.deltaTime);
-				if(blaze != null){
-					blaze.transform.localEulerAngles = new Vector3 (0,0,0);
+
+				//Quaternion lookFireRotation = Quaternion.LookRotation(target.position - transform.position);
+				//Quaternion.LerpUnclamped
+				//transform.rotation.
+				//Debug.Log("gqb------>drol: " + 
+					//(transform.rotation.eulerAngles - Quaternion.LookRotation(target.position - transform.position).eulerAngles).magnitude);
+				Quaternion fromRol = transform.rotation;
+				Quaternion toRol = Quaternion.LookRotation(target.position - transform.position);
+
+				/*GameObject g = new GameObject ();
+				g.transform.rotation = transform.rotation;
+				Vector3 rawForward = g.transform.forward;
+				g.transform.rotation = toRol;
+				Vector3 newForward = g.transform.forward;
+				float dRol = Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg;
+				if(dRol > 40){
+					aimSpeed = aimSpeed * 0.5f;
 				}
+				Debug.Log(Mathf.Asin (Vector3.Distance(Vector3.zero, Vector3.Cross (rawForward.normalized, newForward.normalized)) ) * Mathf.Rad2Deg + "; gqb------>drol: " + Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg);
+				Destroy (g);
+
+				transform.rotation = Quaternion.Slerp(fromRol, 
+					toRol, aimSpeed * Time.deltaTime);*/
+				
+				float dRolX = Util.getDirectDRol(fromRol.eulerAngles.x, toRol.eulerAngles.x, aimSpeed, moreScale);
+				float dRolY = Util.getDirectDRol(fromRol.eulerAngles.y, toRol.eulerAngles.y, aimSpeed, moreScale);
+				float dRolZ = Util.getDirectDRol(fromRol.eulerAngles.z, toRol.eulerAngles.z, aimSpeed, moreScale);
+				transform.rotation = Quaternion.Euler (new Vector3((transform.eulerAngles.x + dRolX), 
+					(transform.eulerAngles.y + dRolY), 
+					(transform.eulerAngles.z + dRolZ))
+				);
+				//Debug.Log("gqb------>dRolX: " + dRolX + "; dRolY: " + dRolY + "; dRolZ: " + dRolZ);
 				newRotation = transform.rotation;
+			}
+			if(blaze != null){
+				blaze.transform.localEulerAngles = new Vector3 (0,0,0);
 			}
 			if(transform.parent != null){
 				transform.parent = null;
@@ -64,7 +97,7 @@ public class MissileType3 : PojulObject {
 				float angle = Mathf.Acos (Vector3.Dot (rawForward.normalized, newForward.normalized)) * Mathf.Rad2Deg;
 				//Debug.Log (speed + "gqb------>angle: " + angle);
 				if(angle < 90 && speed > 400){
-					speed = speed - 8f - angle *12f;
+					speed = speed - 5f - angle *9f;
 				}
 
 				if(speed <= 400){
@@ -91,17 +124,26 @@ public class MissileType3 : PojulObject {
 		type = strs [1];
 		this.target = MissileType1.getMissileTarget(transform, target);
 		this.speed = startSpeed;
+		isForward = true;
 		initBlaze ();
-
+		float aimspeedRaw = 0.0f;
 		if (target.parent != null && target.parent.GetComponent<PojulObject> () && target.parent.GetComponent<PojulObject> ().type.Equals ("a10")) {
-			aimSpeed = 4.2f;
+			//aimSpeed = 5.8f;
+			aimspeedRaw = GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().a10AimSpeed;
+			aimSpeed = GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().a10AimSpeed * Time.deltaTime *200;
 		} else {
-			aimSpeed = 6.4f;
+			aimspeedRaw = 8.8f;
+			aimSpeed = 8.8f * Time.deltaTime * 200 * 40;
 		}
-		//Debug.Log (target.parent.GetComponent<PojulObject> () +  "gqb------>aimSpeed: " + aimSpeed);
-		Invoke ("startDecay", 5f);
-		Invoke ("destoryMissile", 15);
+		//Debug.Log (aimspeedRaw + "; gqb------>aimSpeed: " + aimSpeed);
+		Invoke ("startDecay", 7.0f);
+		Invoke ("destoryMissile", 17);
+		Invoke ("changeForward", 0.4f);
 
+	}
+
+	void changeForward(){
+		isForward = false;
 	}
 
 	void startDecay(){

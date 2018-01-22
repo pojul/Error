@@ -91,6 +91,9 @@ public class GameInit  : MonoBehaviour {
 	private bool airShapArrive = false;
 	private int hasBuildAirNum = 0;
 
+	public static bool isAttacking_0;
+	public static bool isAttacking_1;
+
 	/*[RuntimeInitializeOnLoadMethod]
     static void OnRuntimeMethodLoad()
     {
@@ -104,6 +107,14 @@ public class GameInit  : MonoBehaviour {
         Debug.Log("SecondMethod After scene is loaded and game is running.");
     }*/
 
+	public GameObject backgroundMusicObj;
+	public AudioSource backgroundMusic;
+	public AudioClip[] backgroundMusics = new AudioClip[3];
+	//public AudioClip music1;
+	//public AudioClip music2;
+	public bool needStopMusic = false;
+	private float randomMusicTime = 0.0f;
+
 	void Start () {
 
 		initData ();
@@ -111,7 +122,7 @@ public class GameInit  : MonoBehaviour {
 
 		InvokeRepeating("addMoney", 2.0f, 2.0f);
 
-		InvokeRepeating("gc", 60.0f, 60.0f);
+		//InvokeRepeating("gc", 60.0f, 60.0f);
 
 		InvokeRepeating("enemyManager", 5f, 5f);
 
@@ -120,11 +131,14 @@ public class GameInit  : MonoBehaviour {
 		setEnemyAttackRandom ();
 
 		getRandomFighterType ();
+
+		randomMusicTime = Time.time - 60.0f;
+		backgroundMusic = backgroundMusicObj.GetComponent<AudioSource> ();
 	}
 
 	void gc(){
 		if(ShowFPS.currFPS < 20.0f){
-			System.GC.Collect ();
+			//System.GC.Collect ();
 		}
 
 	}
@@ -135,6 +149,9 @@ public class GameInit  : MonoBehaviour {
 
 		copyCurrentM3 = currentInstance ["1_missile3"];
 		copyRemainM3 = remainMissile["1_missile3"];
+
+		onBackgroundMusicControl ();
+
 	}
 
 	void initData(){
@@ -167,7 +184,7 @@ public class GameInit  : MonoBehaviour {
 		progress1 = (Texture2D)Resources.Load ("icon/progress1/progress1c");
 		progress2 = (Texture2D)Resources.Load ("icon/progress1/progress1d");
 
-		prices.Add ("a10", 42);
+		prices.Add ("a10", 35);
 		prices.Add ("f15e", 52);
 		prices.Add ("su34", 50);
 		prices.Add ("car2", 12);//6
@@ -365,6 +382,33 @@ public class GameInit  : MonoBehaviour {
 		//enemyBehavor ();
 
 	}
+
+	void onBackgroundMusicControl(){
+		
+		if(UImanager.attackBehavorId_0 != 3){
+			isAttacking_0 = false;
+		}
+		if ((UImanager.attackBehavorId_1 == 3 && isAttacking_1) || (UImanager.attackBehavorId_0 == 3 && isAttacking_0)) {
+			playBackageMusic (backgroundMusics[0], 0.2f);
+			needStopMusic = false;
+		} else {
+			stopBackageMusic (backgroundMusics [0]);
+			if((Time.time - randomMusicTime) > 70){
+				Debug.Log ("gqb------>randomMusic ");
+				randomMusicTime = Time.time;
+				int needPlay = Random.Range (1,99)%2;
+				if (needPlay == 0) {
+					//stopBackageMusic ();
+					return;
+				}
+				float volumn = 0.1f;
+				int whichClip = Random.Range (1,99)%2;
+				playBackageMusic (backgroundMusics[(whichClip + 1)], volumn);
+			}
+			//float
+		}
+	}
+
 
 	void instanceEnemy(){
 		if(EnemyMoney > prices[enemyRandomFighter]*enemyGoldScale && currentInstance["1_a10"] < maxInstance["1_a10"]){
@@ -623,4 +667,28 @@ public class GameInit  : MonoBehaviour {
 		}
 	}
 
+
+	public void playBackageMusic(AudioClip mClip, float volumn){
+		if(backgroundMusic != null && mClip != null){
+			if(backgroundMusic.clip != mClip){
+				backgroundMusic.clip = mClip;
+			}
+			backgroundMusic.volume = volumn;
+			if(!backgroundMusic.isPlaying){
+				backgroundMusic.Play ();
+			}
+		}
+	}
+
+	public void stopBackageMusic(){
+		if (backgroundMusic != null && backgroundMusic.isPlaying) {
+			backgroundMusic.Pause ();
+		}
+	}
+
+	public void stopBackageMusic(AudioClip mClip){
+		if (backgroundMusic != null && backgroundMusic.isPlaying && backgroundMusic.clip == mClip) {
+			backgroundMusic.Pause ();
+		}
+	}
 }

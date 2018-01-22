@@ -549,4 +549,14 @@ public class CarType5 : PojulObject {
 		currentMountMissle = temptMountMissle;
 	}
 
+	public override int getSellGold(){
+		if(isDestoryed){
+			return 0;
+		}
+		float gold1 = (GameInit.prices ["car5"] * 0.5f *sliderHealth.value / sliderHealth.maxValue);
+		float gold2 = 0.5f * currentMountMissle * GameInit.prices ["missile1"] ;
+		int gold = (int)(gold1 + gold2);
+		return gold;
+	}
+
 }

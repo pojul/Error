@@ -40,4 +40,6 @@ public class PojulObject : MonoBehaviour {
 
 	public virtual void setTransport (Transform transporter, bool isTransport){}
 
+	public virtual int getSellGold (){return 0;}
+
 }

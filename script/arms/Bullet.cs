@@ -47,9 +47,16 @@ public class Bullet : PojulObject {
 				//bulletBomb2.transform.parent = 
 				//Debug.Log ("gqb------>Update2: " + hit.transform.tag);
 			} else {
-				GameObject bulletBomb1 = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bulletBomb1"), 
-					hit.point , Quaternion.LookRotation(hit.normal) ) as GameObject;
-				bulletBomb1.tag = "bulletBomb1";
+				GameObject bulletBomb;
+				string[] names = hit.transform.name.Split ('_');
+				if (names.Length == 2 && "metal".Equals (names [1])) {
+					bulletBomb = (GameObject)Instantiate (Resources.Load ("Prefabs/Particle/bulletBomb2"), 
+						hit.point, Quaternion.LookRotation (hit.normal)) as GameObject;
+				} else {
+					bulletBomb = (GameObject)Instantiate(Resources.Load("Prefabs/Particle/bulletBomb1"), 
+						hit.point , Quaternion.LookRotation(hit.normal) ) as GameObject;
+				}
+				bulletBomb.tag = "bulletBomb1";
 				//Debug.Log ("gqb------>Update1: " + hit.transform.tag);
 			}
 			isHit = true;

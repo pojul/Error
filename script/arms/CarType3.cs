@@ -59,7 +59,7 @@ public class CarType3 : PojulObject {
 	public Vector3 massPark = new Vector3(0,0,0);
 	int massIndex = -1;
 	public float massSpeed;
-	private Transform transporter;
+	public Transform transporter;
 	private Vector3 attackPoint;
 	//private float transportRawHeight = 0;
 
@@ -417,6 +417,10 @@ public class CarType3 : PojulObject {
 			transform.root.position = new Vector3 (-200000, 0, 0);
 			//transform.root.parent = transporter;
 			stop ();
+			if(isSelected){
+				GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().closeAttackWin();
+				isSelected = false;
+			}
 		} else {
 			this.transporter = null;
 			int attackBehavorId;
@@ -608,7 +612,12 @@ public class CarType3 : PojulObject {
 				hitPoint = hit.point;
 				hitName = hit.transform.name;
 			}
-			sliderHealth.value = sliderHealth.value - 36;
+			if (playerId.Equals ("1")) {
+				sliderHealth.value = sliderHealth.value - 23;
+			} else {
+				sliderHealth.value = sliderHealth.value - 36;
+			}
+
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
 				isPanDestoryed = true;
@@ -958,6 +967,15 @@ public class CarType3 : PojulObject {
 		Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, 
 			Quaternion.LookRotation(paoTransform_lod0.position - Camera.main.transform.position), 3.5f * Time.deltaTime);
 		
+	}
+
+	public override int getSellGold(){
+		if(isDestoryed){
+			return 0;
+		}
+		float gold1 = (GameInit.prices ["car3"] * 0.5f *sliderHealth.value / sliderHealth.maxValue);
+		int gold = (int)(gold1);
+		return gold;
 	}
 
 }

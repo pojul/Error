@@ -191,10 +191,10 @@ public class LittleCannon1 : PojulObject {
 
 		Quaternion lookFireRotation = Quaternion.LookRotation(enemyTransform.position - fireTransform.position);
 		 
-		float dRolY = Util.getDirectDRol(fireTransform.rotation.eulerAngles.y, lookFireRotation.eulerAngles.y, aimSpeed);
+		float dRolY = Util.getDirectDRol(fireTransform.rotation.eulerAngles.y, lookFireRotation.eulerAngles.y, aimSpeed, 0);
 		panTransform.rotation = Quaternion.Euler (new Vector3(0, (panTransform.eulerAngles.y + dRolY), 0));
 
-		float dRolX = Util.getDirectDRol(fireTransform.rotation.eulerAngles.x, lookFireRotation.eulerAngles.x, aimSpeed);
+		float dRolX = Util.getDirectDRol(fireTransform.rotation.eulerAngles.x, lookFireRotation.eulerAngles.x, aimSpeed, 0);
 		paoTransform.rotation = Quaternion.Euler (new Vector3((paoTransform.eulerAngles.x + dRolX), panTransform.eulerAngles.y, 0));
 	}
 
@@ -249,7 +249,7 @@ public class LittleCannon1 : PojulObject {
 		if(preShell == null){
 			createShell ();
 		}
-		((ShellType1)preShell.GetComponent<ShellType1> ()).shoot(51000, 0, 0);
+		((ShellType1)preShell.GetComponent<ShellType1> ()).shoot(23800, 0, 0);
 		createShell ();
 	}
 
@@ -265,7 +265,7 @@ public class LittleCannon1 : PojulObject {
 			} else {
 				hitPoint = hit.point;
 			}
-			sliderHealth.value = sliderHealth.value - 28;
+			sliderHealth.value = sliderHealth.value - 22;
 			if(sliderHealth.value <= 0){
 				isDestoryed = true;
 				isPanDestoryed = true;
@@ -273,7 +273,7 @@ public class LittleCannon1 : PojulObject {
 				return;
 			}
 		}else if(type == 3){
-			sliderHealth.value = sliderHealth.value - 37;
+			sliderHealth.value = sliderHealth.value - 33;
 			if (sliderHealth.value <= 0) {
 				isDestoryed = true;
 				isPanDestoryed = true;
@@ -332,7 +332,7 @@ public class LittleCannon1 : PojulObject {
 		if (playerType == 0) {
 			//mCanvas.enabled = false;
 			sliderHealth.GetComponent<RectTransform> ().sizeDelta = new Vector2 (0, 0);
-			PlanControls.newPoint1Rolation = transform.rotation.eulerAngles.y;
+			PlanControls.newPoint1Rolation = panTransform.rotation.eulerAngles.y;
 
 			if(!transform.gameObject.GetComponent<planMove> ()){
 				transform.gameObject.AddComponent<planMove> ();

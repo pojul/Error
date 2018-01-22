@@ -112,7 +112,7 @@ public class A10aPlan : PojulObject {
 
 
 		if("A10a".Equals(airType)){
-			maxMoveSpeed = 0.5f * 3400;
+			maxMoveSpeed = 0.48f * 3400;
 		}else if("su34".Equals(airType)){
 			maxMoveSpeed = 0.7f * 3400;
 		}else if("F15E".Equals(airType)){
@@ -256,9 +256,9 @@ public class A10aPlan : PojulObject {
 			if(nav != null){
 				nav.enabled = false;
 				transform.rotation = navCube.transform.rotation;
-				PlanControls.newPoint3Rolation = -(transform.rotation.eulerAngles.x + 360);
+				PlanControls.newPoint3Rolation = transform.rotation.eulerAngles.x;
 				PlanControls.newPoint1Rolation = transform.rotation.eulerAngles.y;
-				PlanControls.newPoint2Rolation = -(int)(transform.rotation.eulerAngles.z + 360);
+				PlanControls.newPoint2Rolation = (int)transform.rotation.eulerAngles.z ;
 			}
 			if(mAudioSource != null){
 				mAudioSource.volume = 0.0f;
@@ -530,9 +530,6 @@ public class A10aPlan : PojulObject {
 			if(missiles [missilePoses[i]] != null){
 				MissileType3 mMissileType3 = missiles [missilePoses [i]].gameObject.GetComponent<MissileType3> ();
 				float startSpeed = moveSpeed;
-				if(playerType == 0){
-					startSpeed = planMove.player.gameObject.GetComponent<Rigidbody>().velocity.magnitude;
-				}
 				PojulObject mPojulObject = target.parent.gameObject.GetComponent<PojulObject> ();
 				mMissileType3.fireInit ((playerId + "_missile3" ), target, startSpeed * 1.1f);
 				if(mPojulObject != null){
@@ -554,11 +551,13 @@ public class A10aPlan : PojulObject {
 			if(missiles [missilePoses[i]] != null){
 				MissileType3 mMissileType3 = missiles [missilePoses [i]].gameObject.GetComponent<MissileType3> ();
 				float startSpeed = planMove.speed;
+				//Debug.Log ("gqb------>fireMissileOfPlayer111111 startSpeed: " + startSpeed);
 				if(transform.gameObject.GetComponent<Rigidbody>()){
 					startSpeed = transform.gameObject.GetComponent<Rigidbody> ().velocity.magnitude;
+					//Debug.Log ("gqb------>fireMissileOfPlayer222222 startSpeed: " + startSpeed);
 				}
 				PojulObject mPojulObject = target.gameObject.GetComponent<PojulObject> ();
-				mMissileType3.fireInit ((playerId + "_missile3" ), target, startSpeed);
+				mMissileType3.fireInit ((playerId + "_missile3" ), target, startSpeed*1.12f);
 				if(mPojulObject != null){
 					mPojulObject.isMissileAimed = true;
 					mPojulObject.MissileAimedTra = missiles [missilePoses [i]];
@@ -767,10 +766,10 @@ public class A10aPlan : PojulObject {
 		}
 		if(MissileAimedTra != null && isAvoidMissile){
 			if (behavior == 1) {
-				startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.8f);
+				startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.95f);
 			} else if (behavior == 3) {
 				if(currentMountMissle <= 0){
-					startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.8f);
+					startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.95f);
 				}else{
 					int attackId;
 					if ("0".Equals (playerId)) {
@@ -1023,6 +1022,23 @@ public class A10aPlan : PojulObject {
 		if(tempTra != null){
 			missileCar = tempTra;
 		}
+	}
+
+	public override int getSellGold(){
+		if(isDestoryed){
+			return 0;
+		}
+		float gold1 = 0;
+		if("A10a".Equals(airType)){
+			gold1 = (GameInit.prices ["a10"] * 0.5f *sliderHealth.value / sliderHealth.maxValue);
+		}else if("su34".Equals(airType)){
+			gold1 = (GameInit.prices ["su34"] * 0.5f *sliderHealth.value / sliderHealth.maxValue);
+		}else if("F15E".Equals(airType)){
+			gold1 = (GameInit.prices ["f15e"] * 0.5f *sliderHealth.value / sliderHealth.maxValue);
+		}
+		float gold2 = 0.5f * currentMountMissle * GameInit.prices ["missile3"] ;
+		int gold = (int)(gold1 + gold2);
+		return gold;
 	}
 
 }

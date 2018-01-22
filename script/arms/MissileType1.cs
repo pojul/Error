@@ -16,7 +16,7 @@ public class MissileType1 : PojulObject {
 	private float maxSpeed = 3400 * 8f;
 	private float acceleration = 200;
 	private float speed = 0;
-	private float aimSpeed = 80f;
+	private float aimSpeed = 320f;
 
 	private Rigidbody mRigidbody;
 

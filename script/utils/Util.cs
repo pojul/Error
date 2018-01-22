@@ -11,6 +11,7 @@ public class Util : MonoBehaviour {
 		}else if("1".Equals(playId)){
 			tempPark = GameInit.park1;
 		}
+		//Debug.Log ("gqb------>playId: " + playId );
 		foreach(Vector3 key in tempPark.Keys)
 		{
 			if((int)tempPark[key] == 0){
@@ -214,7 +215,7 @@ public class Util : MonoBehaviour {
 	}
 
 
-	public static float getDirectDRol(float fromRol, float toRol, float limit){
+	public static float getDirectDRol(float fromRol, float toRol, float limit, float moreScale){
 		float dRol = 0;
 		float dRol1 = 0;
 		float dRol2 = 0;
@@ -242,7 +243,7 @@ public class Util : MonoBehaviour {
 		}
 		float minDRol = limit * Time.deltaTime;
 		if(dRol > minDRol){
-			dRol = minDRol;
+			dRol = minDRol + (dRol - minDRol) * moreScale;
 		}
 		return dRol*direct;
 	}

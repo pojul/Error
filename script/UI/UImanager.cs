@@ -20,6 +20,7 @@ public class UImanager : MonoBehaviour {
 	public Image touchMove;
 	public Image leave;
 	public Image attack;
+	public Image fireLeft;
 
 
 	public Image thubmnailPoint;
@@ -48,6 +49,9 @@ public class UImanager : MonoBehaviour {
 	public Sprite leave2;
 	public Sprite attack1;
 	public Sprite attack2;
+	public Sprite fireLeft1;
+	public Sprite fireLeft2;
+	public Sprite fireLeft3;
 
 	private Dictionary<int, object[]> thubmnailPoints = new Dictionary<int, object[]> ();//GameObject, Image
 	private Dictionary<int, object[]> enemythubmnailPoints = new Dictionary<int, object[]> ();
@@ -83,7 +87,7 @@ public class UImanager : MonoBehaviour {
 	public static float fireInterval = 2;
 
 	private bool showShopWin = false;
-	public string[] armNames = new string[10];
+	public string[] armNames = new string[9];
 	private float armShopItemImgHeight = Screen.height * 0.16f;
 	private float armShopItemImgWidth = Screen.height * 0.3f;
 	private float armShopItemPriceHeight = Screen.height * 0.16f;
@@ -96,12 +100,12 @@ public class UImanager : MonoBehaviour {
 	public Image armShopClose;
 	public GameObject armShopScrollView;
 	public GameObject armShopContent;
-	public Image[] armShopImgs = new Image[10];
-	public Text[] armShopPrices = new Text[10];
+	public Image[] armShopImgs = new Image[9];
+	public Text[] armShopPrices = new Text[9];
 	public List<Image> armShopBuys = new List<Image>();
 	private List<GameObject> armShopBuyObjs = new List<GameObject>();
-	public Sprite[] armShopBgs = new Sprite[10];
-	private bool[] couldArmBuy = new bool[10];
+	public Sprite[] armShopBgs = new Sprite[9];
+	private bool[] couldArmBuy = new bool[9];
 
 	public Sprite armShopClose1;
 	public Sprite armShopClose2;
@@ -178,7 +182,7 @@ public class UImanager : MonoBehaviour {
 	private RectTransform unAttackArmValsRect;
 	private RectTransform attackArmValsRect;
 	private float attackItemHeight = Screen.height * 0.048f;
-	private bool showAttackWin = false;
+	public bool showAttackWin = false;
 	private float unAttackScrollPos = 0.0f;
 	private float attackScrollPos = 0.0f;
 	public static List<Transform> unattacks_0 = new List<Transform> ();
@@ -240,11 +244,26 @@ public class UImanager : MonoBehaviour {
 
 
 	private Color waringColor = new Color(Color.red.r, Color.red.g, Color.red.b, 0.9f);
-	private Color normalColor = new Color(Color.white.r, Color.white.g, Color.white.b, 0.9f);
+	private Color normalColor = new Color (Color.white.r, Color.white.g, Color.white.b, 0.9f);
+
+	//test
+	public float a10AimSpeed = 20f;
+	public float missile3MaxSpeed = 2.0f;
+	public float moreScale = 0.1f;
+
+	public GameObject uiClickSoreceObj;
+	public GameObject waringSoreceObj;
+	private AudioSource uiClickSorece;
+	private AudioSource waringSorece;
 
 	//public RawImage  100;
 	void Start () {
 		fireAim = fireAimPre;
+		a10AimSpeed = 10f;
+		missile3MaxSpeed = 1.1f;
+		moreScale = 0.040f;
+		uiClickSorece = uiClickSoreceObj.GetComponent<AudioSource> ();
+		waringSorece = waringSoreceObj.GetComponent<AudioSource> ();
                      
 		thubmnail.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.32f, Screen.height * 0.32f);
 		thubmnail.rectTransform.position = new Vector3 (thubmnail.rectTransform.sizeDelta .x * 0.5f, 
@@ -295,6 +314,10 @@ public class UImanager : MonoBehaviour {
 		attack.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.1f, Screen.height * 0.1f);
 		attack.rectTransform.position = new Vector3 (attack.rectTransform.sizeDelta .x * 0.5f, 
 		attack.rectTransform.sizeDelta .y * 4f,attack.rectTransform.position.z);
+
+		fireLeft.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.1f, Screen.height * 0.1f);
+		fireLeft.rectTransform.position = new Vector3 (fireLeft.rectTransform.sizeDelta .x * 0.5f, 
+			fireLeft.rectTransform.sizeDelta .y * 3f,fireLeft.rectTransform.position.z);
                      
 		touchMove.rectTransform.sizeDelta = new Vector2 ( (Screen.width - Screen.height * 0.64f), Screen.height);
 		touchMove.rectTransform.position = new Vector3 ((Screen.height * 0.32f + touchMove.rectTransform.sizeDelta .x * 0.5f), 
@@ -316,20 +339,20 @@ public class UImanager : MonoBehaviour {
 		healthProgressVal.rectTransform.position = new Vector3 (magnifierBorder.rectTransform.position.x, 
 			(magnifierBorder.rectTransform.position.y), healthProgress.rectTransform.position.z);
 
-		uidataType.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.y * 2.01f , magnifierBorder.rectTransform.sizeDelta.y * 0.32f);
-		uidataType.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.44f),
+		uidataType.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.y * 2 , magnifierBorder.rectTransform.sizeDelta.y * 0.32f);
+		uidataType.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.43f),
 			(magnifierBorder.rectTransform.position.y + magnifierBorder.rectTransform.sizeDelta.y*0.518f - uidataType.rectTransform.sizeDelta.y *0.5f),
 			uidataType.rectTransform.position.z
 		);
 
 		uidataHeight.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.y * 2.01f , magnifierBorder.rectTransform.sizeDelta.y * 0.32f);
-		uidataHeight.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.44f),
+		uidataHeight.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.43f),
 			(magnifierBorder.rectTransform.position.y),
 			uidataType.rectTransform.position.z
 		);
 
 		uidataMissile.rectTransform.sizeDelta = new Vector2 (magnifierBorder.rectTransform.sizeDelta.y * 2.01f , magnifierBorder.rectTransform.sizeDelta.y * 0.32f);
-		uidataMissile.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.44f),
+		uidataMissile.rectTransform.position = new Vector3 ((magnifierBorder.rectTransform.position.x - uidataType.rectTransform.sizeDelta.x * 0.43f),
 			(magnifierBorder.rectTransform.position.y - magnifierBorder.rectTransform.sizeDelta.y*0.518f + uidataType.rectTransform.sizeDelta.y *0.5f),
 			uidataType.rectTransform.position.z
 		);
@@ -394,7 +417,7 @@ public class UImanager : MonoBehaviour {
 			armShopScrollViewRect.position.z);
  
 		RectTransform armShopContentRect = armShopContent.GetComponent<RectTransform> ();
-		armShopContentRect.sizeDelta = new Vector2 (armShopContentRect.sizeDelta.x, (armShopItemImgHeight*10 + armShopItemSpace*9));
+		armShopContentRect.sizeDelta = new Vector2 (armShopContentRect.sizeDelta.x, (armShopItemImgHeight*9 + armShopItemSpace*8));
 		scrollPos = armShopContentRect.position.y;
 
 		for(int i = 0; i< armShopImgs.Length; i++){
@@ -657,8 +680,8 @@ public class UImanager : MonoBehaviour {
 
 		unAttackArmValsRect = unAttackArmVals.GetComponent<RectTransform> ();
 		unAttackScrollPos = unAttackArmValsRect.position.y;
-		unAttackArmValsRect.sizeDelta = new Vector2 (unAttackArmValsRect.sizeDelta.x, attackItemHeight*10.0f);
-		for(int i = 0; i< 10; i++){
+		unAttackArmValsRect.sizeDelta = new Vector2 (unAttackArmValsRect.sizeDelta.x, attackItemHeight*9.0f);
+		for(int i = 0; i< 9; i++){
 			//unAttackArmVals
 			Text tempText = (Text)Instantiate (text);
 			tempText.rectTransform.sizeDelta = new Vector2 (unAttackArmValRect.sizeDelta.x, attackItemHeight);
@@ -692,8 +715,8 @@ public class UImanager : MonoBehaviour {
 			attackArmValRect.position.z);
 		attackArmValsRect = attackArmVals.GetComponent<RectTransform> ();
 		attackScrollPos = attackArmValsRect.position.y;
-		attackArmValsRect.sizeDelta = new Vector2 (attackArmValsRect.sizeDelta.x, attackItemHeight*10.0f);
-		for(int i = 0; i< 10; i++){
+		attackArmValsRect.sizeDelta = new Vector2 (attackArmValsRect.sizeDelta.x, attackItemHeight*9.0f);
+		for(int i = 0; i< 9; i++){
 			//unAttackArmVals
 			Text tempText = (Text)Instantiate (text);
 			tempText.rectTransform.sizeDelta = new Vector2 (attackArmValRect.sizeDelta.x, attackItemHeight);
@@ -1010,9 +1033,10 @@ public class UImanager : MonoBehaviour {
 	}
 
 	void onArmSelected(Transform tra){
-		if(showShopWin){
-			return;
-		}
+		//if(showShopWin){
+			//return;
+		//}
+		//Debug.Log ("gqb----->tra: " + tra.name);
 		if (tra == null) {
 			return;
 		}
@@ -1024,7 +1048,7 @@ public class UImanager : MonoBehaviour {
 
 		mPojulObject = tra.GetComponent<PojulObject> ();
 		if("car2".Equals(mPojulObject.type) || "car3".Equals(mPojulObject.type) || "car5".Equals(mPojulObject.type)
-			|| "a10".Equals(mPojulObject.type) || "littlecannon1".Equals(mPojulObject.type) || "homepao".Equals(mPojulObject.type)){
+			|| "a10".Equals(mPojulObject.type) || "transport1".Equals(mPojulObject.type) || "littlecannon1".Equals(mPojulObject.type) || "homepao".Equals(mPojulObject.type)){
 			if(showAttackWin){
 				if(selectedTra != null && selectedTra.GetComponent<PojulObject>()){
 					selectedTra.GetComponent<PojulObject> ().isSelected = false;
@@ -1039,7 +1063,9 @@ public class UImanager : MonoBehaviour {
 			selectedTra = tra;
 			tra.GetComponent<PojulObject> ().isSelected = true;
 			armInfoPanel.GetComponent<RectTransform> ().localScale = new Vector3 (1,1,1);
+			playUiClick (uiClickSorece, 1.0f);
 			showArmInfo = true;
+			//Debug.Log ("gqb----->showShopWin: " + showShopWin);
 			if(showShopWin){
 				armShopPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
 				showShopWin = false;
@@ -1050,7 +1076,7 @@ public class UImanager : MonoBehaviour {
 			}else if(sellingTra != null){
 				armInfoSell.sprite = armInfoSell4;
 			}else{
-				if("littlecannon1".Equals (mPojulObject.type) || "homepao".Equals (mPojulObject.type)){
+				if("transport1".Equals (mPojulObject.type) || "littlecannon1".Equals (mPojulObject.type) || "homepao".Equals (mPojulObject.type)){
 					armInfoSell.sprite = armInfoSell4;
 				}else{
 					armInfoSell.sprite = armInfoSell1;
@@ -1074,21 +1100,36 @@ public class UImanager : MonoBehaviour {
 				supplyPriorityValue.enabled = false;
 				armInfoArms.text = ((CarType2)mPojulObject).currentMissiles [0] + " S-A missiles, "
 				+ ((CarType2)mPojulObject).currentMissiles [2] + " F missiles";
-				armInfoSellNote.text = (int)(GameInit.prices ["car2"] * 0.5f * ((CarType2)mPojulObject).sliderHealth.value / ((CarType2)mPojulObject).sliderHealth.maxValue)
-				+ " golds";
+				armInfoSellNote.text = mPojulObject.getSellGold() + " golds";
 				armInfoControl.sprite = armInfoControl3;
 			} else if ("car3".Equals (mPojulObject.type)) {
 				armInfoType.text = "type: tank";
 				health.text = "health: " + ((CarType3)mPojulObject).sliderHealth.value;
-				patrolArea.color = textEnableColor;
-				patrolAreaValue.gameObject.GetComponent<Image> ().color = Color.white;
-				patrolAreaValue.enabled = true;
-				if (((CarType3)mPojulObject).mPatrolArea.areaId <= 4) {
-					patrolAreaValue.value = ((CarType3)mPojulObject).mPatrolArea.areaId - 1;
+				if (planMove.player != null || mPojulObject.behavior == 5) {
+					armInfoControl.sprite = armInfoControl3;
+				} else {
+					armInfoControl.sprite = armInfoControl1;
 				}
-				attackArmy.color = textEnableColor;
-				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
-				attackArmyValue.enabled = true;
+				if (((CarType3)mPojulObject).transporter == null) {
+					patrolArea.color = textEnableColor;
+					patrolAreaValue.gameObject.GetComponent<Image> ().color = Color.white;
+					patrolAreaValue.enabled = true;
+					if (((CarType3)mPojulObject).mPatrolArea.areaId <= 4) {
+						patrolAreaValue.value = ((CarType3)mPojulObject).mPatrolArea.areaId - 1;
+					}
+					attackArmy.color = textEnableColor;
+					attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
+					attackArmyValue.enabled = true;
+					armInfoArms.text = "";
+				} else {
+					patrolArea.color = textDisableColor;
+					patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+					patrolAreaValue.enabled = false;
+					attackArmy.color = textDisableColor;
+					attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = textDisableColor;
+					attackArmyValue.enabled = false;
+					armInfoArms.text = "Transporting";
+				}
 				attackArmyValue.isOn = mPojulObject.isAttackArmy;
 				maxMountMissile.color = textDisableColor;
 				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
@@ -1096,14 +1137,7 @@ public class UImanager : MonoBehaviour {
 				supplyPriority.color = textDisableColor;
 				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				supplyPriorityValue.enabled = false;
-				armInfoArms.text = "";
-				armInfoSellNote.text = (int)(GameInit.prices ["car3"] * 0.5f * ((CarType3)mPojulObject).sliderHealth.value / ((CarType3)mPojulObject).sliderHealth.maxValue)
-				+ " golds";
-				if (planMove.player != null || mPojulObject.behavior == 5) {
-					armInfoControl.sprite = armInfoControl3;
-				} else {
-					armInfoControl.sprite = armInfoControl1;
-				}
+				armInfoSellNote.text = mPojulObject.getSellGold() + " golds";
 			} else if ("car5".Equals (mPojulObject.type)) {
 				armInfoType.text = "type: missile car";
 				health.text = "health: " + ((CarType5)mPojulObject).sliderHealth.value;
@@ -1127,8 +1161,7 @@ public class UImanager : MonoBehaviour {
 				supplyPriorityValue.value = ((CarType5)mPojulObject).priority;
 				armInfoArms.text = ((CarType5)mPojulObject).currentMountMissle + " S-A missiles, ";
 
-				armInfoSellNote.text = (int)(GameInit.prices ["car5"] * 0.5f * ((CarType5)mPojulObject).sliderHealth.value / ((CarType5)mPojulObject).sliderHealth.maxValue)
-				+ " golds";
+				armInfoSellNote.text = mPojulObject.getSellGold() + " golds";
 				armInfoControl.sprite = armInfoControl3;
 			} else if ("a10".Equals (mPojulObject.type)) {
 				armInfoType.text = "type: fighter";
@@ -1152,8 +1185,7 @@ public class UImanager : MonoBehaviour {
 				supplyPriorityValue.enabled = false;
 				armInfoArms.text = ((A10aPlan)mPojulObject).currentMountMissle + " F missiles";
 
-				armInfoSellNote.text = (int)(GameInit.prices ["a10"] * 0.5f * ((A10aPlan)mPojulObject).sliderHealth.value / ((A10aPlan)mPojulObject).sliderHealth.maxValue)
-				+ " golds";
+				armInfoSellNote.text = mPojulObject.getSellGold() + " golds";
 				if (planMove.player != null) {
 					armInfoControl.sprite = armInfoControl3;
 				} else {
@@ -1174,14 +1206,14 @@ public class UImanager : MonoBehaviour {
 				supplyPriority.color = textDisableColor;
 				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				supplyPriorityValue.enabled = false;
-				armInfoArms.text = "muzzle velocity of shells: 15 mach";
+				armInfoArms.text = "muzzle velocity of shells: 7 mach";
 				armInfoSellNote.text = "";
 				if (planMove.player != null) {
 					armInfoControl.sprite = armInfoControl3;
 				} else {
 					armInfoControl.sprite = armInfoControl1;
 				}
-			}else if ("homepao".Equals (mPojulObject.type)) {
+			} else if ("homepao".Equals (mPojulObject.type)) {
 				armInfoType.text = "type: big railgun";
 				health.text = "health: " + ((HomePao)mPojulObject).sliderHealth.value;
 				patrolArea.color = textDisableColor;
@@ -1196,13 +1228,32 @@ public class UImanager : MonoBehaviour {
 				supplyPriority.color = textDisableColor;
 				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				supplyPriorityValue.enabled = false;
-				armInfoArms.text = "muzzle velocity of shells: 20 mach";
+				armInfoArms.text = "muzzle velocity of shells: 8 mach";
 				armInfoSellNote.text = "";
 				if (planMove.player != null) {
 					armInfoControl.sprite = armInfoControl3;
 				} else {
 					armInfoControl.sprite = armInfoControl1;
 				}
+			} else if ("transport1".Equals (mPojulObject.type)) {
+				armInfoType.text = "type: transport";
+				health.text = "health: " + ((TransportType1)mPojulObject).sliderHealth.value;
+				patrolArea.color = textDisableColor;
+				patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				patrolAreaValue.enabled = false;
+				attackArmy.color = textEnableColor;
+				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
+				attackArmyValue.enabled = true;
+				attackArmyValue.isOn = mPojulObject.isAttackArmy;
+				maxMountMissile.color = textDisableColor;
+				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				maxMountMissileValue.enabled = false;
+				supplyPriority.color = textDisableColor;
+				supplyPriorityValue.gameObject.GetComponent<Image> ().color = textDisableColor;
+				supplyPriorityValue.enabled = false;
+				armInfoControl.sprite = armInfoControl3;
+				armInfoArms.text = "transports" +((TransportType1)mPojulObject).attackTransports + "tanks";
+				armInfoSellNote.text = "";
 			}
 
 		}
@@ -1519,6 +1570,7 @@ public class UImanager : MonoBehaviour {
 			if(mPojulObject != null){
 				canFire = false;
 				Invoke ("car3CanFire", fireInterval);
+				fireLeft.sprite = fireLeft3;
 				fire.sprite = fireBg3;
 				mPojulObject.fireOfPlayer ();
 			}
@@ -1548,8 +1600,48 @@ public class UImanager : MonoBehaviour {
 		isFireDown = false;
 	}
 
+	public void OnFireLeftClick(){
+		if(isSelectMode){
+			return;
+		}
+		if(planMove.player != null && !"a10".Equals(playerType) && canFire){
+			PojulObject mPojulObject = planMove.player.gameObject.GetComponent<PojulObject> ();
+			if(mPojulObject != null){
+				canFire = false;
+				Invoke ("car3CanFire", fireInterval);
+				fireLeft.sprite = fireLeft3;
+				fire.sprite = fireBg3;
+				mPojulObject.fireOfPlayer ();
+			}
+		}
+		//Debug.Log ("gqb------>OnFireClick");
+	}
+
+	public void OnFireLeftDown(){
+		if(isSelectMode){
+			return;
+		}
+		if(!canFire){
+			return;
+		}
+		fireLeft.sprite = fireLeft2;
+		isFireDown = true;
+	}
+
+	public void OnFireLeftUp(){
+		if(isSelectMode){
+			return;
+		}
+		if(!canFire){
+			return;
+		}
+		fireLeft.sprite = fireLeft1;
+		isFireDown = false;
+	}
+
 	void car3CanFire(){
 		fire.sprite = fireBg1;
+		fireLeft.sprite = fireLeft1;
 		canFire = true;
 	}
 
@@ -1594,6 +1686,7 @@ public class UImanager : MonoBehaviour {
 		armShopPanel.rectTransform.localScale = new Vector3 (1, 1, 1);
 		RectTransform tempRectTransform = armShopContent.GetComponent<RectTransform> ();
 		tempRectTransform.position = new Vector3 (tempRectTransform.position.x, scrollPos,tempRectTransform.position.z);
+		playUiClick (uiClickSorece, 1.0f);
 	}
 
 	public void OnBuyDown(){
@@ -1819,21 +1912,17 @@ public class UImanager : MonoBehaviour {
 			leftTime = 4 - (int)(Time.time - sellingInv);
 			if(leftTime <= 0){
 				PojulObject mPojulObject = sellingTra.GetComponent<PojulObject> ();
-				int sellMoney = 0;
+				int sellMoney = mPojulObject.getSellGold();
 				if ("car2".Equals (mPojulObject.type)) {
-					sellMoney = (int)(GameInit.prices ["car2"] * 0.5f * ((CarType2)mPojulObject).sliderHealth.value / ((CarType2)mPojulObject).sliderHealth.maxValue);
 					((CarType2)mPojulObject).destoryData ();
 					((CarType2)mPojulObject).destoryAll ();
 				} else if ("car3".Equals (mPojulObject.type)) {
-					sellMoney = (int)(GameInit.prices ["car3"] * 0.5f * ((CarType3)mPojulObject).sliderHealth.value / ((CarType3)mPojulObject).sliderHealth.maxValue);
 					((CarType3)mPojulObject).destoryData ();
 					((CarType3)mPojulObject).destoryAll ();
 				} else if ("car5".Equals (mPojulObject.type)) {
-					sellMoney = (int)(GameInit.prices ["car5"] * 0.5f * ((CarType5)mPojulObject).sliderHealth.value / ((CarType5)mPojulObject).sliderHealth.maxValue);
 					((CarType5)mPojulObject).destoryData ();
 					((CarType5)mPojulObject).destoryAll ();
 				} else if ("a10".Equals (mPojulObject.type)) {
-					sellMoney = (int)(GameInit.prices ["a10"] * 0.5f * ((A10aPlan)mPojulObject).sliderHealth.value / ((A10aPlan)mPojulObject).sliderHealth.maxValue);
 					((A10aPlan)mPojulObject).destoryData ();
 					((A10aPlan)mPojulObject).destoryAll ();
 				}
@@ -1855,16 +1944,7 @@ public class UImanager : MonoBehaviour {
 		if(showArmInfo && selectedTra != null && selectedTra.GetComponent<PojulObject>()){
 			PojulObject mPojulObject = selectedTra.GetComponent<PojulObject> ();
 			if(mPojulObject.isSelling){
-				string text = "";
-				if ("car2".Equals (mPojulObject.type)) {
-					text = (int)(GameInit.prices["car2"]*0.5f*((CarType2)mPojulObject).sliderHealth.value/((CarType2)mPojulObject).sliderHealth.maxValue) + " golds";
-				} else if ("car3".Equals (mPojulObject.type)) {
-					text = (int)(GameInit.prices["car3"]*0.5f*((CarType3)mPojulObject).sliderHealth.value/((CarType3)mPojulObject).sliderHealth.maxValue) + " golds";
-				}else if ("car5".Equals (mPojulObject.type)) {
-					text = (int)(GameInit.prices["car5"]*0.5f*((CarType5)mPojulObject).sliderHealth.value/((CarType5)mPojulObject).sliderHealth.maxValue) + " golds";
-				}else if ("a10".Equals (mPojulObject.type)) {
-					text = (int)(GameInit.prices["a10"]*0.5f*((A10aPlan)mPojulObject).sliderHealth.value/((A10aPlan)mPojulObject).sliderHealth.maxValue) + " golds";
-				}
+				string text = mPojulObject.getSellGold() + " golds";
 				text = text + sellingNotes[sellingNoteIndex] + leftTime;
 				armInfoSellNote.text = text;
 				sellingNoteIndex = (sellingNoteIndex + 1) % 3;
@@ -1933,7 +2013,7 @@ public class UImanager : MonoBehaviour {
 			uidataMissile.sprite = uidataMissile1;
 			return;
 		}
-
+		bool needWaring = false;
 		float height = planMove.player.position.y * 0.1f;
 		if(mPojulObject.type.Equals("homepao") || mPojulObject.type.Equals("littlecannon1")){
 			height = 0;
@@ -1941,6 +2021,7 @@ public class UImanager : MonoBehaviour {
 		uidataHeightVal.text = "      height: " + height.ToString ("f2");
 		if(height < 100 && mPojulObject.type.Equals("a10") && (Util.isOnNavArea1(planMove.player.position) || Util.isOnNavArea2(planMove.player.position))){
 			uidataHeight.sprite = uidataHeight2;
+			needWaring = true;
 		}else {
 			uidataHeight.sprite = uidataHeight1;
 		}
@@ -1949,6 +2030,7 @@ public class UImanager : MonoBehaviour {
 			uidataMissile.sprite = uidataMissile2;
 			float missiledDis = (planMove.player.position - mPojulObject.MissileAimedTra.position).magnitude * 0.1f;
 			uidataMissileVal.text = "    missiled: " + missiledDis.ToString("f2");
+			needWaring = true;
 		} else {
 			uidataMissile.sprite = uidataMissile1;
 			uidataMissileVal.text = "    missiled: 0.0";
@@ -1961,12 +2043,14 @@ public class UImanager : MonoBehaviour {
 		} else {
 			uidataTypeVal.text = "    velocity: 0";
 		}
+		playWaringSound (waringSorece, needWaring);
 
 	}
 
 	public void OnArmShopCloseClick(){
 		armShopPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
 		showShopWin = false;
+		playUiClick (uiClickSorece, 1.0f);
 	}
 
 	public void OnArmShopCloseDown(){
@@ -1987,6 +2071,7 @@ public class UImanager : MonoBehaviour {
 		GameInit.instanceGameobject ("0", armNames[index]);
 		GameInit.MyMoney = GameInit.MyMoney - (int)GameInit.prices [armNames [index]];
 		updateBuyArmStatus ();
+		playUiClick (uiClickSorece, 1.0f);
 	}
 
 	public void OnArmShopItemDown(GameObject obj){
@@ -2013,6 +2098,7 @@ public class UImanager : MonoBehaviour {
 			selectedTra.GetComponent<PojulObject> ().isSelected = false;
 			selectedTra = null;
 		}
+		playUiClick (uiClickSorece, 1.0f);
 	}
 
 	public void OnArmInfoCloseDown(){
@@ -2035,13 +2121,18 @@ public class UImanager : MonoBehaviour {
 		PojulObject mPojulObject = selectedTra.GetComponent<PojulObject> ();
 		if ("car3".Equals (mPojulObject.type)) {
 			((CarType3)mPojulObject).setPlayType (0);
+			playUiClick (uiClickSorece, 1.0f);
 		}else if("a10".Equals (mPojulObject.type)){
 			((A10aPlan)mPojulObject).setPlayType (0);
+			playUiClick (uiClickSorece, 1.0f);
 		}else if("littlecannon1".Equals (mPojulObject.type)){
 			((LittleCannon1)mPojulObject).setPlayType (0);
+			playUiClick (uiClickSorece, 1.0f);
 		}else if("homepao".Equals (mPojulObject.type)){
 			((HomePao)mPojulObject).setPlayType (0);
+			playUiClick (uiClickSorece, 1.0f);
 		}
+
 
 	}
 
@@ -2073,6 +2164,7 @@ public class UImanager : MonoBehaviour {
 		sellingInv = Time.time;
 		sellingNoteIndex = 0;
 		sellingTra = selectedTra;
+		playUiClick (uiClickSorece, 1.0f);
 	}
 
 	public void OnArmInfoSellDown(){
@@ -2174,15 +2266,19 @@ public class UImanager : MonoBehaviour {
 			}
 			((CarType3)mPojulObject).setPlayType (1);
 			isOnLeave = true;
+			playUiClick (uiClickSorece, 1.0f);
 		} else if ("a10".Equals (mPojulObject.type)) {
 			((A10aPlan)mPojulObject).setPlayType (1);
 			isOnLeave = true;
+			playUiClick (uiClickSorece, 1.0f);
 		} else if ("littlecannon1".Equals (mPojulObject.type)) {
 			((LittleCannon1)mPojulObject).setPlayType (1);
 			isOnLeave = true;
+			playUiClick (uiClickSorece, 1.0f);
 		} else if ("homepao".Equals (mPojulObject.type)) {
 			((HomePao)mPojulObject).setPlayType (1);
 			isOnLeave = true;
+			playUiClick (uiClickSorece, 1.0f);
 		}
 
 	}
@@ -2213,6 +2309,7 @@ public class UImanager : MonoBehaviour {
 		attackPanel.rectTransform.localScale = new Vector3 (1, 1, 1);
 		unAttackArmValsRect.position = new Vector3 (unAttackArmValsRect.position.x, unAttackScrollPos, unAttackArmValsRect.position.z);
 		attackArmValsRect.position = new Vector3 (attackArmValsRect.position.x, attackScrollPos, attackArmValsRect.position.z);
+		playUiClick (uiClickSorece, 1.0f);
 	}
 
 	public void OnAttackDown(){
@@ -2237,6 +2334,7 @@ public class UImanager : MonoBehaviour {
 		}
 		attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
 		showAttackWin = false;
+		playUiClick (uiClickSorece, 1.0f);
 	}
 
 	public void OnAttackCloseDown(){
@@ -2257,6 +2355,7 @@ public class UImanager : MonoBehaviour {
 				((A10aPlan)mPojulObject).onBehavorChanged ();
 			}
 			updateAttackStatus ();
+			playUiClick (uiClickSorece, 1.0f);
 			return;
 		}
 	}
@@ -2279,6 +2378,7 @@ public class UImanager : MonoBehaviour {
 				((A10aPlan)mPojulObject).onBehavorChanged ();
 			}
 			updateAttackStatus ();
+			playUiClick (uiClickSorece, 1.0f);
 			return;
 		}
 	}
@@ -2410,6 +2510,7 @@ public class UImanager : MonoBehaviour {
 		magnifier5x.sprite = magnifier5x1;
 		magnifier10x.sprite = magnifier10x1;
 		WorldUIManager.magnifierCamera.fieldOfView = 12;
+		playUiClick(uiClickSorece, 1);
 	}
 
 	public void OnMagnifier1xDown(){
@@ -2425,7 +2526,8 @@ public class UImanager : MonoBehaviour {
 		magnifier1x.sprite = magnifier1x1;
 		magnifier5x.sprite = magnifier5x2;
 		magnifier10x.sprite = magnifier10x1;
-		WorldUIManager.magnifierCamera.fieldOfView = 5;
+		WorldUIManager.magnifierCamera.fieldOfView = 8;
+		playUiClick(uiClickSorece, 1);
 	}
 
 	public void OnMagnifier5xDown(){
@@ -2441,7 +2543,8 @@ public class UImanager : MonoBehaviour {
 		magnifier1x.sprite = magnifier1x1;
 		magnifier5x.sprite = magnifier5x1;
 		magnifier10x.sprite = magnifier10x2;
-		WorldUIManager.magnifierCamera.fieldOfView = 3f;
+		WorldUIManager.magnifierCamera.fieldOfView = 6f;
+		playUiClick(uiClickSorece, 1);
 	}
 
 	public void OnMagnifier10xDown(){
@@ -2450,6 +2553,29 @@ public class UImanager : MonoBehaviour {
 
 	public void OnMagnifier10xUp(){
 		magnifier10x.sprite = magnifier10x1;
+	}
+
+	public void closeAttackWin(){
+		attackPanel.rectTransform.localScale = new Vector3 (0, 0, 0);
+		showAttackWin = false;
+	}
+
+	void playUiClick(AudioSource mSorece, float pitch){
+		if(mSorece != null){
+			mSorece.pitch = pitch;
+			mSorece.Play ();
+		}
+	}
+
+	void playWaringSound(AudioSource mSorece, bool play){
+		if(mSorece == null){
+			return;
+		}
+		if (play && !mSorece.isPlaying) {
+			mSorece.Play();
+		} else if(!play){
+			mSorece.Pause ();
+		}
 	}
 
 }

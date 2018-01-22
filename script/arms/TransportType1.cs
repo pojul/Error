@@ -51,7 +51,7 @@ public class TransportType1 : PojulObject {
 	private float maxFlyHeight = 10000.0f;
 	//private float flyHeight = 190.0f;
 
-	private Vector3 park;
+	public Vector3 park;
 	public GameObject navCube;
 	public UnityEngine.AI.NavMeshAgent nav;
 	public Vector3 transportTo;
@@ -68,7 +68,7 @@ public class TransportType1 : PojulObject {
 	public Slider sliderHealth;
 
 	void Start () {
-		transform.name = "Transport1";
+		//transform.name = "Transport1";
 
 		transform_lod0 = transform.FindChild ("transport_type_lod0");
 		transform_lod1 = transform.FindChild ("transport_type_lod1");
@@ -103,7 +103,7 @@ public class TransportType1 : PojulObject {
 		//mRenderer_lod2_door = doorTransform_lod2.GetComponent<Renderer>();
 		createNavCube();
 
-		run ();
+		//run ();
 
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
@@ -135,10 +135,10 @@ public class TransportType1 : PojulObject {
 			mRectTransform.sizeDelta = new Vector2 (Screen.width / 18, Screen.width / 60);
 		}
 		sliderHealth.value = sliderHealth.maxValue;
-
+		//Debug.Log ("; gqb------>park: " + park);
 		//transportTo = park;
 		//startNav (park);
-
+		behavior = 1;
 		InvokeRepeating("behaviorListener", 0.5f, 0.5f);
 	}
 	
@@ -163,6 +163,7 @@ public class TransportType1 : PojulObject {
 		if(isDestoryed){
 			return;
 		}
+		//Debug.Log ("gqb------>behaviorListener: " + behavior);
 		if (behavior == 2) {
 			ToMass ();
 		} else if (behavior == 1) {
@@ -184,6 +185,9 @@ public class TransportType1 : PojulObject {
 			massId = UImanager.massId_1;
 		}
 		transportTo = attackMasses [massId];
+		if(Mathf.Abs(transform.position.x) > 60000){
+			startNav (attackMasses [massId]);
+		}
 		//Debug.Log (massId + "; gqb------>massId: " + attackMasses [massId]);
 		if ((nav.destination - attackMasses [massId]).magnitude > 500) {
 			navPathDistance = -1;
@@ -214,7 +218,6 @@ public class TransportType1 : PojulObject {
 			attackId = UImanager.attackAreaId_1 -1;
 		}
 		if(attackTransports.Count > 0 && (new Vector3(transform.position.x, 0, transform.position.z) - attackAreas[attackId]).magnitude > 500){
-			
 			bool isHasNearTrans = hasNearTrans ();
 			//Debug.Log("gqb------>hasNearTrans: " + isHasNearTrans);
 			if(!isHasNearTrans || attackTransports.Count >= 3){
@@ -237,6 +240,14 @@ public class TransportType1 : PojulObject {
 				mPojulObject.setTransport (transform, false);
 				transportOutTime = Time.time;
 				attackTransports.RemoveAt (0);
+				if(attackTransports.Count <= 0){
+					if (playerId.Equals ("0")) {
+						GameInit.isAttacking_0 = true;
+					} else {
+						GameInit.isAttacking_1 = true;
+					}
+
+				}
 				return;
 			}
 		}
@@ -354,9 +365,9 @@ public class TransportType1 : PojulObject {
 			float targetHeight = height + heightScal * maxFlyHeight;
 
 			if((transform.position.y - targetHeight) < -8){
-				tempHeight = tempHeight + 13;
+				tempHeight = tempHeight + 20;
 			}else if((transform.position.y - targetHeight) > 8){
-				tempHeight = tempHeight - 13;
+				tempHeight = tempHeight - 20;
 			}
 			//float tempHeightSpeed = 0.1f * (1.1f - heightScal) * 6;
 			//Debug.Log(heightScal + "gqb------>tempHeight: " + tempHeight);
@@ -384,9 +395,9 @@ public class TransportType1 : PojulObject {
 		//2000
 		//Debug.Log("gqb------>startMove");
 		if (aniSpeed < 1000) {
-			aniSpeed = aniSpeed + 2f;
+			aniSpeed = aniSpeed + 3f;
 			mAudioSource.volume = 1;
-			mAudioSource.pitch = aniSpeed * 0.001f;
+			mAudioSource.pitch = aniSpeed * 0.00096f;
 		} else {
 			if(transportTo != null){
 				startNav (transportTo);
@@ -430,6 +441,7 @@ public class TransportType1 : PojulObject {
 		}
 		nav.destination = navPoint;//target.transform.position;
 		//float patrol = Random.Range(maxMoveSpeed*0.6f, maxMoveSpeed);
+		Debug.Log(nav.destination + "; gqb------>: " + navPoint);
 		nav.speed = maxMoveSpeed;
 		nav.acceleration = maxMoveSpeed ;
 		nav.autoRepath = true;
@@ -484,9 +496,9 @@ public class TransportType1 : PojulObject {
 				float ds1 = (collision.contacts[0].point - force1_lod0.position).magnitude;
 				float ds2 = (collision.contacts[0].point - force2_lod0.position).magnitude;
 				if (ds1 > ds2) {
-					ispropeller1Destory = true;
-				} else {
 					ispropeller2Destory = true;
+				} else {
+					ispropeller1Destory = true;
 				}
 				destoryData ();
 				inflame (collision.contacts[0].point, 122000.0f);
@@ -517,6 +529,9 @@ public class TransportType1 : PojulObject {
 
 		Destroy (transform_lod1.gameObject);
 		Destroy (transform_lod2.gameObject);
+		if(navCube != null){
+			Destroy (navCube);
+		}
 
 		GameObject inflameObj = (GameObject)Instantiate(Resources.Load((string)GameInit.modelpaths["inflame"]), 
 			point, Quaternion.Euler(0, 0, 0)) as GameObject;
@@ -574,13 +589,11 @@ public class TransportType1 : PojulObject {
 		if(mainTransform_lod0 != null){
 			Destroy (mainTransform_lod0.gameObject);
 		}
-		if(navCube != null){
-			Destroy (navCube);
-		}
 		if(transform_lod0 != null){
 			Destroy (transform_lod0.gameObject);
 		}
 		Destroy(transform.root.gameObject);
+
 	}
 
 	void onDestoried(){
