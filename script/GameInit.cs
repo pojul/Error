@@ -4,51 +4,49 @@ using UnityEngine;
 
 public class GameInit  : MonoBehaviour {
 
-	public static Object locker = new Object();
+	public static Object locker;
 
-	public static float mach = 1000;
+	public static float mach;
 
-	public static string goldgatePrefabPath = "Prefabs/goldgate_lod";
-	public static string homePrefabPath = "Prefabs/Home_type1";
 	//public static string homePrefabPath = "Prefabs/Home_lod";
-	public static Hashtable modelpaths = new Hashtable();
-	public static Hashtable modelParams = new Hashtable();
+	public static Hashtable modelpaths;
+	public static Hashtable modelParams;
 
-	public static Dictionary<string, float> prices = new Dictionary<string, float>();
-	public static List<GameObject> gameObjectInstance = new List <GameObject>();
-	public static List<GameObject> myThumbnailObjs = new List <GameObject>();
-	public static Dictionary<string, int> maxInstance = new  Dictionary<string, int>();
-	public static Dictionary<string, int> currentInstance = new Dictionary<string, int>();
-	public static Hashtable park0 = new Hashtable(); //我方停车位
-	public static Hashtable park1 = new Hashtable(); //敌方停车位
-	public static Dictionary<string, List<Transform>> coordinateManager0 = new Dictionary<string, List<Transform>>();
-	public static Dictionary<string, List<Transform>> coordinateManager1 = new Dictionary<string, List<Transform>>();
+	public static Dictionary<string, float> prices;
+	public static List<GameObject> gameObjectInstance;
+	public static List<GameObject> myThumbnailObjs;
+	public static Dictionary<string, int> maxInstance;
+	public static Dictionary<string, int> currentInstance;
+	public static Hashtable park0; //我方停车位
+	public static Hashtable park1; //敌方停车位
+	public static Dictionary<string, List<Transform>> coordinateManager0;
+	public static Dictionary<string, List<Transform>> coordinateManager1;
 
-	public static Dictionary<int, object[]>  allNearEnemys_0 = new Dictionary<int, object[]>();//Transform, float
-	public static Dictionary<int, object[]>  allNearEnemys_1 = new Dictionary<int, object[]>();
-	public static Dictionary<int, Dictionary<Transform, float>>  nearEnemys_0 = new Dictionary<int, Dictionary<Transform, float>>();
-	public static Dictionary<int, Dictionary<Transform, float>>  nearEnemys_1 = new Dictionary<int, Dictionary<Transform, float>>();
+	public static Dictionary<int, object[]>  allNearEnemys_0;//Transform, float
+	public static Dictionary<int, object[]>  allNearEnemys_1;
+	public static Dictionary<int, Dictionary<Transform, float>>  nearEnemys_0;
+	public static Dictionary<int, Dictionary<Transform, float>>  nearEnemys_1;
 
-	public static Dictionary<int, GameObject> Car5Area0 = new Dictionary<int, GameObject>();
-	public static Dictionary<int, GameObject> Car5Area1 = new Dictionary<int, GameObject>();
+	public static Dictionary<int, GameObject> Car5Area0;
+	public static Dictionary<int, GameObject> Car5Area1;
 
-	public static Dictionary<string, int> remainMissile = new Dictionary<string, int>();
+	public static Dictionary<string, int> remainMissile;
 
-	public static List<Transform> MyCar2 = new List<Transform> ();
-	public static List<Transform> EnemyCar2 = new List<Transform> ();
+	public static List<Transform> MyCar2;
+	public static List<Transform> EnemyCar2;
 
-	public static List<Transform> attackArms_0 = new List<Transform>();
-	public static List<Transform> attackArms_1 = new List<Transform>();
-	public static List<Vector3> attackMasses_0 = new List<Vector3> ();
-	public static List<Vector3> attackMasses_1 = new List<Vector3> ();
-	public static List<Vector3> attackAreas_0 = new List<Vector3> ();
-	public static List<Vector3> attackAreas_1 = new List<Vector3> ();
+	public static List<Transform> attackArms_0;
+	public static List<Transform> attackArms_1;
+	public static List<Vector3> attackMasses_0;
+	public static List<Vector3> attackMasses_1;
+	public static List<Vector3> attackAreas_0;
+	public static List<Vector3> attackAreas_1;
 
-	public static Vector3 home1Pos = new Vector3(0, 0, -60000);
-	public static Vector3 home2Pos = new Vector3(0, 0, 60000);//19003//17750
+	public static Vector3 home1Pos;
+	public static Vector3 home2Pos;//19003//17750
 
-	public static List<Transform> invades_0 = new List<Transform> ();
-	public static List<Transform> invades_1 = new List<Transform> ();
+	public static List<Transform> invades_0;
+	public static List<Transform> invades_1;
 
 	public static Texture2D backgroundProgress;
 	public static Texture2D progress1;
@@ -56,9 +54,9 @@ public class GameInit  : MonoBehaviour {
 	
 	public static GameObject player;
 
-	public static float MyMoney = 0;
-	public static float EnemyMoney = 0;
-	
+	public static float MyMoney;
+	public static float EnemyMoney;
+
 	public UnityEngine.AI.NavMeshAgent nav;
 
 	public RadiusArea mRadiusArea1= new RadiusArea(5);
@@ -76,12 +74,7 @@ public class GameInit  : MonoBehaviour {
 	public int copyCurrentM3 = 0;
 	public int copyRemainM3 = 0;
 
-	public static Vector3[] myNavPoint1as = new Vector3[]{new Vector3(3340, 100, -34925), 
-		new Vector3 (32331, 100, -61230), 
-		new Vector3 (-3853, 100, -92787),//15549), 
-		new Vector3 (-42224, 100, -61568)//3109)
-		//new Vector3 (11630, 125, 235)
-		};
+	public static Vector3[] myNavPoint1as;
 
 	private int airShipNum = 10;
 	private float airShipInterval = 20;
@@ -115,6 +108,8 @@ public class GameInit  : MonoBehaviour {
 	public bool needStopMusic = false;
 	private float randomMusicTime = 0.0f;
 
+	public static int gameStatus; //0: running; 1: victory; 2: failure
+
 	void Start () {
 
 		initData ();
@@ -132,7 +127,7 @@ public class GameInit  : MonoBehaviour {
 
 		getRandomFighterType ();
 
-		randomMusicTime = Time.time - 60.0f;
+		randomMusicTime = Time.time - 30.0f;
 		backgroundMusic = backgroundMusicObj.GetComponent<AudioSource> ();
 	}
 
@@ -155,6 +150,52 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	void initData(){
+
+		locker = new Object();
+		mach = 1000;
+		modelpaths = new Hashtable();
+		modelParams = new Hashtable();
+		prices = new Dictionary<string, float>();
+		gameObjectInstance = new List <GameObject>();
+		myThumbnailObjs = new List <GameObject>();
+		maxInstance = new  Dictionary<string, int>();
+		currentInstance = new Dictionary<string, int>();
+		park0 = new Hashtable();
+		park1 = new Hashtable(); 
+		coordinateManager0 = new Dictionary<string, List<Transform>>();
+		coordinateManager1 = new Dictionary<string, List<Transform>>();
+		allNearEnemys_0 = new Dictionary<int, object[]>();//Transform, float
+		allNearEnemys_1 = new Dictionary<int, object[]>();
+		nearEnemys_0 = new Dictionary<int, Dictionary<Transform, float>>();
+		nearEnemys_1 = new Dictionary<int, Dictionary<Transform, float>>();
+		Car5Area0 = new Dictionary<int, GameObject>();
+		Car5Area1 = new Dictionary<int, GameObject>();
+		remainMissile = new Dictionary<string, int>();
+		MyCar2 = new List<Transform> ();
+		EnemyCar2 = new List<Transform> ();
+		attackArms_0 = new List<Transform>();
+		attackArms_1 = new List<Transform>();
+		attackMasses_0 = new List<Vector3> ();
+		attackMasses_1 = new List<Vector3> ();
+		attackAreas_0 = new List<Vector3> ();
+		attackAreas_1 = new List<Vector3> ();
+		home1Pos = new Vector3(0, 0, -60000);
+		home2Pos = new Vector3(0, 0, 60000);//19003//17750
+		invades_0 = new List<Transform> ();
+		invades_1 = new List<Transform> ();
+		myNavPoint1as = new Vector3[]{new Vector3(3340, 100, -34925), 
+			new Vector3 (32331, 100, -61230), 
+			new Vector3 (-3853, 100, -92787),//15549), 
+			new Vector3 (-42224, 100, -61568)//3109)
+			//new Vector3 (11630, 125, 235)
+		};
+		MyMoney = 0;
+		EnemyMoney = 0;
+		isAttacking_0 = false;
+		isAttacking_1 = false;
+		gameStatus = 0;
+		Time.timeScale = 1.0f;
+
 		modelpaths.Add ("a10", "Prefabs/A10a_lod");
 		modelpaths.Add ("f15e", "Prefabs/F15E_lod");
 		modelpaths.Add ("su34", "Prefabs/Su34_lod");
@@ -384,16 +425,26 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	void onBackgroundMusicControl(){
-		
+
+		if(gameStatus != 0){
+			playBackageMusic (backgroundMusics[4], 0.85f, true);
+			backgroundMusic.loop = true;
+			Time.timeScale = 0;
+			return;
+		}
+
 		if(UImanager.attackBehavorId_0 != 3){
 			isAttacking_0 = false;
 		}
+		if(UImanager.attackBehavorId_1 != 3){
+			isAttacking_1 = false;
+		}
 		if ((UImanager.attackBehavorId_1 == 3 && isAttacking_1) || (UImanager.attackBehavorId_0 == 3 && isAttacking_0)) {
-			playBackageMusic (backgroundMusics[0], 0.2f);
+			playBackageMusic (backgroundMusics[0], 0.2f, true);
 			needStopMusic = false;
 		} else {
 			stopBackageMusic (backgroundMusics [0]);
-			if((Time.time - randomMusicTime) > 70){
+			if((Time.time - randomMusicTime) > 30){
 				Debug.Log ("gqb------>randomMusic ");
 				randomMusicTime = Time.time;
 				int needPlay = Random.Range (1,99)%2;
@@ -402,8 +453,8 @@ public class GameInit  : MonoBehaviour {
 					return;
 				}
 				float volumn = 0.1f;
-				int whichClip = Random.Range (1,99)%2;
-				playBackageMusic (backgroundMusics[(whichClip + 1)], volumn);
+				int whichClip = Random.Range (1,99)%3;
+				playBackageMusic (backgroundMusics[(whichClip + 1)], volumn, false);
 			}
 			//float
 		}
@@ -641,6 +692,9 @@ public class GameInit  : MonoBehaviour {
 	}
 
 	void onEnemyBehavorChanged(){
+		if(UImanager.attacks_1 == null){
+			return;
+		}
 		for (int i = 0; i < UImanager.attacks_1.Count; i++) {
 			if(UImanager.attacks_1[i] == null){
 				continue;
@@ -668,13 +722,22 @@ public class GameInit  : MonoBehaviour {
 	}
 
 
-	public void playBackageMusic(AudioClip mClip, float volumn){
-		if(backgroundMusic != null && mClip != null){
+	public void playBackageMusic(AudioClip mClip, float volumn, bool forced){
+		if (backgroundMusic == null || mClip == null) {
+			return;
+		}
+		if (forced) {
 			if(backgroundMusic.clip != mClip){
 				backgroundMusic.clip = mClip;
 			}
 			backgroundMusic.volume = volumn;
 			if(!backgroundMusic.isPlaying){
+				backgroundMusic.Play ();
+			}
+		} else {
+			if(!backgroundMusic.isPlaying){
+				backgroundMusic.clip = mClip;
+				backgroundMusic.volume = volumn;
 				backgroundMusic.Play ();
 			}
 		}

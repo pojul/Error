@@ -8,7 +8,7 @@ public class planMove : MonoBehaviour {
 	public static Transform player;
 	public static int currentMountMissle;
 
-	public static List<Transform> nearEnemy = new List<Transform>();
+	public static List<Transform> nearEnemy;
 
 	//public float velocity = 0.0f;
 	public static float maxAccelerate;
@@ -33,6 +33,7 @@ public class planMove : MonoBehaviour {
 	public float minSpeed = 0;
 
 	void Start(){
+		nearEnemy = new List<Transform>();
 		player = transform;
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
@@ -60,8 +61,7 @@ public class planMove : MonoBehaviour {
 	}
 
 	void Update(){
-
-		if(mPojulObject == null || mPojulObject.isDestoryed){
+		if(GameInit.gameStatus != 0 || mPojulObject == null || mPojulObject.isDestoryed){
 			return;
 		}
 

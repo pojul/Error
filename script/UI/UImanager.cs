@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class UImanager : MonoBehaviour {
 
@@ -66,9 +67,9 @@ public class UImanager : MonoBehaviour {
 	private float lastFireTime = 0;
 	private bool isFireDown = false;
 	private bool isSelectMode = false;
-	public static bool isCamreaMoveTo = false;
-	public static bool isCamreaHeightMove = false;
-	public static Vector3 currentCamreaMoveTo = new Vector3(0, 12000, -60000);
+	public static bool isCamreaMoveTo;
+	public static bool isCamreaHeightMove;
+	public static Vector3 currentCamreaMoveTo;
 	private float lastCamreaMoveToTime = 0;
 	private Vector2 touch1;
 	private Vector2 touch2;
@@ -82,9 +83,9 @@ public class UImanager : MonoBehaviour {
 	private float frontCameraY = 12000;
 	private Transform selectedTra;
 	private float scrollPos = 0.0f;
-	public static bool isOnLeave = false;
+	public static bool isOnLeave;
 	private float onLeaveHeight = 12000;
-	public static float fireInterval = 2;
+	public static float fireInterval;
 
 	private bool showShopWin = false;
 	public string[] armNames = new string[9];
@@ -185,15 +186,15 @@ public class UImanager : MonoBehaviour {
 	public bool showAttackWin = false;
 	private float unAttackScrollPos = 0.0f;
 	private float attackScrollPos = 0.0f;
-	public static List<Transform> unattacks_0 = new List<Transform> ();
+	public static List<Transform> unattacks_0;
 	private List<PojulObject> unattackSrcs_0 = new List<PojulObject> ();
-	public static List<Transform> attacks_0 = new List<Transform> ();
+	public static List<Transform> attacks_0;
 	private List<PojulObject> attackSrcs_0 = new List<PojulObject> ();
 	private List<GameObject> unAttackTexts = new List<GameObject> ();
 	private List<GameObject> attackTexts = new List<GameObject> ();
 
-	public static List<Transform> unattacks_1 = new List<Transform> ();
-	public static List<Transform> attacks_1 = new List<Transform> ();
+	public static List<Transform> unattacks_1;
+	public static List<Transform> attacks_1;
 
 	private Transform attackSelected;
 	private Image attackSelectedBg;
@@ -201,12 +202,12 @@ public class UImanager : MonoBehaviour {
 	private Image unAttackSelectedBg;
 	private Color textSelectedColor = new Color(208/255f, 230/255f, 240/255f, 90/255f);
 	private Color textUnSelectedColor = new Color(33/255f, 140/255f, 189/255f, 0/255f);
-	public static int massId_0 = 0;
-	public static int attackAreaId_0 = 0;
-	public static int attackBehavorId_0 = 1;
-	public static int massId_1 = 0;
-	public static int attackAreaId_1 = 1;
-	public static int attackBehavorId_1 = 1;
+	public static int massId_0;
+	public static int attackAreaId_0;
+	public static int attackBehavorId_0;
+	public static int massId_1;
+	public static int attackAreaId_1;
+	public static int attackBehavorId_1;
 
 	public Sprite attackAdd1;
 	public Sprite attackAdd2;
@@ -239,6 +240,7 @@ public class UImanager : MonoBehaviour {
 	public Sprite magnifier5x2;
 	public Sprite magnifier10x1;
 	public Sprite magnifier10x2;
+	private bool showGameOver = false;
 
 	private int magnifierTimes = 1; //1: 1x; 5: 5x; 10: 10x
 
@@ -255,12 +257,44 @@ public class UImanager : MonoBehaviour {
 	public GameObject waringSoreceObj;
 	private AudioSource uiClickSorece;
 	private AudioSource waringSorece;
+	public Transform homePao_0;
+	public Transform homePao_1;
+
+	public Image gameOver;
+	public Image gameOverBg;
+	public Image tryAgain;
+	public Image mainMenu;
+	public Image exit;
+	public Text gameOverNote;
+
+	public Sprite tryAgain1;
+	public Sprite tryAgain2;
+	public Sprite mainMenu1;
+	public Sprite mainMenu2;
+	public Sprite exit1;
+	public Sprite exit2;
 
 	//public RawImage  100;
 	void Start () {
+		isCamreaMoveTo = false;
+		isCamreaHeightMove = false;
+		currentCamreaMoveTo = new Vector3(0, 12000, -60000);
+		isOnLeave = false;
+		fireInterval = 2;
+		unattacks_0 = new List<Transform> ();
+		attacks_0 = new List<Transform> ();
+		unattacks_1 = new List<Transform> ();
+		attacks_1 = new List<Transform> ();
+		massId_0 = 0;
+		attackAreaId_0 = 0;
+		attackBehavorId_0 = 1;
+		massId_1 = 0;
+		attackAreaId_1 = 1;
+		attackBehavorId_1 = 1;
+
 		fireAim = fireAimPre;
 		a10AimSpeed = 10f;
-		missile3MaxSpeed = 1.1f;
+		missile3MaxSpeed = 1.0f;
 		moreScale = 0.040f;
 		uiClickSorece = uiClickSoreceObj.GetComponent<AudioSource> ();
 		waringSorece = waringSoreceObj.GetComponent<AudioSource> ();
@@ -385,11 +419,52 @@ public class UImanager : MonoBehaviour {
 		initArmShop();
 		initArmInfo();
 		initAttack();
+		initGameOver();
 		InvokeRepeating("updateThubmnail", 0.5f, 0.5f);
 
 		InvokeRepeating("updateMissileAim", 0.2f, 0.2f);
 		InvokeRepeating("clearNullThubmnail", 2f, 2f);
 	}                
+
+	void initGameOver(){
+		gameOver.rectTransform.sizeDelta = new Vector2 (Screen.width, Screen.height);
+		gameOver.rectTransform.position = new Vector3 (
+			Screen.width * 0.5f, 
+			Screen.height * 0.5f, 
+			gameOver.rectTransform.position.z);
+
+		gameOverBg.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.63f, Screen.height * 0.8f);
+		gameOverBg.rectTransform.position = new Vector3 (
+			gameOver.rectTransform.position.x, 
+			gameOver.rectTransform.position.y, 
+			gameOverBg.rectTransform.position.z);
+
+		mainMenu.rectTransform.sizeDelta = new Vector2 (gameOverBg.rectTransform.sizeDelta.x * 0.5f, gameOverBg.rectTransform.sizeDelta.x * 0.21f);
+		mainMenu.rectTransform.position = new Vector3 (
+			gameOverBg.rectTransform.position.x, 
+			gameOverBg.rectTransform.position.y - gameOverBg.rectTransform.sizeDelta.x * 0.08f, 
+			mainMenu.rectTransform.position.z);
+
+		tryAgain.rectTransform.sizeDelta = new Vector2 (mainMenu.rectTransform.sizeDelta.x, mainMenu.rectTransform.sizeDelta.y);
+		tryAgain.rectTransform.position = new Vector3 (
+			mainMenu.rectTransform.position.x, 
+			(mainMenu.rectTransform.position.y + mainMenu.rectTransform.sizeDelta.y * 0.85f), 
+			tryAgain.rectTransform.position.z);
+
+		exit.rectTransform.sizeDelta = new Vector2 (mainMenu.rectTransform.sizeDelta.x, mainMenu.rectTransform.sizeDelta.y);
+		exit.rectTransform.position = new Vector3 (
+			mainMenu.rectTransform.position.x, 
+			(mainMenu.rectTransform.position.y - mainMenu.rectTransform.sizeDelta.y * 0.85f), 
+			exit.rectTransform.position.z);
+
+		gameOverNote.rectTransform.sizeDelta = new Vector2 (gameOverBg.rectTransform.sizeDelta.x * 0.6f, gameOverBg.rectTransform.sizeDelta.x * 0.3f);
+		gameOverNote.rectTransform.position = new Vector3 (
+			gameOverBg.rectTransform.position.x, 
+			gameOverBg.rectTransform.position.y + gameOverBg.rectTransform.sizeDelta.x * 0.38f, 
+			gameOverNote.rectTransform.position.z);
+		gameOverNote.fontSize = (int)(textSize * 1.2f);
+		gameOver.rectTransform.localScale = new Vector3 (0, 0, 0);
+	}
 
 	void initArmShop(){
 		armShopPanel.rectTransform.sizeDelta = new Vector2 (Screen.height * 1.12f, Screen.height * 0.7f);
@@ -518,18 +593,18 @@ public class UImanager : MonoBehaviour {
 			(armInfoContent.rectTransform.position.x - (armInfoContent.rectTransform.sizeDelta.x - patrolAreaValueRect.sizeDelta.x)*0.5f + Screen.height*0.262f), 
 			(patrolArea.rectTransform.position.y), 
 			patrolAreaValueRect.position.z);
-		patrolAreaValue.transform.FindChild ("Label").GetComponent<Text>().fontSize = textSize1;
-		patrolAreaValue.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
-		patrolAreaValue.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((patrolAreaValueRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
-		RectTransform patrolAreaValueItemRect = patrolAreaValue.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		patrolAreaValue.transform.Find ("Label").GetComponent<Text>().fontSize = textSize1;
+		patrolAreaValue.transform.Find ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		patrolAreaValue.transform.Find ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((patrolAreaValueRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		RectTransform patrolAreaValueItemRect = patrolAreaValue.transform.Find ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
 		patrolAreaValueItemRect.sizeDelta = new Vector2 (patrolAreaValueItemRect.sizeDelta.x, textSize1*2f);
-		RectTransform patrolAreaValueItemRect1 = patrolAreaValue.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		RectTransform patrolAreaValueItemRect1 = patrolAreaValue.transform.Find ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
 		patrolAreaValueItemRect1.sizeDelta = new Vector2 (textSize1*1.6f, textSize1*1.6f);//
 		patrolAreaValueItemRect1.position = new Vector3 ((patrolAreaValueRect.position.x - (patrolAreaValueRect.sizeDelta.x - textSize1*1.6f)*0.5f), 
 			patrolAreaValueItemRect1.position.y,patrolAreaValueItemRect1.position.z);
-		RectTransform patrolAreaValueItemRect2 = patrolAreaValue.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		RectTransform patrolAreaValueItemRect2 = patrolAreaValue.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
 		patrolAreaValueItemRect2.localPosition = new Vector3 (textSize1*0.8f,patrolAreaValueItemRect2.localPosition.y,patrolAreaValueItemRect2.localPosition.z);
-		patrolAreaValue.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+		patrolAreaValue.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
 			.fontSize = textSize1;
 
 
@@ -540,8 +615,8 @@ public class UImanager : MonoBehaviour {
 			(armInfoContent.rectTransform.position.x + (armInfoContent.rectTransform.sizeDelta.x - attackArmy.rectTransform.sizeDelta.x)*0.5f + Screen.height*0.12f), 
 			(attackArmy.rectTransform.position.y - attackArmyValueRect.sizeDelta.x*0.5f), 
 			attackArmyValueRect.position.z);
-		attackArmyValue.transform.FindChild ("Background").GetComponent<RectTransform> ().sizeDelta = new Vector2(attackArmyValueRect.sizeDelta.x*0.7f, attackArmyValueRect.sizeDelta.y*0.7f);
-		attackArmyValue.transform.FindChild("Background/Checkmark").GetComponent<RectTransform> ().sizeDelta = new Vector2(attackArmyValueRect.sizeDelta.x*0.7f, attackArmyValueRect.sizeDelta.y*0.7f);
+		attackArmyValue.transform.Find ("Background").GetComponent<RectTransform> ().sizeDelta = new Vector2(attackArmyValueRect.sizeDelta.x*0.7f, attackArmyValueRect.sizeDelta.y*0.7f);
+		attackArmyValue.transform.Find("Background/Checkmark").GetComponent<RectTransform> ().sizeDelta = new Vector2(attackArmyValueRect.sizeDelta.x*0.7f, attackArmyValueRect.sizeDelta.y*0.7f);
 
 		maxMountMissile.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.4f, armInfoContent.rectTransform.sizeDelta.y * 0.25f);
 		maxMountMissile.rectTransform.position = new Vector3 (
@@ -563,19 +638,19 @@ public class UImanager : MonoBehaviour {
 			(armInfoContent.rectTransform.position.x - (armInfoContent.rectTransform.sizeDelta.x - maxMountMissileValueRect.sizeDelta.x)*0.5f + Screen.height*0.298f), 
 			(maxMountMissile.rectTransform.position.y), 
 			maxMountMissileValueRect.position.z);
-		maxMountMissileValue.transform.FindChild ("Label").GetComponent<Text>().fontSize = textSize1;
-		maxMountMissileValue.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
-		maxMountMissileValue.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((maxMountMissileValueRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		maxMountMissileValue.transform.Find ("Label").GetComponent<Text>().fontSize = textSize1;
+		maxMountMissileValue.transform.Find ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		maxMountMissileValue.transform.Find ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((maxMountMissileValueRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
 
-		RectTransform maxMountMissileItemRect = maxMountMissileValue.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		RectTransform maxMountMissileItemRect = maxMountMissileValue.transform.Find ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
 		maxMountMissileItemRect.sizeDelta = new Vector2 (maxMountMissileItemRect.sizeDelta.x, textSize1*2f);
-		RectTransform maxMountMissileItemRect1 = maxMountMissileValue.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		RectTransform maxMountMissileItemRect1 = maxMountMissileValue.transform.Find ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
 		maxMountMissileItemRect1.sizeDelta = new Vector2 (textSize1*1.6f, textSize1*1.6f);//
 		maxMountMissileItemRect1.position = new Vector3 ((maxMountMissileValueRect.position.x - (maxMountMissileValueRect.sizeDelta.x - textSize1*1.6f)*0.5f), 
 			maxMountMissileItemRect1.position.y,maxMountMissileItemRect1.position.z);
-		RectTransform maxMountMissileItemRect2 = maxMountMissileValue.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		RectTransform maxMountMissileItemRect2 = maxMountMissileValue.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
 		maxMountMissileItemRect2.localPosition = new Vector3 (textSize1*0.8f,maxMountMissileItemRect2.localPosition.y,maxMountMissileItemRect2.localPosition.z);
-		maxMountMissileValue.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+		maxMountMissileValue.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
 			.fontSize = textSize1;
 
 
@@ -585,18 +660,18 @@ public class UImanager : MonoBehaviour {
 			(armInfoContent.rectTransform.position.x + (armInfoContent.rectTransform.sizeDelta.x - supplyPriorityValueRect.sizeDelta.x)*0.5f - Screen.height*0.005f), 
 			(supplyPriority.rectTransform.position.y), 
 			supplyPriorityValueRect.position.z);
-		supplyPriorityValue.transform.FindChild ("Label").GetComponent<Text>().fontSize = textSize1;
-		supplyPriorityValue.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
-		supplyPriorityValue.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((supplyPriorityValueRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
-		RectTransform supplyPriorityItemRect = supplyPriorityValue.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		supplyPriorityValue.transform.Find ("Label").GetComponent<Text>().fontSize = textSize1;
+		supplyPriorityValue.transform.Find ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		supplyPriorityValue.transform.Find ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((supplyPriorityValueRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		RectTransform supplyPriorityItemRect = supplyPriorityValue.transform.Find ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
 		supplyPriorityItemRect.sizeDelta = new Vector2 (supplyPriorityItemRect.sizeDelta.x, textSize1*2f);
-		RectTransform supplyPriorityItemRect1 = supplyPriorityValue.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		RectTransform supplyPriorityItemRect1 = supplyPriorityValue.transform.Find ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
 		supplyPriorityItemRect1.sizeDelta = new Vector2 (textSize1*1.6f, textSize1*1.6f);//
 		supplyPriorityItemRect1.position = new Vector3 ((supplyPriorityValueRect.position.x - (supplyPriorityValueRect.sizeDelta.x - textSize1*1.6f)*0.5f), 
 			supplyPriorityItemRect1.position.y,supplyPriorityItemRect1.position.z);
-		RectTransform supplyPriorityItemRect2 = supplyPriorityValue.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		RectTransform supplyPriorityItemRect2 = supplyPriorityValue.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
 		supplyPriorityItemRect2.localPosition = new Vector3 (textSize1*0.8f,supplyPriorityItemRect2.localPosition.y,supplyPriorityItemRect2.localPosition.z);
-		supplyPriorityValue.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+		supplyPriorityValue.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
 			.fontSize = textSize1;
 
 		armInfoArms.rectTransform.sizeDelta = new Vector2 (Screen.height * 0.4f, armInfoContent.rectTransform.sizeDelta.y * 0.125f);
@@ -791,18 +866,18 @@ public class UImanager : MonoBehaviour {
 			(attackContent.rectTransform.position.x + attackContent.rectTransform.sizeDelta.x*0.35f/6), 
 			(attackStatus.rectTransform.position.y), 
 			attackAreaValRect.position.z);
-		attackAreaVal.transform.FindChild ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
-		attackAreaVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
-		attackAreaVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((attackAreaValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
-		RectTransform attackAreaValItemRect = attackAreaVal.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		attackAreaVal.transform.Find ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
+		attackAreaVal.transform.Find ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		attackAreaVal.transform.Find ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((attackAreaValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		RectTransform attackAreaValItemRect = attackAreaVal.transform.Find ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
 		attackAreaValItemRect.sizeDelta = new Vector2 (attackAreaValItemRect.sizeDelta.x, textSize1*2f);
-		RectTransform attackAreaValItemRect1 = attackAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		RectTransform attackAreaValItemRect1 = attackAreaVal.transform.Find ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
 		attackAreaValItemRect1.sizeDelta = new Vector2 (textSize1*1.2f, textSize1*1.2f);//
 		attackAreaValItemRect1.position = new Vector3 ((attackAreaValItemRect1.position.x - (attackAreaValItemRect1.sizeDelta.x - textSize1*1.5f)*0.4f), 
 			attackAreaValItemRect1.position.y,attackAreaValItemRect1.position.z);
-		RectTransform attackAreaValItemRect2 = attackAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		RectTransform attackAreaValItemRect2 = attackAreaVal.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
 		attackAreaValItemRect2.localPosition = new Vector3 (textSize1*0.8f,attackAreaValItemRect2.localPosition.y,attackAreaValItemRect2.localPosition.z);
-		attackAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+		attackAreaVal.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
 			.fontSize = textSize1;
 
 		RectTransform massAreaValRect = massAreaVal.GetComponent<RectTransform> ();
@@ -811,18 +886,18 @@ public class UImanager : MonoBehaviour {
 			(attackContent.rectTransform.position.x - attackContent.rectTransform.sizeDelta.x*1.65f/6), 
 			(attackStatus.rectTransform.position.y), 
 			massAreaValRect.position.z);
-		massAreaVal.transform.FindChild ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
-		massAreaVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
-		massAreaVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((massAreaValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
-		RectTransform massAreaValItemRect = massAreaVal.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		massAreaVal.transform.Find ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
+		massAreaVal.transform.Find ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		massAreaVal.transform.Find ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((massAreaValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		RectTransform massAreaValItemRect = massAreaVal.transform.Find ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
 		massAreaValItemRect.sizeDelta = new Vector2 (massAreaValItemRect.sizeDelta.x, textSize1*2f);
-		RectTransform massAreaValItemRect1 = massAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		RectTransform massAreaValItemRect1 = massAreaVal.transform.Find ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
 		massAreaValItemRect1.sizeDelta = new Vector2 (textSize1*1.2f, textSize1*1.2f);//
 		massAreaValItemRect1.position = new Vector3 ((massAreaValItemRect1.position.x - (massAreaValItemRect1.sizeDelta.x - textSize1*1.5f)*0.4f), 
 			massAreaValItemRect1.position.y,massAreaValItemRect1.position.z);
-		RectTransform massAreaValItemRect2 = massAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		RectTransform massAreaValItemRect2 = massAreaVal.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
 		massAreaValItemRect2.localPosition = new Vector3 (textSize1*0.8f,massAreaValItemRect2.localPosition.y,massAreaValItemRect2.localPosition.z);
-		massAreaVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+		massAreaVal.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
 			.fontSize = textSize1;
 
 
@@ -832,18 +907,18 @@ public class UImanager : MonoBehaviour {
 			(attackContent.rectTransform.position.x + attackContent.rectTransform.sizeDelta.x*2.35f/6), 
 			(attackStatus.rectTransform.position.y), 
 			attackStatusValRect.position.z);
-		attackStatusVal.transform.FindChild ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
-		attackStatusVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
-		attackStatusVal.transform.FindChild ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((attackStatusValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
-		RectTransform attackStatusValItemRect = attackStatusVal.transform.FindChild ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
+		attackStatusVal.transform.Find ("Label").GetComponent<Text>().fontSize = (int)(textSize1*0.8f);
+		attackStatusVal.transform.Find ("Arrow").GetComponent<RectTransform>().sizeDelta = new Vector2 (textSize1*1.8f, textSize1*1.8f);
+		attackStatusVal.transform.Find ("Arrow").GetComponent<RectTransform>().localPosition = new Vector3 ((attackStatusValRect.sizeDelta.x - textSize1*1.8f)*0.5f, 0, 0);
+		RectTransform attackStatusValItemRect = attackStatusVal.transform.Find ("Template/Viewport/Content/Item").GetComponent<RectTransform> ();
 		attackStatusValItemRect.sizeDelta = new Vector2 (attackStatusValItemRect.sizeDelta.x, textSize1*2f);
-		RectTransform attackStatusValItemRect1 = attackStatusVal.transform.FindChild ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
+		RectTransform attackStatusValItemRect1 = attackStatusVal.transform.Find ("Template/Viewport/Content/Item/Item Checkmark").GetComponent<RectTransform> ();
 		attackStatusValItemRect1.sizeDelta = new Vector2 (textSize1*1.2f, textSize1*1.2f);//
 		attackStatusValItemRect1.position = new Vector3 ((attackStatusValItemRect1.position.x - (attackStatusValItemRect1.sizeDelta.x - textSize1*1.5f)*0.4f), 
 			attackStatusValItemRect1.position.y, attackStatusValItemRect1.position.z);
-		RectTransform attackStatusValItemRect2 = attackStatusVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
+		RectTransform attackStatusValItemRect2 = attackStatusVal.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<RectTransform> ();
 		attackStatusValItemRect2.localPosition = new Vector3 (textSize1*0.8f,attackStatusValItemRect2.localPosition.y,attackStatusValItemRect2.localPosition.z);
-		attackStatusVal.transform.FindChild ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
+		attackStatusVal.transform.Find ("Template/Viewport/Content/Item/Item Label").GetComponent<Text> ()
 			.fontSize = textSize1;
 		//attackPanel.GetComponent<RectTransform> ().localScale = new Vector3 (0,0,0);
 
@@ -859,7 +934,9 @@ public class UImanager : MonoBehaviour {
 
 
 	void Update(){
-
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		if(isSelectMode){
 			listenerScreenTap ();
 		}
@@ -1090,7 +1167,7 @@ public class UImanager : MonoBehaviour {
 				patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				patrolAreaValue.enabled = false;
 				attackArmy.color = textDisableColor;
-				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = textDisableColor;
+				attackArmyValue.transform.Find ("Background").GetComponent<Image> ().color = textDisableColor;
 				attackArmyValue.enabled = false;
 				maxMountMissile.color = textDisableColor;
 				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
@@ -1118,7 +1195,7 @@ public class UImanager : MonoBehaviour {
 						patrolAreaValue.value = ((CarType3)mPojulObject).mPatrolArea.areaId - 1;
 					}
 					attackArmy.color = textEnableColor;
-					attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
+					attackArmyValue.transform.Find ("Background").GetComponent<Image> ().color = Color.white;
 					attackArmyValue.enabled = true;
 					armInfoArms.text = "";
 				} else {
@@ -1126,7 +1203,7 @@ public class UImanager : MonoBehaviour {
 					patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 					patrolAreaValue.enabled = false;
 					attackArmy.color = textDisableColor;
-					attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = textDisableColor;
+					attackArmyValue.transform.Find ("Background").GetComponent<Image> ().color = textDisableColor;
 					attackArmyValue.enabled = false;
 					armInfoArms.text = "Transporting";
 				}
@@ -1148,7 +1225,7 @@ public class UImanager : MonoBehaviour {
 					patrolAreaValue.value = ((CarType5)mPojulObject).mPatrolArea.areaId - 1;
 				}
 				attackArmy.color = textEnableColor;
-				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
+				attackArmyValue.transform.Find ("Background").GetComponent<Image> ().color = Color.white;
 				attackArmyValue.enabled = true;
 				attackArmyValue.isOn = mPojulObject.isAttackArmy;
 				maxMountMissile.color = textEnableColor;
@@ -1173,7 +1250,7 @@ public class UImanager : MonoBehaviour {
 					patrolAreaValue.value = ((A10aPlan)mPojulObject).mPatrolArea.areaId - 1;
 				}
 				attackArmy.color = textEnableColor;
-				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
+				attackArmyValue.transform.Find ("Background").GetComponent<Image> ().color = Color.white;
 				attackArmyValue.enabled = true;
 				attackArmyValue.isOn = mPojulObject.isAttackArmy;
 				maxMountMissile.color = textEnableColor;
@@ -1198,7 +1275,7 @@ public class UImanager : MonoBehaviour {
 				patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				patrolAreaValue.enabled = false;
 				attackArmy.color = textDisableColor;
-				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = textDisableColor;
+				attackArmyValue.transform.Find ("Background").GetComponent<Image> ().color = textDisableColor;
 				attackArmyValue.enabled = false;
 				maxMountMissile.color = textDisableColor;
 				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
@@ -1220,7 +1297,7 @@ public class UImanager : MonoBehaviour {
 				patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				patrolAreaValue.enabled = false;
 				attackArmy.color = textDisableColor;
-				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = textDisableColor;
+				attackArmyValue.transform.Find ("Background").GetComponent<Image> ().color = textDisableColor;
 				attackArmyValue.enabled = false;
 				maxMountMissile.color = textDisableColor;
 				maxMountMissileValue.gameObject.GetComponent<Image> ().color = textDisableColor;
@@ -1242,7 +1319,7 @@ public class UImanager : MonoBehaviour {
 				patrolAreaValue.gameObject.GetComponent<Image> ().color = textDisableColor;
 				patrolAreaValue.enabled = false;
 				attackArmy.color = textEnableColor;
-				attackArmyValue.transform.FindChild ("Background").GetComponent<Image> ().color = Color.white;
+				attackArmyValue.transform.Find ("Background").GetComponent<Image> ().color = Color.white;
 				attackArmyValue.enabled = true;
 				attackArmyValue.isOn = mPojulObject.isAttackArmy;
 				maxMountMissile.color = textDisableColor;
@@ -1368,6 +1445,8 @@ public class UImanager : MonoBehaviour {
 			}
 		}
 
+		isHomePaoDestoried ();
+
 	}
 
 	void updatyXZ(Transform key, Image img){
@@ -1450,6 +1529,29 @@ public class UImanager : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	void isHomePaoDestoried(){
+		if(showGameOver){
+			return;
+		}
+		if(homePao_0 == null || !homePao_0.GetComponent<PojulObject>() || homePao_0.GetComponent<PojulObject>().isDestoryed){
+			gameOverNote.text = "FAILURE";
+			showGameOverPop (2);
+			return;
+		}
+		if(homePao_1 == null || !homePao_1.GetComponent<PojulObject>() || homePao_1.GetComponent<PojulObject>().isDestoryed){
+			gameOverNote.text = "VICTORY";
+			showGameOverPop (1);
+			return;
+		}
+	}
+
+	void showGameOverPop(int status){
+		gameOver.rectTransform.localScale = new Vector3 (1,1,1);
+		showGameOver = true;
+		playUiClick (uiClickSorece, 1.0f);
+		GameInit.gameStatus = status;
 	}
 
 	public void AcceleratePointerUp(BaseEventData data){
@@ -2002,15 +2104,20 @@ public class UImanager : MonoBehaviour {
 	}
 
 	void updateUiData(){
+		if(homePao_0 != null){
+			healthProgressVal.fillAmount = homePao_0.GetComponent<PojulObject>().health * 0.01f;
+		}
 		if(planMove.player == null){
 			uidataHeight.sprite = uidataHeight1;
 			uidataMissile.sprite = uidataMissile1;
+			playWaringSound (waringSorece, false);
 			return;
 		}
 		PojulObject mPojulObject = planMove.player.GetComponent<PojulObject> ();
 		if(mPojulObject == null || mPojulObject.isDestoryed){
 			uidataHeight.sprite = uidataHeight1;
 			uidataMissile.sprite = uidataMissile1;
+			playWaringSound (waringSorece, false);
 			return;
 		}
 		bool needWaring = false;
@@ -2035,7 +2142,7 @@ public class UImanager : MonoBehaviour {
 			uidataMissile.sprite = uidataMissile1;
 			uidataMissileVal.text = "    missiled: 0.0";
 		}
-		healthProgressVal.fillAmount = mPojulObject.health * 0.01f;
+
 
 		if (planMove.player.GetComponent<Rigidbody> ()) {
 			int velocity = (int)(planMove.player.GetComponent<Rigidbody> ().velocity.magnitude * 0.1f);
@@ -2566,7 +2673,7 @@ public class UImanager : MonoBehaviour {
 			mSorece.Play ();
 		}
 	}
-
+		
 	void playWaringSound(AudioSource mSorece, bool play){
 		if(mSorece == null){
 			return;
@@ -2576,6 +2683,45 @@ public class UImanager : MonoBehaviour {
 		} else if(!play){
 			mSorece.Pause ();
 		}
+	}
+
+	public void OnTryAgainClick(){
+		playUiClick (uiClickSorece, 1.0f);
+		SceneManager.LoadScene ("T4");
+	}
+
+	public void OnTryAgainDown(){
+		tryAgain.sprite = tryAgain2;
+	}
+
+	public void OnTryAgainUp(){
+		tryAgain.sprite = tryAgain1;
+	}
+
+	public void OnMainMenuClick(){
+		playUiClick (uiClickSorece, 1.0f);
+		SceneManager.LoadScene ("MainScene");
+	}
+
+	public void OnMainMenuDown(){
+		mainMenu.sprite = mainMenu2;
+	}
+
+	public void OnMainMenuUp(){
+		mainMenu.sprite = mainMenu1;
+	}
+
+	public void OnExitClick(){
+		playUiClick (uiClickSorece, 1.0f);
+		Application.Quit();
+	}
+
+	public void OnExitDown(){
+		exit.sprite = exit2;
+	}
+
+	public void OnExitUp(){
+		exit.sprite = exit1;
 	}
 
 }

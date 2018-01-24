@@ -46,9 +46,9 @@ public class TankFire : PojulObject {
 
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
-		transform_lod0 = transform.FindChild ("car_type3_lod0");
-		transform_lod1 = transform.FindChild ("car_type3_lod1");
-		transform_lod2 = transform.FindChild ("car_type3_lod2");
+		transform_lod0 = transform.Find ("car_type3_lod0");
+		transform_lod1 = transform.Find ("car_type3_lod1");
+		transform_lod2 = transform.Find ("car_type3_lod2");
 
 		mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
@@ -57,19 +57,19 @@ public class TankFire : PojulObject {
 		mAnimator_lod1.SetBool ("roll", false);
 		mAnimator_lod2.SetBool ("roll", false);
 
-		panTransform_lod0 = transform_lod0.FindChild("pan");
-		panTransform_lod1 = transform_lod1.FindChild("pan");
-		panTransform_lod2 = transform_lod2.FindChild("pan");
+		panTransform_lod0 = transform_lod0.Find("pan");
+		panTransform_lod1 = transform_lod1.Find("pan");
+		panTransform_lod2 = transform_lod2.Find("pan");
 
 		mRenderer_lod0_pan = panTransform_lod0.GetComponent<Renderer>();
 		mRenderer_lod1_pan = panTransform_lod1.GetComponent<Renderer>();
 		mRenderer_lod2_pan = panTransform_lod2.GetComponent<Renderer>();
 
-		paoTransform_lod0 = panTransform_lod0.FindChild ("pao");
-		paoTransform_lod1 = panTransform_lod1.FindChild ("pao");
-		paoTransform_lod2 = panTransform_lod2.FindChild ("pao");
+		paoTransform_lod0 = panTransform_lod0.Find ("pao");
+		paoTransform_lod1 = panTransform_lod1.Find ("pao");
+		paoTransform_lod2 = panTransform_lod2.Find ("pao");
 
-		fireTransform = transform.FindChild ("car_type3_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
+		fireTransform = transform.Find ("car_type3_lod0").Find ("pan").Find("pao").Find("fire");
 
 		//test
 		target = GameObject.FindGameObjectWithTag("player");

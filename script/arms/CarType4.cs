@@ -60,30 +60,30 @@ public class CarType4 : PojulObject {
 
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
-		transform_lod0 = transform.FindChild ("car_type4_lod0");
-		transform_lod1 = transform.FindChild ("car_type4_lod1");
-		transform_lod2 = transform.FindChild ("car_type4_lod2");
+		transform_lod0 = transform.Find ("car_type4_lod0");
+		transform_lod1 = transform.Find ("car_type4_lod1");
+		transform_lod2 = transform.Find ("car_type4_lod2");
 
-		fireTransform = transform.FindChild ("car_type4_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
-		mainTransform_lod0 = transform_lod0.FindChild("main");
-		mainTransform_lod1 = transform_lod1.FindChild("main");
-		mainTransform_lod2 = transform_lod2.FindChild("main");
+		fireTransform = transform.Find ("car_type4_lod0").Find ("pan").Find("pao").Find("fire");
+		mainTransform_lod0 = transform_lod0.Find("main");
+		mainTransform_lod1 = transform_lod1.Find("main");
+		mainTransform_lod2 = transform_lod2.Find("main");
 
 		mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
 		mAnimator_lod2 = (Animator)transform_lod2.GetComponent<Animator> ();
 
-		panTransform_lod0 = transform_lod0.FindChild("pan");
-		panTransform_lod1 = transform_lod1.FindChild("pan");
-		panTransform_lod2 = transform_lod2.FindChild("pan");
+		panTransform_lod0 = transform_lod0.Find("pan");
+		panTransform_lod1 = transform_lod1.Find("pan");
+		panTransform_lod2 = transform_lod2.Find("pan");
 
 		mRenderer_lod0_pan = panTransform_lod0.GetComponent<Renderer>();
 		mRenderer_lod1_pan = panTransform_lod1.GetComponent<Renderer>();
 		mRenderer_lod2_pan = panTransform_lod2.GetComponent<Renderer>();
 
-		paoTransform_lod0 = panTransform_lod0.FindChild ("pao");
-		paoTransform_lod1 = panTransform_lod1.FindChild ("pao");
-		paoTransform_lod2 = panTransform_lod2.FindChild ("pao");
+		paoTransform_lod0 = panTransform_lod0.Find ("pao");
+		paoTransform_lod1 = panTransform_lod1.Find ("pao");
+		paoTransform_lod2 = panTransform_lod2.Find ("pao");
 
 		string[] strs = transform.tag.Split ('_');
 		playerId = strs [0];
@@ -114,7 +114,7 @@ public class CarType4 : PojulObject {
 		//test
 		GameObject targetObj = null;//GameObject.FindGameObjectWithTag("player");
 		if(targetObj != null){
-			target = targetObj.transform.FindChild ("aim");
+			target = targetObj.transform.Find ("aim");
 		}
 		run ();
 
@@ -326,9 +326,9 @@ public class CarType4 : PojulObject {
 		}
 
 		for(int i =0;i <= 5; i++){
-			Transform lunzi_lod0 = transform_lod0.FindChild (("lunzi" + (i + 1).ToString()));
-			Transform lunzi_lod1 = transform_lod1.FindChild (("lunzi" + (i + 1).ToString()));
-			Transform lunzi_lod2 = transform_lod2.FindChild (("lunzi" + (i + 1).ToString()));
+			Transform lunzi_lod0 = transform_lod0.Find (("lunzi" + (i + 1).ToString()));
+			Transform lunzi_lod1 = transform_lod1.Find (("lunzi" + (i + 1).ToString()));
+			Transform lunzi_lod2 = transform_lod2.Find (("lunzi" + (i + 1).ToString()));
 			lunzi_lod0.parent = null;
 			lunzi_lod1.parent = lunzi_lod0;
 			lunzi_lod2.parent = lunzi_lod0;
@@ -352,7 +352,7 @@ public class CarType4 : PojulObject {
 		if(nav != null){
 			nav.enabled = false;	
 		}
-		Transform aim = transform.FindChild ("aim");
+		Transform aim = transform.Find ("aim");
 		stop ();
 		if(aim != null){
 			Destroy (aim.gameObject);
@@ -430,7 +430,7 @@ public class CarType4 : PojulObject {
 					//Debug.Log ("gqb------>findInvade: " + tag);
 					if( target == null && ("car2".Equals(tempType) || "car3".Equals(tempType)
 						|| "car4".Equals(tempType) || "car5".Equals(tempType) || "car6".Equals(tempType)) ){
-						target = tempTransform.FindChild("aim");
+						target = tempTransform.Find("aim");
 					}
 					Util.AddNearEnemys (tempTransform, playerId);
 				}
@@ -470,8 +470,8 @@ public class CarType4 : PojulObject {
 					dangeroustDis = tempDis;
 				}
 			}
-			if(dangeroustEnemy != null && dangeroustEnemy.FindChild("aim") != null){
-				target = dangeroustEnemy.FindChild("aim");
+			if(dangeroustEnemy != null && dangeroustEnemy.Find("aim") != null){
+				target = dangeroustEnemy.Find("aim");
 			}
 		}
 	}

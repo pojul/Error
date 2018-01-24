@@ -15,6 +15,9 @@ public class Bullet : PojulObject {
 	
 	// Update is called once per frame
 	void Update () {
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		if(isHit){
 			return;
 		}//collision.contacts[0].point

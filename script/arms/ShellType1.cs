@@ -19,6 +19,9 @@ public class ShellType1 : PojulObject {
 	
 	// Update is called once per frame
 	void Update () {
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		if(isShoot){
 			if(isHit){
 				return;

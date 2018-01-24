@@ -23,8 +23,8 @@ public class PlanControls : MonoBehaviour {
 	private float controlCircle1bX = Screen.width*0.8f/10 + Screen.height*0.625f/10;
 	private float controlCircle1bY = Screen.height*7.425f/10;*/
 	//public GUIStyle controlpoint1style;
-	public static float oldPoint1Rolation = -1.0f;
-	public static float newPoint1Rolation = 0.0f;
+	public static float oldPoint1Rolation;
+	public static float newPoint1Rolation;
 	/*private float centerControlpoint1X = 0.0f;
 	private float centerControlpoint1Y = 0.0f;
 	//private float controlpoint1Size = Screen.height*1.25f/30;
@@ -42,7 +42,7 @@ public class PlanControls : MonoBehaviour {
 	public GUIStyle control2Pointstyle;
 	private float control2PointSize = Screen.height*5.2f/90;
 	private float oldPoint2Rolation = -1.0f;*/
-	public static int newPoint2Rolation = 0;
+	public static int newPoint2Rolation;
 	/*private float centerControlpoint2X = 0.0f;
 	private float centerControlpoint2Y = 0.0f;
 	private float controlpoint2X = 0.0f;
@@ -55,13 +55,13 @@ public class PlanControls : MonoBehaviour {
 	//control3 ： 垂直方向控制
 	public GUIStyle control3Circlestyle;
 	private float control3CircleSize = Screen.height*3.2f/10;//Screen.height*5f/30;
-	public static float control3CircleCenterX = Screen.width*9.4f/10 - Screen.height*1.6f/10;//Screen.width*8.15f/10 - Screen.height*2.5f/30;
+	public static float control3CircleCenterX;//Screen.width*8.15f/10 - Screen.height*2.5f/30;
 	private float control3CircleCenterY = Screen.height*8.15f/10;
-	public static float control3CircleX = Screen.width*9.4f/10 - Screen.height*3.2f/10;
+	public static float control3CircleX;
 	private float control3CircleY = Screen.height*6.55f/10;
 	
 	private float oldPoint3Rolation = -1.0f;
-	public static float newPoint3Rolation = 0.0f;
+	public static float newPoint3Rolation;
 	/*public GUIStyle control3Pointstyle;
 	private float control3PointSize = Screen.height*0.635f/10;
 	private float centerControlpoint3X = 0.0f;
@@ -79,6 +79,13 @@ public class PlanControls : MonoBehaviour {
 	
 	// Use this for initialization
 	void Start () {
+
+		oldPoint1Rolation = -1.0f;
+		newPoint1Rolation = 0.0f;newPoint2Rolation = 0;
+		control3CircleCenterX = Screen.width*9.4f/10 - Screen.height*1.6f/10;//Screen.width*8.15f/10 - Screen.height*2.5f/30;
+		control3CircleX = Screen.width*9.4f/10 - Screen.height*3.2f/10;
+		newPoint3Rolation = 0.0f;
+
 		Input.multiTouchEnabled = true;
 		controlCircle1astyle = controlNormalStyle;
 		control3Circlestyle = controlNormalStyle;
@@ -93,7 +100,9 @@ public class PlanControls : MonoBehaviour {
 	}
 	
 	void OnGUI(){
-
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		listenIput ();
 		
 		//绘制水平方向控制盘

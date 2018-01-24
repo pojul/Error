@@ -70,29 +70,29 @@ public class TransportType1 : PojulObject {
 	void Start () {
 		//transform.name = "Transport1";
 
-		transform_lod0 = transform.FindChild ("transport_type_lod0");
-		transform_lod1 = transform.FindChild ("transport_type_lod1");
-		transform_lod2 = transform.FindChild ("transport_type_lod2");
+		transform_lod0 = transform.Find ("transport_type_lod0");
+		transform_lod1 = transform.Find ("transport_type_lod1");
+		transform_lod2 = transform.Find ("transport_type_lod2");
 
 		//mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		//mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
 		//mAnimator_lod2 = (Animator)transform_lod2.GetComponent<Animator> ();
 
-		mainTransform_lod0 = transform_lod0.FindChild ("main");
-		force1_lod0 = mainTransform_lod0.FindChild ("force1");
-		force2_lod0 = mainTransform_lod0.FindChild ("force2");
+		mainTransform_lod0 = transform_lod0.Find ("main");
+		force1_lod0 = mainTransform_lod0.Find ("force1");
+		force2_lod0 = mainTransform_lod0.Find ("force2");
 		mAudioSource = (AudioSource)mainTransform_lod0.GetComponent<AudioSource> ();
 
-		doorTransform_lod0 = transform_lod0.FindChild ("door");
-		doorTransform_lod1 = transform_lod1.FindChild ("door");
-		doorTransform_lod2 = transform_lod2.FindChild ("door");
+		doorTransform_lod0 = transform_lod0.Find ("door");
+		doorTransform_lod1 = transform_lod1.Find ("door");
+		doorTransform_lod2 = transform_lod2.Find ("door");
 
-		propeller1Transform_lod0 = transform_lod0.FindChild ("propeller1");
-		propeller2Transform_lod0 = transform_lod0.FindChild ("propeller2");
-		propeller1Transform_lod1 = transform_lod1.FindChild ("propeller1");
-		propeller2Transform_lod1 = transform_lod1.FindChild ("propeller2");
-		propeller1Transform_lod2 = transform_lod2.FindChild ("propeller1");
-		propeller2Transform_lod2 = transform_lod2.FindChild ("propeller2");
+		propeller1Transform_lod0 = transform_lod0.Find ("propeller1");
+		propeller2Transform_lod0 = transform_lod0.Find ("propeller2");
+		propeller1Transform_lod1 = transform_lod1.Find ("propeller1");
+		propeller2Transform_lod1 = transform_lod1.Find ("propeller2");
+		propeller1Transform_lod2 = transform_lod2.Find ("propeller1");
+		propeller2Transform_lod2 = transform_lod2.Find ("propeller2");
 
 
 
@@ -144,6 +144,9 @@ public class TransportType1 : PojulObject {
 	
 	// Update is called once per frame
 	void Update () {
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		health = sliderHealth.value;
 		if(isMoving){
 			listenerRollAni ();

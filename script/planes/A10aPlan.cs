@@ -80,10 +80,10 @@ public class A10aPlan : PojulObject {
 		transform_lod2 = transform.GetChild (2);
 		airType = transform_lod0.name.Split ('_') [0];
 
-		missilePoses.Add (transform.FindChild ("missilePos1"));
-		missilePoses.Add (transform.FindChild ("missilePos2"));
-		missilePoses.Add (transform.FindChild ("missilePos3"));
-		missilePoses.Add (transform.FindChild ("missilePos4"));
+		missilePoses.Add (transform.Find ("missilePos1"));
+		missilePoses.Add (transform.Find ("missilePos2"));
+		missilePoses.Add (transform.Find ("missilePos3"));
+		missilePoses.Add (transform.Find ("missilePos4"));
 
 		missiles.Add (missilePoses[0], null);
 		missiles.Add (missilePoses[1], null);
@@ -91,18 +91,18 @@ public class A10aPlan : PojulObject {
 		missiles.Add (missilePoses[3], null);
 
 		if("A10a".Equals(airType)){
-			fires[0] = transform.FindChild ("fire1");
-			fires[1] = transform.FindChild ("fire2");
-			fires[2] = transform.FindChild ("fire3");
-			fires[3] = transform.FindChild ("fire4");
-			fires[4] = transform.FindChild ("fire5");
-			fires[5] = transform.FindChild ("fire6");
-			fires[6] = transform.FindChild ("fire7");
-			fires[7] = transform.FindChild ("fire8");
+			fires[0] = transform.Find ("fire1");
+			fires[1] = transform.Find ("fire2");
+			fires[2] = transform.Find ("fire3");
+			fires[3] = transform.Find ("fire4");
+			fires[4] = transform.Find ("fire5");
+			fires[5] = transform.Find ("fire6");
+			fires[6] = transform.Find ("fire7");
+			fires[7] = transform.Find ("fire8");
 		}
 
-		airRay1Pos = transform.FindChild ("airRay1Pos");
-		airRay2Pos = transform.FindChild ("airRay2Pos");
+		airRay1Pos = transform.Find ("airRay1Pos");
+		airRay2Pos = transform.Find ("airRay2Pos");
 
 		addAirRay ();
 
@@ -177,6 +177,12 @@ public class A10aPlan : PojulObject {
 	}
 		
 	void Update () {
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		health = sliderHealth.value;
 		if(isDestoryed){
 			return;
@@ -282,7 +288,7 @@ public class A10aPlan : PojulObject {
 			planMove.rolSpeed = 12.0f;
 			if ("A10a".Equals (airType)) {
 				if (fires [0] == null) {
-					fires [0] = transform.FindChild ("fire1");
+					fires [0] = transform.Find ("fire1");
 				}
 				WorldUIManager.fireAimTra = fires [0];
 			} else {
@@ -675,8 +681,8 @@ public class A10aPlan : PojulObject {
 				}
 			}
 		}
-		if(dangeroustEnemy != null && dangeroustEnemy.FindChild ("aim") != null){
-			target = dangeroustEnemy.FindChild ("aim");
+		if(dangeroustEnemy != null && dangeroustEnemy.Find ("aim") != null){
+			target = dangeroustEnemy.Find ("aim");
 		}
 
 		if (target == null) {
@@ -722,8 +728,8 @@ public class A10aPlan : PojulObject {
 		if(playerId.Equals("1") && planMove.player != null){
 			PojulObject mPojulObject = planMove.player.GetComponent<PojulObject> ();
 			if(mPojulObject != null && !mPojulObject.isDestoryed && mPojulObject.type.Equals("a10") && Util.isOnNavArea2(planMove.player.position)){
-				if(planMove.player.FindChild("aim") != null){
-					target = planMove.player.FindChild("aim");
+				if(planMove.player.Find("aim") != null){
+					target = planMove.player.Find("aim");
 					return;
 				}
 			}
@@ -750,8 +756,8 @@ public class A10aPlan : PojulObject {
 				dangeroustDis = tempDis;
 			}
 		}
-		if(dangeroustEnemy != null && dangeroustEnemy.FindChild("aim") != null){
-			target = dangeroustEnemy.FindChild("aim");
+		if(dangeroustEnemy != null && dangeroustEnemy.Find("aim") != null){
+			target = dangeroustEnemy.Find("aim");
 		}
 	}
 
@@ -766,10 +772,10 @@ public class A10aPlan : PojulObject {
 		}
 		if(MissileAimedTra != null && isAvoidMissile){
 			if (behavior == 1) {
-				startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.95f);
+				startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 1.1f);
 			} else if (behavior == 3) {
 				if(currentMountMissle <= 0){
-					startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 0.95f);
+					startNav (mPatrolArea.getRandomPoint (), maxMoveSpeed * 1.1f);
 				}else{
 					int attackId;
 					if ("0".Equals (playerId)) {
@@ -895,7 +901,7 @@ public class A10aPlan : PojulObject {
 			transform_lod0.position, Quaternion.Euler(0, 0, 0)) as GameObject;
 		inflameObj.transform.parent = transform_lod0;
 
-		Transform aim = transform.FindChild ("aim");
+		Transform aim = transform.Find ("aim");
 		if(aim != null){
 			Destroy (aim.gameObject);
 		}

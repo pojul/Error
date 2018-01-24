@@ -80,11 +80,11 @@ public class CarType3 : PojulObject {
 
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
-		transform_lod0 = transform.FindChild ("car_type3_lod0");
-		transform_lod1 = transform.FindChild ("car_type3_lod1");
-		transform_lod2 = transform.FindChild ("car_type3_lod2");
-		fireTransform = transform.FindChild ("car_type3_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
-		aimTransform = transform.FindChild ("aim");
+		transform_lod0 = transform.Find ("car_type3_lod0");
+		transform_lod1 = transform.Find ("car_type3_lod1");
+		transform_lod2 = transform.Find ("car_type3_lod2");
+		fireTransform = transform.Find ("car_type3_lod0").Find ("pan").Find("pao").Find("fire");
+		aimTransform = transform.Find ("aim");
 
 		mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
@@ -93,21 +93,21 @@ public class CarType3 : PojulObject {
 		mAnimator_lod1.SetBool ("roll", false);
 		mAnimator_lod2.SetBool ("roll", false);
 
-		panTransform_lod0 = transform_lod0.FindChild("pan");
-		panTransform_lod1 = transform_lod1.FindChild("pan");
-		panTransform_lod2 = transform_lod2.FindChild("pan");
+		panTransform_lod0 = transform_lod0.Find("pan");
+		panTransform_lod1 = transform_lod1.Find("pan");
+		panTransform_lod2 = transform_lod2.Find("pan");
 
-		mainTransform_lod0 = transform_lod0.FindChild("main");
-		mainTransform_lod1 = transform_lod1.FindChild("main");
-		mainTransform_lod2 = transform_lod2.FindChild("main");
+		mainTransform_lod0 = transform_lod0.Find("main");
+		mainTransform_lod1 = transform_lod1.Find("main");
+		mainTransform_lod2 = transform_lod2.Find("main");
 
 		mRenderer_lod0_main = mainTransform_lod0.GetComponent<Renderer>();
 		mRenderer_lod1_main = mainTransform_lod1.GetComponent<Renderer>();
 		mRenderer_lod2_main = mainTransform_lod2.GetComponent<Renderer>();
 
-		paoTransform_lod0 = panTransform_lod0.FindChild ("pao");
-		paoTransform_lod1 = panTransform_lod1.FindChild ("pao");
-		paoTransform_lod2 = panTransform_lod2.FindChild ("pao");
+		paoTransform_lod0 = panTransform_lod0.Find ("pao");
+		paoTransform_lod1 = panTransform_lod1.Find ("pao");
+		paoTransform_lod2 = panTransform_lod2.Find ("pao");
 		if (lunzis [0] == null) {
 			getLunzis ();
 		}
@@ -150,7 +150,7 @@ public class CarType3 : PojulObject {
 		//test
 		GameObject targetObj = null;//GameObject.FindGameObjectWithTag("player");
 		if(targetObj != null){
-			target = targetObj.transform.FindChild ("aim");
+			target = targetObj.transform.Find ("aim");
 		}
 		run ();
 
@@ -164,6 +164,9 @@ public class CarType3 : PojulObject {
 
 	// Update is called once per frame
 	void Update () {
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		health = sliderHealth.value;
 		if(isDestoryed){
 			return;
@@ -191,10 +194,10 @@ public class CarType3 : PojulObject {
 
 	void getLunzis(){
 		if(transform_lod0 == null){
-			transform_lod0 = transform.FindChild ("car_type3_lod0");
+			transform_lod0 = transform.Find ("car_type3_lod0");
 		}
 		for (int i = 0; i <= 7; i++) {
-			lunzis[i] = transform_lod0.FindChild (("lunzi00" + (i + 1).ToString ()));
+			lunzis[i] = transform_lod0.Find (("lunzi00" + (i + 1).ToString ()));
 		}
 	}
 
@@ -232,7 +235,7 @@ public class CarType3 : PojulObject {
 			PlanControls.rorateSpeed = 35f;
 			planMove.rolSpeed = 7.0f;
 			if(fireTransform == null){
-				fireTransform = transform.FindChild ("car_type3_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
+				fireTransform = transform.Find ("car_type3_lod0").Find ("pan").Find("pao").Find("fire");
 			}
 			WorldUIManager.fireAimTra = fireTransform;
 			WorldUIManager.fireAimDistance = 12000.0f;
@@ -683,9 +686,9 @@ public class CarType3 : PojulObject {
 		}
 
 		for(int i =0;i <= 7; i++){
-			Transform lunzi_lod0 = transform_lod0.FindChild (("lunzi00" + (i + 1).ToString()));
-			Transform lunzi_lod1 = transform_lod1.FindChild (("lunzi00" + (i + 1).ToString()));
-			Transform lunzi_lod2 = transform_lod2.FindChild (("lunzi00" + (i + 1).ToString()));
+			Transform lunzi_lod0 = transform_lod0.Find (("lunzi00" + (i + 1).ToString()));
+			Transform lunzi_lod1 = transform_lod1.Find (("lunzi00" + (i + 1).ToString()));
+			Transform lunzi_lod2 = transform_lod2.Find (("lunzi00" + (i + 1).ToString()));
 			lunzi_lod0.parent = null;
 			lunzi_lod1.parent = lunzi_lod0;
 			lunzi_lod2.parent = lunzi_lod0;
@@ -710,7 +713,7 @@ public class CarType3 : PojulObject {
 			nav.enabled = false;	
 		}
 		stop ();
-		Transform aim = transform.FindChild ("aim");
+		Transform aim = transform.Find ("aim");
 		if(aim != null){
 			Destroy (aim.gameObject);
 		}
@@ -836,8 +839,8 @@ public class CarType3 : PojulObject {
 			}
 		}
 
-		if(dangeroustEnemy != null && dangeroustEnemy.FindChild ("aim") != null){
-			target = dangeroustEnemy.FindChild ("aim");
+		if(dangeroustEnemy != null && dangeroustEnemy.Find ("aim") != null){
+			target = dangeroustEnemy.Find ("aim");
 		}
 
 		if(target == null){
@@ -878,8 +881,8 @@ public class CarType3 : PojulObject {
 				dangeroustDis = tempDis;
 			}
 		}
-		if(dangeroustEnemy != null && dangeroustEnemy.FindChild("aim") != null){
-			target = dangeroustEnemy.FindChild("aim");
+		if(dangeroustEnemy != null && dangeroustEnemy.Find("aim") != null){
+			target = dangeroustEnemy.Find("aim");
 		}
 	}
 

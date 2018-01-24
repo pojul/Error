@@ -8,7 +8,7 @@ public class WorldUIManager : MonoBehaviour {
 	public Image fireAim;
 	public Image magnifierAim;
 	public static Transform fireAimTra;
-	public static float fireAimDistance = 0.0f;
+	public static float fireAimDistance;
 	public List<Transform> MyPaos = new List<Transform> ();
 	public Transform mainPao;
 
@@ -20,6 +20,8 @@ public class WorldUIManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		fireAimDistance = 0.0f;
+
 		for(int i =0; i< Camera.allCameras.Length; i++){
 			if(Camera.allCameras [i].CompareTag("magnifierCamera")){
 				magnifierCamera = Camera.allCameras [i];
@@ -43,7 +45,9 @@ public class WorldUIManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		//Debug.Log (planMove.player + " :player gqb------>fireAimTra: " +fireAimTra);
-
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		if(planMove.player != null ){
 			PojulObject mPojulObject = planMove.player.GetComponent<PojulObject> ();
 			if(mPojulObject != null && !mPojulObject.isDestoryed && mPojulObject.type.Equals("a10") && mPojulObject.MissileAimedTra != null){

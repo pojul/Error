@@ -13,15 +13,16 @@ public class MissileType1 : PojulObject {
 	private bool isForward = false;
 	private bool isDecay = false;
 
-	private float maxSpeed = 3400 * 8f;
-	private float acceleration = 200;
+	private float maxSpeed = 3400 * 3f;
+	private float acceleration = 50;
 	private float speed = 0;
-	private float aimSpeed = 320f;
+	private float aimSpeed = 180  *200;
 
 	private Rigidbody mRigidbody;
 
 	private ParticleSystem mParticleSystem;
 	private Transform mFire;
+	private float moreScale = 0.04f;
 
 
 
@@ -29,7 +30,7 @@ public class MissileType1 : PojulObject {
 	void Start () {
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
-		blazePos = transform.FindChild ("blazePos");
+		blazePos = transform.Find ("blazePos");
 
 		//InvokeRepeating ("velocityOverLife", 1f, 1f);
 
@@ -37,6 +38,9 @@ public class MissileType1 : PojulObject {
 
 	// Update is called once per frame
 	void Update () {
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		if(isDestoryed){
 			transform.position = transform.position + transform.forward * GameInit.mach * Time.deltaTime;
 			return;
@@ -45,8 +49,19 @@ public class MissileType1 : PojulObject {
 			Quaternion rawRotation = transform.rotation;
 			Quaternion newRotation = new Quaternion();
 			if (!isForward && !missTarget) {
-				transform.rotation = Quaternion.Slerp(transform.rotation, 
-					Quaternion.LookRotation(target.position - transform.position), aimSpeed * Time.deltaTime);
+				//transform.rotation = Quaternion.Slerp(transform.rotation, 
+					//Quaternion.LookRotation(target.position - transform.position), aimSpeed * Time.deltaTime);
+
+				Quaternion fromRol = transform.rotation;
+				Quaternion toRol = Quaternion.LookRotation(target.position - transform.position);
+				float dRolX = Util.getDirectDRol(fromRol.eulerAngles.x, toRol.eulerAngles.x, aimSpeed * Time.deltaTime, moreScale);
+				float dRolY = Util.getDirectDRol(fromRol.eulerAngles.y, toRol.eulerAngles.y, aimSpeed * Time.deltaTime, moreScale);
+				float dRolZ = Util.getDirectDRol(fromRol.eulerAngles.z, toRol.eulerAngles.z, aimSpeed * Time.deltaTime, moreScale);
+				transform.rotation = Quaternion.Euler (new Vector3((transform.eulerAngles.x + dRolX), 
+					(transform.eulerAngles.y + dRolY), 
+					(transform.eulerAngles.z + dRolZ))
+				);
+
 				newRotation = transform.rotation;
 			}
 			if(transform.parent != null){
@@ -98,8 +113,8 @@ public class MissileType1 : PojulObject {
 
 		initBlaze ();
 
-		Invoke ("startDecay", 8);
-		Invoke ("destoryMissile", 22);
+		Invoke ("startDecay", 10);
+		Invoke ("destoryMissile", 28);
 
 	}
 
@@ -121,8 +136,8 @@ public class MissileType1 : PojulObject {
 		if(mAudioSource != null && !mAudioSource.isPlaying){
 			mAudioSource.Play ();
 		}
-		mParticleSystem = blaze.transform.FindChild ("smoke").gameObject.GetComponent<ParticleSystem>();
-		mFire = blaze.transform.FindChild ("fire");
+		mParticleSystem = blaze.transform.Find ("smoke").gameObject.GetComponent<ParticleSystem>();
+		mFire = blaze.transform.Find ("fire");
 	}
 
 	void addRigidbody(){
@@ -192,8 +207,8 @@ public class MissileType1 : PojulObject {
 
 	public static Transform getMissileTarget(Transform self, Transform rawTarget){
 		if(rawTarget.parent != null && (rawTarget.parent.CompareTag("0_transport1") || rawTarget.parent.CompareTag("1_transport1"))){
-			Transform pos1 = rawTarget.parent.FindChild ("aimpos1");
-			Transform pos2 = rawTarget.parent.FindChild ("aimpos1");
+			Transform pos1 = rawTarget.parent.Find ("aimpos1");
+			Transform pos2 = rawTarget.parent.Find ("aimpos1");
 			if (pos1 != null || pos2 != null) {
 				float ds1 = 100000;
 				float ds2 = 100000;

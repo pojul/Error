@@ -41,19 +41,19 @@ public class ConnonType1 : PojulObject {
 
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
-		transform_lod0 = transform.FindChild ("cannon_type1_lod0");
-		transform_lod1 = transform.FindChild ("cannon_type1_lod1");
-		transform_lod2 = transform.FindChild ("cannon_type1_lod2");
+		transform_lod0 = transform.Find ("cannon_type1_lod0");
+		transform_lod1 = transform.Find ("cannon_type1_lod1");
+		transform_lod2 = transform.Find ("cannon_type1_lod2");
 
 		mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
 
-		mRenderer_lod0_lunzi1 = transform_lod0.FindChild("lunzi1").GetComponent<Renderer>();
-		mRenderer_lod1_lunzi1 = transform_lod1.FindChild("lunzi1").GetComponent<Renderer>();
+		mRenderer_lod0_lunzi1 = transform_lod0.Find("lunzi1").GetComponent<Renderer>();
+		mRenderer_lod1_lunzi1 = transform_lod1.Find("lunzi1").GetComponent<Renderer>();
 
-		paoTransform_lod0 = transform_lod0.FindChild ("pao");
-		paoTransform_lod1 = transform_lod1.FindChild ("pao");
-		paoTransform_lod2 = transform_lod2.FindChild ("pao");
+		paoTransform_lod0 = transform_lod0.Find ("pao");
+		paoTransform_lod1 = transform_lod1.Find ("pao");
+		paoTransform_lod2 = transform_lod2.Find ("pao");
 
 		//test
 		target = GameObject.FindGameObjectWithTag("player");

@@ -10,14 +10,14 @@ public class TestBullet : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		
-		fires[0] = transform.FindChild ("fire1");
-		fires[1] = transform.FindChild ("fire2");
-		fires[2] = transform.FindChild ("fire3");
-		fires[3] = transform.FindChild ("fire4");
-		fires[4] = transform.FindChild ("fire5");
-		fires[5] = transform.FindChild ("fire6");
-		fires[6] = transform.FindChild ("fire7");
-		fires[7] = transform.FindChild ("fire8");
+		fires[0] = transform.Find ("fire1");
+		fires[1] = transform.Find ("fire2");
+		fires[2] = transform.Find ("fire3");
+		fires[3] = transform.Find ("fire4");
+		fires[4] = transform.Find ("fire5");
+		fires[5] = transform.Find ("fire6");
+		fires[6] = transform.Find ("fire7");
+		fires[7] = transform.Find ("fire8");
 
 		InvokeRepeating ("fire", 0.12f, 0.12f);
 		//InvokeRepeating ("fire", 6f, 6f);

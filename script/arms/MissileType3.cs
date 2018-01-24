@@ -17,7 +17,7 @@ public class MissileType3 : PojulObject {
 	private float acceleration = 32;
 	private float speed = 0;
 	private float aimSpeed = 5f;
-	private float moreScale = 0.1f;
+	private float moreScale = 0.040f;
 
 	private Rigidbody mRigidbody;
 	private BoxCollider mBoxCollider;
@@ -28,13 +28,16 @@ public class MissileType3 : PojulObject {
 		mBoxCollider = transform.gameObject.GetComponent<BoxCollider> ();
 		mBoxCollider.enabled = false;
 
-		blazePos = transform.FindChild ("blazePos");
+		blazePos = transform.Find ("blazePos");
 		maxSpeed = 3400 * GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().missile3MaxSpeed;
 		moreScale = GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().moreScale;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		if(target != null && !isDestoryed){
 			Quaternion rawRotation = transform.rotation;
 			Quaternion newRotation = new Quaternion();
@@ -63,9 +66,9 @@ public class MissileType3 : PojulObject {
 				transform.rotation = Quaternion.Slerp(fromRol, 
 					toRol, aimSpeed * Time.deltaTime);*/
 				
-				float dRolX = Util.getDirectDRol(fromRol.eulerAngles.x, toRol.eulerAngles.x, aimSpeed, moreScale);
-				float dRolY = Util.getDirectDRol(fromRol.eulerAngles.y, toRol.eulerAngles.y, aimSpeed, moreScale);
-				float dRolZ = Util.getDirectDRol(fromRol.eulerAngles.z, toRol.eulerAngles.z, aimSpeed, moreScale);
+				float dRolX = Util.getDirectDRol(fromRol.eulerAngles.x, toRol.eulerAngles.x, aimSpeed * Time.deltaTime, moreScale);
+				float dRolY = Util.getDirectDRol(fromRol.eulerAngles.y, toRol.eulerAngles.y, aimSpeed * Time.deltaTime, moreScale);
+				float dRolZ = Util.getDirectDRol(fromRol.eulerAngles.z, toRol.eulerAngles.z, aimSpeed * Time.deltaTime, moreScale);
 				transform.rotation = Quaternion.Euler (new Vector3((transform.eulerAngles.x + dRolX), 
 					(transform.eulerAngles.y + dRolY), 
 					(transform.eulerAngles.z + dRolZ))
@@ -126,14 +129,14 @@ public class MissileType3 : PojulObject {
 		this.speed = startSpeed;
 		isForward = true;
 		initBlaze ();
-		float aimspeedRaw = 0.0f;
+		//float aimspeedRaw = 0.0f;
 		if (target.parent != null && target.parent.GetComponent<PojulObject> () && target.parent.GetComponent<PojulObject> ().type.Equals ("a10")) {
 			//aimSpeed = 5.8f;
-			aimspeedRaw = GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().a10AimSpeed;
-			aimSpeed = GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().a10AimSpeed * Time.deltaTime *200;
+			//aimspeedRaw = GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().a10AimSpeed;
+			aimSpeed = GameObject.FindGameObjectWithTag ("mainUI").GetComponent<UImanager> ().a10AimSpeed *200;
 		} else {
-			aimspeedRaw = 8.8f;
-			aimSpeed = 8.8f * Time.deltaTime * 200 * 40;
+			//aimspeedRaw = 8.8f;
+			aimSpeed = 8.8f * 200 * 40;
 		}
 		//Debug.Log (aimspeedRaw + "; gqb------>aimSpeed: " + aimSpeed);
 		Invoke ("startDecay", 7.0f);

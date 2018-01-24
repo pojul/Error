@@ -16,7 +16,7 @@ public class HomePao : PojulObject {
 	private float fireInterval = 4.5f;
 	private float lastFileTime = 0.0f;
 	private float aimSpeed = 20f;
-	private float rayCastEnemyDis = 10000;
+	private float rayCastEnemyDis = 50000;
 	private float findEnemyDis = 56000;
 
 	private GameObject preShell;
@@ -31,13 +31,13 @@ public class HomePao : PojulObject {
 			tag = "0_homepao";
 			enemyId = "1";
 			aimSpeed = 20f;
-			rayCastEnemyDis = 6000;
+			rayCastEnemyDis = 50000;
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.251f, 0.647f, 0.78f);
 		} else {
 			tag = "1_homepao";
 			enemyId = "0";
-			aimSpeed = 40f;
-			rayCastEnemyDis = 16000;
+			aimSpeed = 60f;
+			rayCastEnemyDis = 50000;
 			sliderHealth.fillRect.GetComponent<Image> ().color = new Color(0.698f, 0.255f, 0.157f);
 		}
 
@@ -46,12 +46,12 @@ public class HomePao : PojulObject {
 		}
 		sliderHealth.value = sliderHealth.maxValue;
 
-		panTransform = transform.FindChild ("home_pao").FindChild ("pan");
-		paoTransform = panTransform.FindChild ("pao");
-		fireTransform = paoTransform.FindChild("fire");
-		aimTransform = transform.FindChild ("aim");
-		homeTra = transform.FindChild ("home_pao").FindChild ("homeTra");
-		playerView = paoTransform.FindChild("playerView");
+		panTransform = transform.Find ("home_pao").Find ("pan");
+		paoTransform = panTransform.Find ("pao");
+		fireTransform = paoTransform.Find("fire");
+		aimTransform = transform.Find ("aim");
+		homeTra = transform.Find ("home_pao").Find ("homeTra");
+		playerView = paoTransform.Find("playerView");
 
 
 
@@ -69,6 +69,9 @@ public class HomePao : PojulObject {
 	
 	// Update is called once per frame
 	void Update () {
+		if(GameInit.gameStatus != 0){
+			return;	
+		}
 		health = sliderHealth.value;
 		if(isDestoryed){
 			return;
@@ -174,8 +177,8 @@ public class HomePao : PojulObject {
 			}
 		}
 
-		if(dangeroustEnemy != null && dangeroustEnemy.FindChild("aim") != null){
-			target = dangeroustEnemy.FindChild("aim");
+		if(dangeroustEnemy != null && dangeroustEnemy.Find("aim") != null){
+			target = dangeroustEnemy.Find("aim");
 			//Debug.Log ("find Enemy: " + target.root.name);
 		}
 
@@ -352,7 +355,7 @@ public class HomePao : PojulObject {
 			PlanControls.rorateSpeed = 35f;
 			planMove.rolSpeed = 7.0f;
 			if(fireTransform == null){
-				fireTransform = transform.FindChild ("car_type3_lod0").FindChild ("pan").FindChild("pao").FindChild("fire");
+				fireTransform = transform.Find ("car_type3_lod0").Find ("pan").Find("pao").Find("fire");
 			}
 			WorldUIManager.fireAimTra = fireTransform;
 			WorldUIManager.fireAimDistance = 12000.0f;

@@ -57,33 +57,33 @@ public class CarType5 : PojulObject {
 
 		mAudioSource = (AudioSource)transform.GetComponent<AudioSource> ();
 
-		transform_lod0 = transform.FindChild ("car_type5_lod0");
-		transform_lod1 = transform.FindChild ("car_type5_lod1");
-		transform_lod2 = transform.FindChild ("car_type5_lod2");
+		transform_lod0 = transform.Find ("car_type5_lod0");
+		transform_lod1 = transform.Find ("car_type5_lod1");
+		transform_lod2 = transform.Find ("car_type5_lod2");
 
 
-		aimTransform = transform.FindChild ("aim");
+		aimTransform = transform.Find ("aim");
 
-		mainTransform_lod0 = transform_lod0.FindChild("main");
-		mainTransform_lod1 = transform_lod1.FindChild("main");
-		mainTransform_lod2 = transform_lod2.FindChild("main");
+		mainTransform_lod0 = transform_lod0.Find("main");
+		mainTransform_lod1 = transform_lod1.Find("main");
+		mainTransform_lod2 = transform_lod2.Find("main");
 
 		//Debug.Log (mainTransform_lod0 + "gqb------>" + mainTransform_lod1);
 
 		mAnimator_lod0 = (Animator)transform_lod0.GetComponent<Animator> ();
 		mAnimator_lod1 = (Animator)transform_lod1.GetComponent<Animator> ();
 
-		mRenderer_lod0_lunzi1 = transform_lod0.FindChild("lunzi1").GetComponent<Renderer>();
-		mRenderer_lod1_lunzi1 = transform_lod1.FindChild("lunzi1").GetComponent<Renderer>();
+		mRenderer_lod0_lunzi1 = transform_lod0.Find("lunzi1").GetComponent<Renderer>();
+		mRenderer_lod1_lunzi1 = transform_lod1.Find("lunzi1").GetComponent<Renderer>();
 
-		paoTransform_lod0 = transform_lod0.FindChild ("pao");
-		paoTransform_lod1 = transform_lod1.FindChild ("pao");
-		paoTransform_lod2 = transform_lod2.FindChild ("pao");
+		paoTransform_lod0 = transform_lod0.Find ("pao");
+		paoTransform_lod1 = transform_lod1.Find ("pao");
+		paoTransform_lod2 = transform_lod2.Find ("pao");
 
-		missilePoses.Add (paoTransform_lod0.FindChild ("missilePos1"));
-		missilePoses.Add (paoTransform_lod0.FindChild ("missilePos2"));
-		missilePoses.Add (paoTransform_lod0.FindChild ("missilePos3"));
-		missilePoses.Add (paoTransform_lod0.FindChild ("missilePos4"));
+		missilePoses.Add (paoTransform_lod0.Find ("missilePos1"));
+		missilePoses.Add (paoTransform_lod0.Find ("missilePos2"));
+		missilePoses.Add (paoTransform_lod0.Find ("missilePos3"));
+		missilePoses.Add (paoTransform_lod0.Find ("missilePos4"));
 
 		missiles.Add (missilePoses[0], null);
 		missiles.Add (missilePoses[1], null);
@@ -425,9 +425,9 @@ public class CarType5 : PojulObject {
 			paoTransform_lod0.gameObject.GetComponent<Rigidbody> ().mass = 0.9f;
 		}
 		for(int i =0;i <= 5; i++){
-			Transform lunzi_lod0 = transform_lod0.FindChild (("lunzi" + (i + 1).ToString()));
-			Transform lunzi_lod1 = transform_lod1.FindChild (("lunzi" + (i + 1).ToString()));
-			Transform lunzi_lod2 = transform_lod2.FindChild (("lunzi" + (i + 1).ToString()));
+			Transform lunzi_lod0 = transform_lod0.Find (("lunzi" + (i + 1).ToString()));
+			Transform lunzi_lod1 = transform_lod1.Find (("lunzi" + (i + 1).ToString()));
+			Transform lunzi_lod2 = transform_lod2.Find (("lunzi" + (i + 1).ToString()));
 			lunzi_lod0.parent = null;
 			lunzi_lod1.parent = lunzi_lod0;
 			lunzi_lod2.parent = lunzi_lod0;
@@ -454,7 +454,7 @@ public class CarType5 : PojulObject {
 			nav.enabled = false;	
 		}
 		stop ();
-		Transform aim = transform.FindChild ("aim");
+		Transform aim = transform.Find ("aim");
 		if(aim != null){
 			Destroy (aim.gameObject);
 		}
@@ -528,7 +528,7 @@ public class CarType5 : PojulObject {
 				string tempType = strs [1];
 				if (enemyId.Equals (tempPlayerId)) {
 					if (target == null && ("a10".Equals (tempType))) {
-						target = tempTransform.FindChild ("aim");
+						target = tempTransform.Find ("aim");
 					}
 					Util.AddNearEnemys (tempTransform, playerId);
 				}
